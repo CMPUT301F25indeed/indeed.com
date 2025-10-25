@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/startUpFragment">
+
+    <fragment
+        android:id="@+id/startUpFragment"
+        android:name="com.example.indeedgambling.StartUpFragment"
+        android:label="Start Up">
+        <action
+            android:id="@+id/action_startUp_to_entrantHome"
+            app:destination="@id/entrantHomeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/entrantHomeFragment"
+        android:name="com.example.indeedgambling.Entrant_HomeFragment"
+        android:label="Entrant Home" />
+
+</navigation>
