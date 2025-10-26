@@ -16,6 +16,43 @@
     <fragment
         android:id="@+id/entrantHomeFragment"
         android:name="com.example.indeedgambling.Entrant_HomeFragment"
-        android:label="Entrant Home" />
+        android:label="Entrant Home" >
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_entrant_BrowseFragment"
+            app:destination="@id/entrant_BrowseFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_entrant_HistoryFragment"
+            app:destination="@id/entrant_HistoryFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_entrant_ProfileFragment"
+            app:destination="@id/entrant_ProfileFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_startUpFragment"
+            app:destination="@id/startUpFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/entrant_BrowseFragment"
+        android:name="com.example.indeedgambling.Entrant_BrowseFragment"
+        android:label="Entrant_BrowseFragment" >
+        <action
+            android:id="@+id/action_entrant_BrowseFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/entrant_HistoryFragment"
+        android:name="com.example.indeedgambling.Entrant_HistoryFragment"
+        android:label="Entrant_HistoryFragment" >
+        <action
+            android:id="@+id/action_entrant_HistoryFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/entrant_ProfileFragment"
+        android:name="com.example.indeedgambling.Entrant_ProfileFragment"
+        android:label="Entrant_ProfileFragment" >
+        <action
+            android:id="@+id/action_entrant_ProfileFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+    </fragment>
 
 </navigation>

@@ -6,7 +6,6 @@ public class Entrant extends Profile{
     private String email;
     private String phoneNum;
 
-    public Boolean joinEventWait(Event )
     public Entrant(String password, String profileName) {
         super(password, profileName);
     }

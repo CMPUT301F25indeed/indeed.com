@@ -7,10 +7,10 @@
     >
 
     <TextView
-        android:id="@+id/entrant_greeting_home"
+        android:id="@+id/entrant_recent_history"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Hello Entrant"
+        android:text="Recent"
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -20,21 +20,21 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ListView
-        android:id="@+id/entrant_home_buttons"
+        android:id="@+id/entrant_activity_history"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:choiceMode="singleChoice"
         android:listSelector="#999999"
-        app:layout_constraintTop_toBottomOf="@id/entrant_greeting_home"
-        app:layout_constraintBottom_toTopOf="@id/entrant_logout_button_home"
+        app:layout_constraintTop_toBottomOf="@id/entrant_recent_history"
+        app:layout_constraintBottom_toTopOf="@id/entrant_home_button_history"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/entrant_logout_button_home"
+        android:id="@+id/entrant_home_button_history"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Logout"
+        android:text="Home"
         android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
