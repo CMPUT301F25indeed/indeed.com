@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    //id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -49,14 +49,14 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     // Firebase
-    //implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
-    //implementation("com.google.firebase:firebase-firestore")
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation("com.google.firebase:firebase-firestore")
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.0.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.0.1")
 
     // JavaDocs
-    //implementation(files("C:\\Users\\Tejj\\AppData\\Local\\Android\\Sdk\\platforms\\android-36\\android.jar"))
+    //implementation(files("C:/Users/Tejj/AppData/Local/Android/Sdk/platforms/android-36/android.jar"))
 
 }

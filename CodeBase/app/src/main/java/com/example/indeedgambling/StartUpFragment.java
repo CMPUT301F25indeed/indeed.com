@@ -2,6 +2,7 @@ package com.example.indeedgambling;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,15 @@ public class StartUpFragment extends Fragment {
 
         loginButton.setOnClickListener(v -> showLoginPopup());
         signupButton.setOnClickListener(v -> showSignUpPopup());
+
+        ProfileHandler phandle = new ProfileHandler();
+        Profile Guy = new Profile("SuperGuy82","Guy Gardener");
+        Profile Gary = new Profile("Gary","Gary1901");
+        phandle.addProfile(Guy);
+        phandle.addProfile(Gary);
+        Log.d("Gary Hash Check",phandle.hashProfile(Gary));
+        Log.d("Gilby Check", Boolean.toString(phandle.hasProfile("Gilby","Gary1901")));
+        Log.d("Guy Check", Boolean.toString(phandle.hasProfile(Guy)));
 
         return view;
     }
@@ -54,6 +64,12 @@ public class StartUpFragment extends Fragment {
                         NavHostFragment.findNavController(this)
                                 .navigate(R.id.action_startUp_to_entrantHome);
                     }
+                    else if (username.equalsIgnoreCase("org")) {
+                        NavHostFragment.findNavController(this)
+                                .navigate(R.id.action_startUp_to_organizerHome);
+                    }
+
+                    //Need to check if data matches any profile, and then which class.
 
 
                 })

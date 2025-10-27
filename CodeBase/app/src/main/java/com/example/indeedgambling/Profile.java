@@ -1,27 +1,27 @@
 package com.example.indeedgambling;
 
 public class Profile {
-    public String ProfileName;
-    private String Password;
+    public String profileName;
+    private String password;
 
     public String getProfileName() {
-        return ProfileName;
+        return profileName;
     }
 
     public void setProfileName(String profileName) {
-        ProfileName = profileName;
+        this.profileName = profileName;
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
 
     public void setPassword(String password) {
-        Password = password;
+        this.password = password;
     }
 
     public Profile(String password, String profileName) {
-        Password = password;
-        ProfileName = profileName;
+        this.password = password;
+        this.profileName = profileName;
     }
 }
