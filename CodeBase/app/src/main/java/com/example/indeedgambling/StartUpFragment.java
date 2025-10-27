@@ -2,6 +2,7 @@ package com.example.indeedgambling;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,8 @@ public class StartUpFragment extends Fragment {
                         NavHostFragment.findNavController(this)
                                 .navigate(R.id.action_startUp_to_entrantHome);
                     }
+
+                    //Need to check if data matches any profile, and then which class.
 
 
                 })
