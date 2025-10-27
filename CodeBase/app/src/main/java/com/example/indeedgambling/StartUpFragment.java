@@ -55,6 +55,10 @@ public class StartUpFragment extends Fragment {
                         NavHostFragment.findNavController(this)
                                 .navigate(R.id.action_startUp_to_entrantHome);
                     }
+                    else if (username.equalsIgnoreCase("org")) {
+                        NavHostFragment.findNavController(this)
+                                .navigate(R.id.action_startUp_to_organizerHome);
+                    }
 
                     //Need to check if data matches any profile, and then which class.
 

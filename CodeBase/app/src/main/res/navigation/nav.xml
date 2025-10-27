@@ -11,11 +11,21 @@
         <action
             android:id="@+id/action_startUp_to_entrantHome"
             app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_startUp_to_organizerHome"
+            app:destination="@+id/organizerHomeFragment"/>
     </fragment>
 
     <fragment
         android:id="@+id/entrantHomeFragment"
         android:name="com.example.indeedgambling.Entrant_HomeFragment"
         android:label="Entrant Home" />
+
+    <fragment
+        android:id="@+id/organizerHomeFragment"
+        android:name="com.example.indeedgambling.Organizer_HomeFragment"
+        android:label="Organizer Home">
+
+    </fragment>
 
 </navigation>
