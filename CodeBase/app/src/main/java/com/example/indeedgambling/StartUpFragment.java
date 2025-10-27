@@ -25,6 +25,15 @@ public class StartUpFragment extends Fragment {
         loginButton.setOnClickListener(v -> showLoginPopup());
         signupButton.setOnClickListener(v -> showSignUpPopup());
 
+        ProfileHandler phandle = new ProfileHandler();
+        Profile Guy = new Profile("SuperGuy82","Guy Gardener");
+        Profile Gary = new Profile("Gary","Gary1901");
+        phandle.addProfile(Guy);
+        phandle.addProfile(Gary);
+        Log.d("Gary Hash Check",phandle.hashProfile(Gary));
+        Log.d("Gilby Check", Boolean.toString(phandle.hasProfile("Gilby","Gary1901")));
+        Log.d("Guy Check", Boolean.toString(phandle.hasProfile(Guy)));
+
         return view;
     }
     private void showLoginPopup() {
