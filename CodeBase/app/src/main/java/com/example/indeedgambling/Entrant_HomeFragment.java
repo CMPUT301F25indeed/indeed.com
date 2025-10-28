@@ -31,13 +31,6 @@ public class Entrant_HomeFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-         //Testing Firestore
-        Log.d("TAG", "onCreateView: FireBase");
-        db = FirebaseFirestore.getInstance();
-        testRef = db.collection("test");
-        DocumentReference docRef = testRef.document("1");
-        docRef.set(new Profile("testpass","testprofile")).addOnSuccessListener(aVoid -> Log.d("TAG", "onCreateView: Success")).addOnFailureListener(e -> Log.e("Firestore","Error Moment",e));
-
         View view = inflater.inflate(R.layout.entrant_home_fragment, container, false);
 
         ListView options = view.findViewById(R.id.entrant_home_buttons);
