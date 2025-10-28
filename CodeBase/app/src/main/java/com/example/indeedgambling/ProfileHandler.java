@@ -2,13 +2,18 @@ package com.example.indeedgambling;
 
 import android.util.Log;
 
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Firebase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
+
+import java.util.concurrent.ExecutionException;
 
 /** A handler class for all functions upon all stored profiles.
  *  Accesses our Firebase for Profiles.
@@ -32,29 +37,14 @@ public class ProfileHandler {
      * @param password Password to match
      * @return Boolean
      */
-    public boolean hasProfile(String profileName, String password){
-        Log.d("CheckHash item:" + profileName, hashProfile(profileName,password));
-        Log.d("CheckHash profile:" + profileName, hashProfile(new Profile(password,profileName)));
-        try{
-            DocumentSnapshot snapshot = Tasks.await(ProfRef.document(hashProfile(profileName,password)).get());
-            return snapshot.exists();
-        } catch (Exception e){
-            Log.e("Error", e.toString());
-            return false;
-        }
-        //return ProfRef.document(hashProfile(profileName,password)).get().isSuccessful();
+    public void hasProfile(String profileName, String password){
     }
 
-    public boolean hasProfile(Profile profile){
-        Log.d("CheckHash item:" + profile.getProfileName(), hashProfile(profile.getProfileName(), profile.getPassword()));
-        Log.d("CheckHash profile:"  + profile.getProfileName(), hashProfile(profile));
-        try{
-            DocumentSnapshot snapshot = Tasks.await(ProfRef.document(hashProfile(profile)).get());
-            return snapshot.exists();
-        } catch (Exception e){
-            Log.e("Error", e.toString());
-            return false;
-        }
+    public void hasProfile(Profile profile){
+    }
+
+    public void TryLogIn(){
+
     }
 
     /** Adds the profile to the Firebase.
@@ -75,13 +65,16 @@ public class ProfileHandler {
      * @return Hash(profileName).append(Hash(password))
      */
     protected String hashProfile(Profile profile){
-        //TODO: resolve error with negative secondary value. Does not write to Firebase
-        //Ex: 10238123-1923123 does not write.
-        // Perhaps do a classic mult of their signs.
-            // neg * neg = pos
-            // neg * pos = neg
+        //Function sets the multiplicative result of the two hashes as the signage for the combination
+        // ex: -102 , 302 -> -102302
+        // ex: -334, -212 -> 334212
+        // ex: 123, 456 -> 123456
+        // Done to try to resolve an error with writing to Firebase. Using 331-152 as the document title causes Firebase to subtract the values for the title.
 
         String Hash;
+
+
+
         //If both are negative, make pos. If both pos, keep pos.
         if ((profile.getProfileName().hashCode() < 0 && profile.getPassword().hashCode() < 0) || (profile.getProfileName().hashCode() > 0 && profile.getPassword().hashCode() > 0)){
             Hash = Integer.toString(Math.abs(profile.getProfileName().hashCode())) + Integer.toString(Math.abs(profile.getPassword().hashCode()));

@@ -26,6 +26,11 @@
         android:name="com.example.indeedgambling.Organizer_HomeFragment"
         android:label="Organizer Home">
 
+        <action
+            android:id="@+id/action_organizerHome_to_startup"
+            app:destination="@id/startUpFragment">
+        </action>
+
     </fragment>
 
 </navigation>
