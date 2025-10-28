@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="#ECEFF1">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:background="#455A64">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarLogs"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="View Logs"
+            app:titleTextColor="@android:color/white"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/searchLogs"
+                android:hint="Search logs..."
+                android:layout_weight="1"
+                android:padding="10dp"
+                android:background="@android:drawable/edit_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/btnFilterLogs"
+                android:src="@android:drawable/ic_menu_sort_by_size"
+                android:tint="#263238"
+                android:layout_marginStart="8dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:text="(Logs data will show here)"
+            android:textColor="#757575"
+            android:gravity="center"
+            android:layout_marginTop="60dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

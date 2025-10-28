@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="#E8F9E9">
+
+    <!-- Header -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:background="#4CAF50">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarAdminHome"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Hi Admin"
+            app:titleTextColor="@android:color/white"
+            app:titleCentered="false"/>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Body content -->
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <Button
+            android:id="@+id/btnProfiles"
+            android:text="Browse Profiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="#A5D6A7"
+            android:textColor="#1B5E20"/>
+
+        <Button
+            android:id="@+id/btnEvents"
+            android:text="Browse Events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#A5D6A7"
+            android:textColor="#1B5E20"/>
+
+        <Button
+            android:id="@+id/btnImages"
+            android:text="Browse Images"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#A5D6A7"
+            android:textColor="#1B5E20"/>
+
+        <Button
+            android:id="@+id/btnLogs"
+            android:text="View Logs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#A5D6A7"
+            android:textColor="#1B5E20"/>
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:text="Logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="#81C784"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
