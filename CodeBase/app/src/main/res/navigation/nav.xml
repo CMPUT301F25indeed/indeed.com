@@ -31,6 +31,45 @@
             app:destination="@id/startUpFragment">
         </action>
 
+        <action
+            android:id="@+id/action_organizerHome_to_Browse"
+            app:destination="@id/organizerBrowseFragment">
+        </action>
+
+        <action
+            android:id="@+id/action_organizerHome_to_Upcoming"
+            app:destination="@id/organizerUpcomingFragment">
+        </action>
+
+        <action
+            android:id="@+id/action_organizerHomeFragment_to_organizerHistoryFragment"
+            app:destination="@id/organizerHistoryFragment" />
+        <action
+            android:id="@+id/action_organizerHomeFragment_to_organizerProfileFragment"
+            app:destination="@id/organizerProfileFragment" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/organizerBrowseFragment"
+        android:name="com.example.indeedgambling.Organizer_BrowseFragment"
+        android:label="Organizer Browse">
+    </fragment>
+
+    <fragment
+        android:id="@+id/organizerUpcomingFragment"
+        android:name="com.example.indeedgambling.Organizer_UpcomingFragment"
+        android:label="Organizer Upcoming Events">
+    </fragment>
+
+    <fragment
+        android:id="@+id/organizerHistoryFragment"
+        android:name="com.example.indeedgambling.Organizer_HistoryFragment"
+        android:label="Organizer History"/>
+
+    <fragment
+        android:id="@+id/organizerProfileFragment"
+        android:name="com.example.indeedgambling.Organizer_ProfileFragment"
+        android:label="Organizer Profile"/>
 
 </navigation>

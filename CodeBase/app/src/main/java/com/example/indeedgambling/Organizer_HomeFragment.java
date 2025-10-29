@@ -27,7 +27,29 @@ public class Organizer_HomeFragment extends Fragment {
         LogoutButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.action_organizerHome_to_startup));
 
-        // Setting up other navigation
+        // Browse Button
+        Button BrowseButton = view.findViewById(R.id.Organizer_HomeBrowseEventsButton);
+        BrowseButton.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHome_to_Browse);
+        });
+
+        //Upcoming Events Button
+        Button UpcomingEventsButton = view.findViewById(R.id.Organizer_HomeUpcomingEventsButton);
+        UpcomingEventsButton.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHome_to_Upcoming);
+        });
+
+        //History Button Function
+        Button HistoryButton = view.findViewById(R.id.Organizer_HomeHistoryButton);
+        HistoryButton.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHomeFragment_to_organizerHistoryFragment);
+        });
+
+        //Profile Button function
+        Button ProfileButton = view.findViewById(R.id.Organizer_HomeProfileButton);
+        ProfileButton.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHomeFragment_to_organizerProfileFragment);
+        });
 
 
         return view;

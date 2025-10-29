@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">indeedGambling</string>
     <string name="title_screen">Indeed Gambling</string>
+    <string name="organizer_home_defaultMessage">Hello, Organizer!</string>
+    <string name="organizer_home_SubMessage">What would you like to do today?</string>
+    <string name="organizer_home_Browse_text">Browse Events</string>
+    <string name="organizer_home_UpcomingText">Upcoming</string>
+    <string name="organizer_home_HistoryText">History</string>
+    <string name="organizer_home_BrowseText">Browse Events</string>
 </resources>

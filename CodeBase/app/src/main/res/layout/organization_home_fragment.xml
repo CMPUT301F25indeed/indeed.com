@@ -8,9 +8,9 @@
         android:id="@+id/Organizer_HomeMessageText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello, [OrganizerName]!"
+        android:text="@string/organizer_home_defaultMessage"
         android:textAlignment="center"
-        android:textSize="32dp"
+        android:textSize="32sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
     </TextView>
@@ -20,8 +20,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:textSize="16dp"
-        android:text="What would you like to do today?"
+        android:textSize="16sp"
+        android:text="@string/organizer_home_SubMessage"
         android:textAlignment="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/Organizer_HomeMessageText">
@@ -41,7 +41,7 @@
             android:layout_width="222sp"
             android:layout_height="60sp"
             android:textSize="20sp"
-            android:text="Browse Events"
+            android:text="@string/organizer_home_Browse_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
         </Button>
@@ -51,7 +51,7 @@
             android:layout_width="222sp"
             android:layout_height="60sp"
             android:textSize="20sp"
-            android:text="Upcoming"
+            android:text="@string/organizer_home_UpcomingText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
         </Button>
@@ -61,7 +61,7 @@
             android:layout_width="222sp"
             android:layout_height="60sp"
             android:textSize="20sp"
-            android:text="History"
+            android:text="@string/organizer_home_HistoryText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
         </Button>
@@ -71,7 +71,7 @@
             android:layout_width="222sp"
             android:layout_height="60sp"
             android:textSize="20sp"
-            android:text="Browse Events"
+            android:text="My Profile"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
         </Button>
