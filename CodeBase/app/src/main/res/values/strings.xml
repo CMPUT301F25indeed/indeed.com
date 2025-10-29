@@ -7,4 +7,5 @@
     <string name="organizer_home_UpcomingText">Upcoming</string>
     <string name="organizer_home_HistoryText">History</string>
     <string name="organizer_home_BrowseText">Browse Events</string>
+    <string name="organizer_HomeButton"><![CDATA[< Home]]></string>
 </resources>

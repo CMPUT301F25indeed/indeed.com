@@ -60,6 +60,9 @@
         android:id="@+id/organizerUpcomingFragment"
         android:name="com.example.indeedgambling.Organizer_UpcomingFragment"
         android:label="Organizer Upcoming Events">
+        <action
+            android:id="@+id/action_organizerUpcomingFragment_to_organizerHomeFragment"
+            app:destination="@id/organizerHomeFragment" />
     </fragment>
 
     <fragment

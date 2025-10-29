@@ -12,7 +12,7 @@ public class Organizer_ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        view = inflater.inflate(R.layout.organization_browse_fragment, container, false);
+        view = inflater.inflate(R.layout.organization_profile_fragment, container, false);
         return view;
     }
 }
