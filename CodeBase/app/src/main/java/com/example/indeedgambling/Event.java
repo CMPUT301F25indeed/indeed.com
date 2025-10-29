@@ -48,6 +48,26 @@ public class Event {
         Owner = owner;
     }
 
+    Event(String EventName, Date registrationOpen, Date registrationClose, Organizer owner, int MaxEntrants){
+        //Potential profanity filter.
+
+        //Check if an exact match exists already ().
+        eventName = EventName;
+
+        //Raise error if open date after or equal end date & time
+        if (registrationClose.before(registrationOpen)){
+            throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
+        }
+
+        registrationPeriod = new Pair<>(registrationOpen,registrationClose);
+
+        //Default value for no limit. Cannot have negative maximum entrants, so this should be fine.
+        maxEntrants = MaxEntrants;
+
+        //Setting reference owner
+        Owner = owner;
+    }
+
     /**
      * Returns a set of all entrants on the waiting list
      * @return Entrants???

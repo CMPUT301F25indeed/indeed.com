@@ -33,6 +33,7 @@ public class ProfileHandler {
 
     /**
      * Boolean function that tests if a given profile has matching data in the database.
+     * Currently hindered by trying to get Database info to work with us
      * @param profileName Username to match
      * @param password Password to match
      * @return Boolean
