@@ -3,6 +3,7 @@ package com.example.indeedgambling;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.google.type.DateTime;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -41,6 +43,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
         EH = new EventHandler();
+        EH.SyncWithFireBase();
 
         //HomeButton Function
         Button Home = view.findViewById(R.id.Organizer_Upcoming_HomeButton);
@@ -53,7 +56,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Displaying Organizer's events
         ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-        List<Event> DisplayEvents = EH.GetEvents(); //Placeholder until profile handling added
+        ArrayList<Event> DisplayEvents = EH.GetEvents(); //Placeholder until profile handling added
         ArrayAdapter<Event> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, DisplayEvents);
         EventList.setAdapter(adapter);
 
@@ -100,6 +103,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                         Event CreatedEvent = new Event(EventName,StartDate,EndDate, new Organizer("billy","bob"));
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
                         EH.AddEvent(CreatedEvent);
+                        EH.SyncWithFireBase();
                     }
 
                     //Update Adapter on main page.

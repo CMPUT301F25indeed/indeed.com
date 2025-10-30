@@ -1,5 +1,12 @@
 package com.example.indeedgambling;
 
+import android.util.Log;
+
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,14 +18,13 @@ import java.util.Date;
  */
 public class EventHandler {
     private ArrayList<Event> Events;
+    private FirebaseFirestore db;
+    private CollectionReference EventRef;
 
     public EventHandler(){
         Events = new ArrayList<Event>();
-    }
-
-    public EventHandler(Collection<Event> events){
-        Events = new ArrayList<Event>();
-        Events.addAll(events);
+        db = FirebaseFirestore.getInstance();
+        EventRef = db.collection("events");
     }
 
     /** Returns all events under an organizer, regardless of date
@@ -35,7 +41,7 @@ public class EventHandler {
 
         //Sort by earliest closedate first
         ReturnArray.sort((Event1, Event2) ->
-                Event1.getRegistrationPeriod().second.compareTo(Event2.getRegistrationPeriod().second));
+                Event1.getRegistrationEnd().compareTo(Event2.getRegistrationEnd()));
 
         return ReturnArray;
     }
@@ -49,14 +55,14 @@ public class EventHandler {
 
         //Adds events which end later than now, and are owned by the argument owner
         for (Event instance: Events) {
-            if (instance.getOwner() == owner && instance.getRegistrationPeriod().second.after(new Date())){
+            if (instance.getOwner() == owner && instance.getRegistrationEnd().after(new Date())){
                 ReturnArray.add(instance);
             }
         }
 
         //Sort by closedate Desc (latest close first)
         ReturnArray.sort((Event1, Event2) ->
-                Event2.getRegistrationPeriod().second.compareTo(Event1.getRegistrationPeriod().second));
+                Event2.getRegistrationEnd().compareTo(Event1.getRegistrationEnd()));
 
         return ReturnArray;
     }
@@ -67,21 +73,49 @@ public class EventHandler {
     public ArrayList<Event> GetActiveEvents(){
         ArrayList<Event> ReturnArray = new ArrayList<Event>();
         for (Event instance: Events) {
-            if (instance.getRegistrationPeriod().second.after(new Date())){
+            if (instance.getRegistrationEnd().after(new Date())){
                 ReturnArray.add(instance);
             }
         }
         return ReturnArray;
     }
 
-    /**Debug Function
-     *
+    /** Adds event to local DB and Firebase
+     * @param e Event to be added to db
      */
     public void AddEvent(Event e){
         Events.add(e);
+        EventRef.document(e.toString()).set(e);
     }
 
+    /** Returns an Arraylist of all events, regardless of owner or date.
+     * @return Event Arraylist
+     */
     public ArrayList<Event> GetEvents(){
        return Events;
+    }
+
+    /**Tester that should Update local Events with Firebase
+     * Want to include pushing to Firebase inside too
+     */
+    public boolean SyncWithFireBase(){
+        //Pulling
+        ArrayList<Event> list = new ArrayList<Event>();
+        EventRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Events = new ArrayList<Event>();
+                for (DocumentSnapshot event : task.getResult()) {
+                    //Update to server, as local changes shouldn't exist on database
+                    //Check duplicates by name and date?
+
+                    //Replace local with server, for now
+                    Events.add(event.toObject(Event.class));
+                }
+            } else{
+                Log.e("Firebase Error", "Error getting Events");
+            }
+        });
+        Log.d("Distance","Added OnCompleteListener");
+        return false;
     }
 }

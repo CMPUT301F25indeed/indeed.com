@@ -24,4 +24,7 @@ public class Profile {
         this.password = password;
         this.profileName = profileName;
     }
+
+    //No arg constructor for Firebase
+    public Profile(){}
 }

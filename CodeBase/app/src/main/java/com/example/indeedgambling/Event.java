@@ -1,10 +1,12 @@
 package com.example.indeedgambling;
 
+import android.util.ArraySet;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
 import java.security.acl.Owner;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -14,65 +16,74 @@ import java.util.Set;
  */
 public class Event {
     private String eventName;
-    private Pair<Date,Date> registrationPeriod;
+    private Date registrationStart;
+    private Date registrationEnd;
 
-    private Set<Entrant> waitingEntrants;
+    private ArrayList<Entrant> waitingEntrants;
     private int maxEntrants;
-    private Set<Entrant> invitedEntrants;
+    private ArrayList<Entrant> invitedEntrants;
 
     private Organizer Owner;
 
     /**
      * Creates an event. Enforces Open is before Closed with an IllegalArgumentException
      * @param EventName Title for the event
-     * @param registrationOpen When entrants are allowed to apply
-     * @param registrationClose When entrant applications are no longer accepted
+     * @param RegistrationOpen When entrants are allowed to apply
+     * @param RegistrationClose When entrant applications are no longer accepted
      */
-    Event(String EventName, Date registrationOpen, Date registrationClose, Organizer owner){
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Organizer owner){
         //Potential profanity filter.
 
         //Check if an exact match exists already ().
         eventName = EventName;
 
         //Raise error if open date after or equal end date & time
-        if (registrationClose.before(registrationOpen)){
+        if (RegistrationClose.before(RegistrationOpen)){
             throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
         }
 
-        registrationPeriod = new Pair<>(registrationOpen,registrationClose);
+        registrationStart = RegistrationOpen;
+        registrationEnd = RegistrationClose;
 
-        //Default value for no limit. Cannot have negative maximum entrants, so this should be fine.
-        maxEntrants = -1;
+        waitingEntrants = new ArrayList<Entrant>();
+        invitedEntrants = new ArrayList<Entrant>();
+
+        //0 is value for no limit
+        maxEntrants = 0;
 
         //Setting reference owner
         Owner = owner;
     }
 
-    Event(String EventName, Date registrationOpen, Date registrationClose, Organizer owner, int MaxEntrants){
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Organizer owner, int MaxEntrants){
         //Potential profanity filter.
 
         //Check if an exact match exists already ().
         eventName = EventName;
 
+
         //Raise error if open date after or equal end date & time
-        if (registrationClose.before(registrationOpen)){
+        if (RegistrationClose.before(RegistrationOpen)){
             throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
         }
 
-        registrationPeriod = new Pair<>(registrationOpen,registrationClose);
+        registrationStart = RegistrationOpen;
+        registrationEnd = RegistrationClose;
 
-        //Default value for no limit. Cannot have negative maximum entrants, so this should be fine.
+        //TODO: Throw error if MaxEntrants < 0
         maxEntrants = MaxEntrants;
 
         //Setting reference owner
         Owner = owner;
     }
 
+    //No arg constructor for Firebase
+    Event(){}
     /**
      * Returns a set of all entrants on the waiting list
      * @return Entrants???
      */
-    public Set<Entrant> getWaitingEntrants() {
+    public ArrayList<Entrant> getWaitingEntrants() {
         return waitingEntrants;
     }
 
@@ -80,15 +91,27 @@ public class Event {
         return eventName;
     }
 
-    public Pair<Date, Date> getRegistrationPeriod() {
-        return registrationPeriod;
+    public Date getRegistrationStart() {
+        return registrationStart;
+    }
+
+    public void setRegistrationStart(Date registrationStart) {
+        this.registrationStart = registrationStart;
+    }
+
+    public Date getRegistrationEnd() {
+        return registrationEnd;
+    }
+
+    public void setRegistrationEnd(Date registrationEnd) {
+        this.registrationEnd = registrationEnd;
     }
 
     public int getMaxEntrants() {
         return maxEntrants;
     }
 
-    public Set<Entrant> getInvitedEntrants() {
+    public ArrayList<Entrant> getInvitedEntrants() {
         return invitedEntrants;
     }
 
@@ -114,14 +137,18 @@ public class Event {
      */
     public void setMaxEntrants(int max){
         //Prevents empty entrants
-        if (max <= 0){
+        //Removed since firebase crashes with this
+        /*if (max < 0){
             throw new IllegalArgumentException("Maximum for event must be a positive number!");
-        }
+        }*/
 
         //Raise error if max is less than current signees.
-        if (max < waitingEntrants.size()){
+        //Temp removed since firebase crashes with this
+        /*if (max < waitingEntrants.size()){
             throw new IllegalArgumentException("New maximum less than current signees!");
-        }
+        }*/
+
+        maxEntrants = max;
     }
 
     public void setEventName(String eventName) {
