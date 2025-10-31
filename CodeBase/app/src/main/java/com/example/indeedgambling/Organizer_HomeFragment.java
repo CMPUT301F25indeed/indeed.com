@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.firebase.firestore.DocumentReference;
@@ -16,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class Organizer_HomeFragment extends Fragment {
 
     View view;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

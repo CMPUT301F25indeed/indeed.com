@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TimePicker;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.api.ResourceDescriptor;
@@ -33,17 +34,14 @@ import java.util.List;
 
 public class Organizer_UpcomingFragment extends Fragment {
 
-    private EventHandler EH;
-    private List<Event> DisplayEvents;
-    private ListView EventList;
+    private FireBaseViewModel Data;
 
     private View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
-        EH = new EventHandler();
-        EH.SyncWithFireBase();
+        Data = new ViewModelProvider(requireActivity()).get(FireBaseViewModel.class);
 
         //HomeButton Function
         Button Home = view.findViewById(R.id.Organizer_Upcoming_HomeButton);
@@ -52,11 +50,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         });
 
 
-        EH.AddEvent(new Event("test1",new Date(), new Date(),new Organizer("diggle","piggle")));
-
         //Displaying Organizer's events
         ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-        ArrayList<Event> DisplayEvents = EH.GetEvents(); //Placeholder until profile handling added
+
+        ArrayList<Event> DisplayEvents = Data.getEvents();
+
         ArrayAdapter<Event> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, DisplayEvents);
         EventList.setAdapter(adapter);
 
@@ -98,18 +96,17 @@ public class Organizer_UpcomingFragment extends Fragment {
                         int MaxEntrants = Integer.parseInt(MaxEntrantsInput.getText().toString().trim());
                         Event CreatedEvent = new Event(EventName,StartDate,EndDate, new Organizer("billy","bob"), MaxEntrants);
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
-                        EH.AddEvent(CreatedEvent);
+                        Data.Add(CreatedEvent);
                     } else {
                         Event CreatedEvent = new Event(EventName,StartDate,EndDate, new Organizer("billy","bob"));
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
-                        EH.AddEvent(CreatedEvent);
-                        EH.SyncWithFireBase();
+                        Data.Add(CreatedEvent);
                     }
 
                     //Update Adapter on main page.
                     //Probably not the most efficent
                     ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-                    List<Event> DisplayEvents = EH.GetEvents(); //Placeholder until profile handling added
+                    List<Event> DisplayEvents = Data.getEvents(); //Placeholder until profile handling added
                     ArrayAdapter<Event> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, DisplayEvents);
                     EventList.setAdapter(adapter);
 

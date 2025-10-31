@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
         <ImageButton
             android:id="@+id/Organizer_EventPopup_View_Event_Poster"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View Event Poster" />
+            android:text="View Event Poster"
+            android:contentDescription="Event Poster"/>
 
         <ImageView
             android:id="@+id/Organizer_EventPopup_QR_Code"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:contentDescription="Event QR Code"/>
 
         <TextView
             android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
@@ -35,10 +36,8 @@
         <TextView
             android:id="@+id/Organizer_EventPopup_"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="wrap_content"/>
 
 
 
-    </ListView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

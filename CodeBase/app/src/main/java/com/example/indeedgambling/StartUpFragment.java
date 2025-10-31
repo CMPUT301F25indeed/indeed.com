@@ -10,30 +10,28 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
+
+import java.util.Date;
 
 public class StartUpFragment extends Fragment {
     public StartUpFragment() {}
 
+    private FireBaseViewModel Data;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.start_up_fragment, container, false);
+
+        //Syncing Firebase on startup screen
+        Data = new ViewModelProvider(requireActivity()).get(FireBaseViewModel.class);
 
         Button loginButton = view.findViewById(R.id.button_login);
         Button signupButton = view.findViewById(R.id.button_signup);
 
         loginButton.setOnClickListener(v -> showLoginPopup());
         signupButton.setOnClickListener(v -> showSignUpPopup());
-
-
-        //Testing firebase profile pull
-        //Adding profiles
-        ProfileHandler phandle = new ProfileHandler();
-        Profile Guy = new Entrant("SuperGuy82","Guy Gardener");
-        Profile Gary = new Organizer("Gary","Gary1901");
-        phandle.addProfile(Guy);
-        phandle.addProfile(Gary);
-
 
         return view;
     }
