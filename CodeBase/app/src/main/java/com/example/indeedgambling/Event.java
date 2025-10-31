@@ -1,6 +1,7 @@
 package com.example.indeedgambling;
 
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -120,7 +121,12 @@ public class Event {
      * @param signee Entrant object type.
      */
     public void addToWaitingList(Entrant signee){
-        waitingEntrants.add(signee);
+        if (waitingEntrants.size() < maxEntrants){
+            waitingEntrants.add(signee);
+        }
+        else{
+            Log.d("Event Debug", "addToWaitingList: " + "Event full");
+        }
     }
 
     /** Adds all entrants in a collection to the waitlist for the the event.
@@ -128,7 +134,13 @@ public class Event {
      * @param signees Collection of entrants to be added
      */
     public void addToWaitingList(Collection<Entrant> signees){
-        waitingEntrants.addAll(signees);
+        //Stopping adding if waitlist would be full.
+        if (waitingEntrants.size() + signees.size() <= maxEntrants){
+            waitingEntrants.addAll(signees);
+        }
+        else{
+            Log.d("Event Debug", "addToWaitingList: " + "Event full");
+        }
     }
 
     /** Updates the current maximum number of signees.
