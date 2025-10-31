@@ -180,8 +180,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Waitlist Pop-up
         WaitListButton.setOnClickListener(v -> {
             View listView = inflater.inflate(R.layout.listview_popup, null);
-            //Currently gets all profiles.
-            ArrayAdapter<Profile> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, Data.getProfiles());
+            ArrayAdapter<Entrant> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrants());
 
             new AlertDialog.Builder(requireContext())
                     .setTitle("Waitlist")

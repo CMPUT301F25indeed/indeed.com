@@ -1,16 +1,13 @@
 package com.example.indeedgambling;
 
-import android.util.ArraySet;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
 
-import java.security.acl.Owner;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Set;
 
 /**
  * Basic model for Events
@@ -160,48 +157,46 @@ public class Event {
     /** Adds an entrant to the waiting list of the event.
      * Duplicant signees are not added.
      * @param signee Entrant object type.
+     * @return True if entrant added, False otherwise
      */
-    public void addToWaitingList(Entrant signee){
-        if (waitingEntrants.size() < maxWaitingEntrants){
+    public boolean addToWaitingList(Entrant signee){
+        if (!this.atCapacity()){
             waitingEntrants.add(signee);
+            //Push to cloud.
+            return true;
         }
         else{
             Log.d("Event Debug", "addToWaitingList: " + "Event full");
+            return false;
         }
     }
 
     /** Adds all entrants in a collection to the waitlist for the the event.
      * Duplicant entrants are not added
+     * If capacity met, they are not added.
      * @param signees Collection of entrants to be added
      */
-    public void addToWaitingList(Collection<Entrant> signees){
+    @Deprecated
+    public boolean addToWaitingList(Collection<Entrant> signees){
         //Stopping adding if waitlist would be full.
         if (waitingEntrants.size() + signees.size() <= maxWaitingEntrants){
             waitingEntrants.addAll(signees);
+            return true;
         }
         else{
             Log.d("Event Debug", "addToWaitingList: " + "Event full");
+            return false;
         }
     }
 
     /** Updates the current maximum number of signees.
-     * Enforces positive values & Enforces maximum larger than current signees.
+     * Enforces positive values, minimum is 0
      * @param max New maximum number of entrants for waiting list
      */
     public void setMaxEntrants(int max){
-        //Prevents empty entrants
-        //Removed since firebase crashes with this
-        /*if (max < 0){
-            throw new IllegalArgumentException("Maximum for event must be a positive number!");
-        }*/
+        //No negative max. 0 is unlimited entrants
+        maxWaitingEntrants = Math.max(max, 0);
 
-        //Raise error if max is less than current signees.
-        //Temp removed since firebase crashes with this
-        /*if (max < waitingEntrants.size()){
-            throw new IllegalArgumentException("New maximum less than current signees!");
-        }*/
-
-        maxWaitingEntrants = max;
     }
 
     public void setEventName(String eventName) {
@@ -255,6 +250,29 @@ public class Event {
         if (obj == null || this.getClass() != obj.getClass()) return false;
 
         return this.getEventName().equals(((Event) obj).eventName);
+
+    }
+
+    /** Returns true if the WaitingList is out of room for entrants
+     * @return True if waitlist CANNOT accept any more entrants
+     */
+    public boolean atCapacity(){
+        //0 check is for no-limit. 0 => no limit
+        return (this.maxWaitingEntrants >= this.waitingEntrants.size()) || this.maxWaitingEntrants == 0;
+    }
+
+    /** Returns true if the Event registration period is open now.
+     * @return True if Registration Open
+     */
+    public boolean RegistrationOpen(){
+        return (new Date().before(this.registrationEnd) && new Date().after(this.registrationStart));
+    }
+
+    /** Checks if the event Registration is open AND if waitlist has room.
+     * @return True if accepting waitlist Entrants, False otherwise
+     */
+    public boolean waitList_registrable(){
+        return (!this.atCapacity()) && this.RegistrationOpen();
 
     }
 }

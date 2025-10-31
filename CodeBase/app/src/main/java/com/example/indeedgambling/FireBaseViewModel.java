@@ -6,9 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -36,7 +34,25 @@ public class FireBaseViewModel extends AndroidViewModel {
 
         //Events Syncing
         db.collection("Event").get().addOnCompleteListener(task ->{
-           Events.setValue((ArrayList<Event>) task.getResult().toObjects(Event.class));
+            //Replace local with cloud
+            ArrayList<Event> ResultArray = (ArrayList<Event>) task.getResult().toObjects(Event.class);
+
+            //Add difference to cloud.
+            //If cloud result has all local, do nothing
+
+            //If the cloud is missing items, push
+            if (!ResultArray.containsAll(Objects.requireNonNull(Events.getValue()))){
+                //Push all non-existants to cloud.
+                for (Event e: Events.getValue()) {
+                    if (!ResultArray.contains(e)){
+                        this.Add(e);
+                    }
+                }
+            }
+            //Updating local to cloud
+            else{
+                Events.setValue(ResultArray);
+            }
         });
         //Profile sync
         db.collection("Profile").get().addOnCompleteListener(task -> {
@@ -144,6 +160,20 @@ public class FireBaseViewModel extends AndroidViewModel {
         for (Profile p : Profiles.getValue()){
           if (p.hashCode() == profile.hashCode()) ReturnArray.add(p);
         }
+        return ReturnArray;
+    }
+
+    /** Returns an ArrayList for events that are currently open to register and are not full on waiting Entrants.
+     * @return Events that can take registration to Waitlist.
+     */
+    private ArrayList<Event> getRegisterableEvents(){
+        ArrayList<Event> ReturnArray = new ArrayList<>();
+        for (Event e : Events.getValue()){
+            if (e.waitList_registrable()){
+                ReturnArray.add(e);
+            }
+        }
+
         return ReturnArray;
     }
 }
