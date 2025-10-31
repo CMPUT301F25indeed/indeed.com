@@ -103,7 +103,6 @@ public class Organizer_UpcomingFragment extends Fragment {
         TimePicker EventEndTimeInput = EventClose.findViewById(R.id.DateTimePicker_TimeDialog);
         EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
 
-
         new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
                 .setView(popupView)
@@ -172,6 +171,25 @@ public class Organizer_UpcomingFragment extends Fragment {
         RegPeriod.setText(event.getRegistrationStart().toString().concat("-").concat(event.getRegistrationEnd().toString()));
 
         Capacity.setText(Integer.toString(event.getMaxWaitingEntrants()));
+
+
+        //WaitList Button
+        Button WaitListButton = popupView.findViewById(R.id.Organizer_EventPopup_WaitList);
+        Log.d("DEBUG","Before Listener");
+
+        //Waitlist Pop-up
+        WaitListButton.setOnClickListener(v -> {
+            View listView = inflater.inflate(R.layout.listview_popup, null);
+            //Currently gets all profiles.
+            ArrayAdapter<Profile> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, Data.getProfiles());
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Waitlist")
+                    .setView(listView)
+                    .setAdapter(adapter, null)
+                    .setNegativeButton("Close", null)
+                    .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+        });
 
 
         new AlertDialog.Builder(requireContext()).setTitle(event.getEventName())

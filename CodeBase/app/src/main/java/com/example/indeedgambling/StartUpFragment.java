@@ -33,6 +33,9 @@ public class StartUpFragment extends Fragment {
         loginButton.setOnClickListener(v -> showLoginPopup());
         signupButton.setOnClickListener(v -> showSignUpPopup());
 
+        Data.Add(new Profile("Tester","Tester"));
+        Data.Add(new Profile("Password","ProfileName"));
+
         return view;
     }
     private void showLoginPopup() {

@@ -24,6 +24,7 @@ public class FireBaseViewModel extends AndroidViewModel {
         super(application);
         db = FirebaseFirestore.getInstance();
         Events = new MutableLiveData<>(new ArrayList<Event>());
+        Profiles = new MutableLiveData<>(new ArrayList<Profile>());
         Sync();
     }
 
@@ -31,10 +32,15 @@ public class FireBaseViewModel extends AndroidViewModel {
      * Overwrites local information.
      */
     public void Sync(){
-        //Events Syncing
         //Overwriting local with cloud
+
+        //Events Syncing
         db.collection("Event").get().addOnCompleteListener(task ->{
            Events.setValue((ArrayList<Event>) task.getResult().toObjects(Event.class));
+        });
+        //Profile sync
+        db.collection("Profile").get().addOnCompleteListener(task -> {
+            Profiles.setValue((ArrayList<Profile>) task.getResult().toObjects(Profile.class));
         });
     }
 
@@ -83,15 +89,20 @@ public class FireBaseViewModel extends AndroidViewModel {
      * @param ItemToSave
      */
     public void Add(Object ItemToSave){
-        //Adding directly to server
-        db.collection(ItemToSave.getClass().getSimpleName()).document(ItemToSave.toString()).set(ItemToSave);
 
-        //Adding to local
+        //Event object
         if (ItemToSave.getClass() == Event.class){
+            //Adding to local for instant change
             Objects.requireNonNull(Events.getValue()).add((Event) ItemToSave);
+            //Adding to server
+            db.collection(ItemToSave.getClass().getSimpleName()).document(ItemToSave.toString()).set(ItemToSave);
         }
+        //Profile object
         else if (ItemToSave.getClass() == Profile.class){
+            //Adding to local for instant change
             Objects.requireNonNull(Profiles.getValue()).add((Profile) ItemToSave);
+            //Adding to server
+            db.collection(ItemToSave.getClass().getSimpleName()).document(String.valueOf(ItemToSave.hashCode())).set(ItemToSave);
         }
     }
 
@@ -122,5 +133,17 @@ public class FireBaseViewModel extends AndroidViewModel {
 
     public ArrayList<Profile> getProfiles(){
         return Profiles.getValue();
+    }
+
+    /** Returns all profiles that match the hash
+     * May only return 1 profile since duplicate names are not supported in Firebase
+     * @return
+     */
+    private ArrayList<Profile> getMatchingProfiles(Profile profile){
+        ArrayList<Profile> ReturnArray = new ArrayList<>();
+        for (Profile p : Profiles.getValue()){
+          if (p.hashCode() == profile.hashCode()) ReturnArray.add(p);
+        }
+        return ReturnArray;
     }
 }
