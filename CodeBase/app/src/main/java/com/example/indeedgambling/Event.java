@@ -20,19 +20,24 @@ public class Event {
     private Date registrationStart;
     private Date registrationEnd;
 
+    private Date eventStart;
+    private Date eventEnd;
+
     private ArrayList<Entrant> waitingEntrants;
-    private int maxEntrants;
+    private int maxWaitingEntrants;
     private ArrayList<Entrant> invitedEntrants;
 
     private Organizer Owner;
 
-    /**
-     * Creates an event. Enforces Open is before Closed with an IllegalArgumentException
+    /** Creates an event. Enforces Open is before Closed with an IllegalArgumentException
      * @param EventName Title for the event
      * @param RegistrationOpen When entrants are allowed to apply
      * @param RegistrationClose When entrant applications are no longer accepted
+     * @param EventStart When the actual event starts
+     * @param EventEnd When the actual event ends
+     * @param owner Organizer
      */
-    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Organizer owner){
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, Organizer owner){
         //Potential profanity filter.
 
         //Check if an exact match exists already ().
@@ -42,21 +47,37 @@ public class Event {
         if (RegistrationClose.before(RegistrationOpen)){
             throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
         }
+        //Raise error if open date after or equal end date & time
+        if (EventEnd.before(EventStart)){
+            throw new IllegalArgumentException("Event Start cannot be after Event End");
+        }
 
         registrationStart = RegistrationOpen;
         registrationEnd = RegistrationClose;
+
+        eventStart = EventStart;
+        eventEnd = EventEnd;
 
         waitingEntrants = new ArrayList<Entrant>();
         invitedEntrants = new ArrayList<Entrant>();
 
         //0 is value for no limit
-        maxEntrants = 0;
+        maxWaitingEntrants = 0;
 
         //Setting reference owner
         Owner = owner;
     }
 
-    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Organizer owner, int MaxEntrants){
+    /** Creates an event. Enforces Open is before Closed with an IllegalArgumentException
+     * @param EventName Title for the event
+     * @param RegistrationOpen When entrants are allowed to apply
+     * @param RegistrationClose When entrant applications are no longer accepted
+     * @param EventStart When the actual event starts
+     * @param EventEnd When the actual event ends
+     * @param owner Organizer
+     * @param MaxEntrants Maximum number of waiting entrants
+     */
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, Organizer owner, int MaxEntrants){
         //Potential profanity filter.
 
         //Check if an exact match exists already ().
@@ -67,16 +88,24 @@ public class Event {
         if (RegistrationClose.before(RegistrationOpen)){
             throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
         }
+        //Raise error if open date after or equal end date & time
+        if (EventEnd.before(EventStart)){
+            throw new IllegalArgumentException("Event Start cannot be after Event End");
+        }
 
         registrationStart = RegistrationOpen;
         registrationEnd = RegistrationClose;
 
+        eventStart = EventStart;
+        eventEnd = EventEnd;
+
         //TODO: Throw error if MaxEntrants < 0
-        maxEntrants = MaxEntrants;
+        maxWaitingEntrants = MaxEntrants;
 
         //Setting reference owner
         Owner = owner;
     }
+
 
     //No arg constructor for Firebase
     Event(){}
@@ -108,8 +137,20 @@ public class Event {
         this.registrationEnd = registrationEnd;
     }
 
-    public int getMaxEntrants() {
-        return maxEntrants;
+    public void setWaitingEntrants(ArrayList<Entrant> waitingEntrants) {
+        this.waitingEntrants = waitingEntrants;
+    }
+
+    public void setInvitedEntrants(ArrayList<Entrant> invitedEntrants) {
+        this.invitedEntrants = invitedEntrants;
+    }
+
+    public int getMaxWaitingEntrants() {
+        return maxWaitingEntrants;
+    }
+
+    public void setMaxWaitingEntrants(int maxWaitingEntrants) {
+        this.maxWaitingEntrants = maxWaitingEntrants;
     }
 
     public ArrayList<Entrant> getInvitedEntrants() {
@@ -121,7 +162,7 @@ public class Event {
      * @param signee Entrant object type.
      */
     public void addToWaitingList(Entrant signee){
-        if (waitingEntrants.size() < maxEntrants){
+        if (waitingEntrants.size() < maxWaitingEntrants){
             waitingEntrants.add(signee);
         }
         else{
@@ -135,7 +176,7 @@ public class Event {
      */
     public void addToWaitingList(Collection<Entrant> signees){
         //Stopping adding if waitlist would be full.
-        if (waitingEntrants.size() + signees.size() <= maxEntrants){
+        if (waitingEntrants.size() + signees.size() <= maxWaitingEntrants){
             waitingEntrants.addAll(signees);
         }
         else{
@@ -160,7 +201,7 @@ public class Event {
             throw new IllegalArgumentException("New maximum less than current signees!");
         }*/
 
-        maxEntrants = max;
+        maxWaitingEntrants = max;
     }
 
     public void setEventName(String eventName) {
@@ -175,6 +216,21 @@ public class Event {
         Owner = owner;
     }
 
+    public Date getEventStart() {
+        return eventStart;
+    }
+
+    public void setEventStart(Date eventStart) {
+        this.eventStart = eventStart;
+    }
+
+    public Date getEventEnd() {
+        return eventEnd;
+    }
+
+    public void setEventEnd(Date eventEnd) {
+        this.eventEnd = eventEnd;
+    }
 
     /** Overriding toString's function on Events to return the name of the event instead.
      * @return Name of event
@@ -183,5 +239,22 @@ public class Event {
     @Override
     public String toString(){
         return eventName;
+    }
+
+
+    /** Overriding equals function for Events to compare name only
+     * @param obj Object to compare
+     * @return True if they match names
+     */
+    @Override
+    public boolean equals(Object obj){
+        //If perfectly equal, return true
+        if (this == obj) return true;
+
+        //If types do not match, return false
+        if (obj == null || this.getClass() != obj.getClass()) return false;
+
+        return this.getEventName().equals(((Event) obj).eventName);
+
     }
 }

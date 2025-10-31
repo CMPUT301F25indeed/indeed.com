@@ -68,7 +68,7 @@ public class EventHandler {
     }
 
     /** Returns all events that are currently still open
-     * @return Arraylist of Open Events, sorted by closetime desc
+     * @return Arraylist of Open Events
      */
     public ArrayList<Event> GetActiveEvents(){
         ArrayList<Event> ReturnArray = new ArrayList<Event>();

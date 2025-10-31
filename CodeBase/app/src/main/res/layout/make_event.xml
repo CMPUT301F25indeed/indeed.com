@@ -3,76 +3,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <EditText
-        android:id="@+id/NewEventPopup_NameDialog"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Event Name:"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <DatePicker
-        android:id="@+id/NewEventPopup_StartDateDialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30sp"
-        android:layout_marginEnd="-30sp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
-        app:layout_constraintEnd_toStartOf="@id/NewEventPopup_StartTimeDialog"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog" />
-
-    <TimePicker
-        android:id="@+id/NewEventPopup_StartTimeDialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="-30sp"
-        android:layout_marginEnd="30sp"
-
-        android:scaleX="0.75"
-        android:scaleY="0.75"
-        android:timePickerMode="spinner"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/NewEventPopup_StartDateDialog"
-        app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog" />
-
-    <DatePicker
-        android:id="@+id/NewEventPopup_EndDateDialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:layout_marginStart="30sp"
-        android:layout_marginEnd="-30sp"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
-        app:layout_constraintTop_toBottomOf="@id/NewEventPopup_StartTimeDialog"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/NewEventPopup_EndTimeDialog" />
-
-    <TimePicker
-        android:id="@+id/NewEventPopup_EndTimeDialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="-30sp"
-        android:layout_marginEnd="30sp"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
-        android:timePickerMode="spinner"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/NewEventPopup_EndDateDialog"
-        app:layout_constraintTop_toBottomOf="@id/NewEventPopup_StartTimeDialog" />
+        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/NewEventPopup_NameDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Event Name:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
 
 
-    <EditText
-        android:id="@+id/NewEventPopup_MaxEntrantsDialog"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="(optional) maximum number of applicants:"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/NewEventPopup_EndDateDialog"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Registration Availability Time Range:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog">
+            </TextView>
 
+            <include
+                android:id="@+id/RegistrationOpen"
+                layout="@layout/datetime_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+            </include>
+
+
+            <include
+                android:id="@+id/RegistrationClose"
+                android:layout_marginTop="-60sp"
+                layout="@layout/datetime_picker"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/RegistrationOpen">
+            </include>
+
+
+            <include
+                android:id="@+id/EventOpen"
+                android:layout_marginTop="-60sp"
+                layout="@layout/datetime_picker"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/RegistrationClose">
+            </include>
+
+            <include
+                android:id="@+id/EventClose"
+                android:layout_marginTop="-60sp"
+                layout="@layout/datetime_picker"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/EventOpen">
+            </include>
+
+
+            <EditText
+                android:id="@+id/NewEventPopup_MaxEntrantsDialog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="(optional) maximum number of applicants:"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/EventClose"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
