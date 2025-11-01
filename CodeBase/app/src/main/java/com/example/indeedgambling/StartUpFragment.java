@@ -2,7 +2,10 @@ package com.example.indeedgambling;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.view.*;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -11,19 +14,29 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.firebase.firestore.DocumentSnapshot;
+import java.util.Date;
 
 public class StartUpFragment extends Fragment {
     public StartUpFragment() {}
 
+    //private FirebaseViewModel Data;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.start_up_fragment, container, false);
+
+        //Syncing Firebase on startup screen
+        //Data = new ViewModelProvider(requireActivity()).get(FireBaseViewModel.class);
+
         Button loginButton = view.findViewById(R.id.button_login);
         Button signupButton = view.findViewById(R.id.button_signup);
 
         loginButton.setOnClickListener(v -> showLoginPopup());
         signupButton.setOnClickListener(v -> showSignUpPopup());
 
+        // Xan test data
+        //Data.Add(new Profile("Tester","Tester"));
+        //Data.Add(new Profile("Password","ProfileName"));
 
         return view;
     }
@@ -39,6 +52,16 @@ public class StartUpFragment extends Fragment {
                 .setPositiveButton("Login", (dialog, which) -> {
                     String username = usernameInput.getText().toString().trim();
                     String password = passwordInput.getText().toString().trim();
+
+                    // FOR NAV TESTING
+                    if (username.equals("e")) {
+                        NavHostFragment.findNavController(this).navigate(R.id.action_startUp_to_entrantHome);
+                    } else if (username.equals("o")) {
+                        NavHostFragment.findNavController(this).navigate(R.id.action_startUp_to_organizerHome);
+                    } else if (username.equals("a")) {
+                        NavHostFragment.findNavController(this).navigate(R.id.action_startUp_to_adminHome);
+                    }
+
                     if (username.isEmpty() || password.isEmpty()) {
                         new AlertDialog.Builder(requireContext())
                                 .setMessage("Please enter both username and password.")

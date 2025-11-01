@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+        <ImageButton
+            android:id="@+id/Organizer_EventPopup_View_Event_Poster"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Event Poster"
+
+            android:contentDescription="Event Poster"/>
+
+        <ImageView
+            android:id="@+id/Organizer_EventPopup_QR_Code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="Event QR Code"/>
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_EventRuntime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_EventLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Capacity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/Organizer_EventPopup_WaitList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Waiting List">
+        </Button>
+
+</LinearLayout>

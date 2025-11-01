@@ -5,4 +5,6 @@ public class Organizer extends Profile {
     public Organizer(String profileId, String personName, String email, String phone) {
         super(profileId, personName, email, phone, "organizer");
     }
+    //No arg constructor for Firebase
+//    public Organizer(){}
 }

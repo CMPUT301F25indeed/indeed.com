@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    //alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
 }
 
@@ -64,6 +65,6 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.0.1")
 
     // JavaDocs
-    //implementation(files("C:\\Users\\Tejj\\AppData\\Local\\Android\\Sdk\\platforms\\android-36\\android.jar"))
+    //implementation(files("C:/Users/Tejj/AppData/Local/Android/Sdk/platforms/android-36/android.jar"))
 
 }
