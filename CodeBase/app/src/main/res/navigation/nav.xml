@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_graph"
+    android:id="@+id/nav"
     app:startDestination="@id/startUpFragment">
 
     <fragment
         android:id="@+id/startUpFragment"
-        android:name="com.example.indeedgambling.StartUpFragment"
-        android:label="Start Up">
-        <action
-            android:id="@+id/action_startUp_to_entrantHome"
-            app:destination="@id/entrantHomeFragment" />
+        android:name="com.example.indeedgambling.StartUpFragment">
+        <action android:id="@+id/action_startUp_to_entrantHome" app:destination="@id/entrantHomeFragment" />
+        <action android:id="@+id/action_startUp_to_organizerHome" app:destination="@id/organizerHomeFragment" />
+        <action android:id="@+id/action_startUp_to_adminHome" app:destination="@id/adminHomeFragment" />
     </fragment>
 
     <fragment
@@ -55,4 +54,13 @@
             app:destination="@id/entrantHomeFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/organizerHomeFragment"
+        android:name="com.example.indeedgambling.Organizer_HomeFragment" />
+
+    <fragment
+        android:id="@+id/adminHomeFragment"
+        android:name="com.example.indeedgambling.Admin_HomeFragment" />
+
+    <action android:id="@+id/action_any_to_startUp" app:destination="@id/startUpFragment" />
 </navigation>
