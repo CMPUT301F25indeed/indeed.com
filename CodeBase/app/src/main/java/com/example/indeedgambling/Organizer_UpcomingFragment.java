@@ -18,6 +18,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import android.os.Bundle;
+import android.view.*;
+import android.widget.Button;
+import android.widget.ListView;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -40,13 +46,14 @@ import java.util.List;
 public class Organizer_UpcomingFragment extends Fragment {
 
     private FirebaseViewModel Data;
-
+    private OrganizerViewModel organizerVM;
     private View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
         Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
+        organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
 
         //HomeButton Function
         Button Home = view.findViewById(R.id.Organizer_Upcoming_HomeButton);
@@ -54,6 +61,12 @@ public class Organizer_UpcomingFragment extends Fragment {
             NavHostFragment.findNavController(this).navigate(R.id.action_organizerUpcomingFragment_to_organizerHomeFragment);
         });
 
+        // NEW CODE THAT TAKES YOU TO POTENTIALLY CREATE NEW EVENT
+//        Button newEvent = view.findViewById(R.id.Organizer_Upcoming_NewEventButton);
+//
+//        newEvent.setOnClickListener(v ->
+//                NavHostFragment.findNavController(this).navigate(R.id.organizerCreateEventFragment)
+//        );
 
         //Displaying Organizer's events
         ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
@@ -189,6 +202,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setView(popupView)
                 .setNegativeButton("Close", ((dialog, which) -> {}))
                 .show();
+
 
     }
 }

@@ -46,10 +46,10 @@ public class Entrant_HomeFragment extends Fragment {
         FirebaseViewModel FVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
 
-        Entrant e = EVM.getEntrant();
-        if (e != null && e.getPersonName() != null) {
-            greeting.setText("Hi " + e.getPersonName());
-        }
+//        Entrant e = EVM.getEntrant();
+//        if (e != null && e.getPersonName() != null) {
+//            greeting.setText("Hi " + e.getPersonName());
+//        }
 
         options.setOnItemClickListener((parent, itemView, position, id) -> {
             if (position == 0) {
@@ -69,19 +69,4 @@ public class Entrant_HomeFragment extends Fragment {
 
         return view;
     }}
-
-
-
-
-
-// Adds entrant to firebase after logout, but this is bad cuz this becomes reduadent when we only update entrant
-        // when they do something to change
-        // logging in and out does not change the entrant
-//        logout.setOnClickListener(b -> {
-//            fvm.add(e, () ->
-//                            NavHostFragment.findNavController(this).navigate(R.id.action_any_to_startUp),
-//                    ex -> NavHostFragment.findNavController(this).navigate(R.id.action_any_to_startUp)
-//            );
-//        });
-
 

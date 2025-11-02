@@ -1,37 +1,63 @@
 package com.example.indeedgambling;
 
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.*;
 
-public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.Holder> {
-    public interface OnEventClick { void onClick(Event e); }
-    private List<Event> data = new ArrayList<>();
-    private final OnEventClick click;
+import java.util.ArrayList;
+import java.util.List;
 
-    public EventsAdapter(OnEventClick click) { this.click = click; }
-    public void setData(List<Event> list) { data = list; notifyDataSetChanged(); }
+public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolder> {
 
-    @NonNull @Override public Holder onCreateViewHolder(@NonNull ViewGroup p, int vt) {
-        View v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_event, p, false);
-        return new Holder(v);
+    private List<Event> list = new ArrayList<>();
+    private final OnEventClick listener;
+
+    public interface OnEventClick {
+        void clicked(Event e);
     }
-    @Override public void onBindViewHolder(@NonNull Holder h, int pos) {
-        Event e = data.get(pos);
-        h.title.setText(e.getEventName());
-        h.desc.setText(e.getDescription());
-        h.itemView.setOnClickListener(v -> click.onClick(e));
-    }
-    @Override public int getItemCount() { return data.size(); }
 
-    static class Holder extends RecyclerView.ViewHolder {
+    public EventsAdapter(OnEventClick listener) {
+        this.listener = listener;
+    }
+
+    public void setData(List<Event> events) {
+        this.list = events;
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public EventHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_event, parent, false);
+        return new EventHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull EventHolder holder, int position) {
+        Event e = list.get(position);
+        holder.title.setText(e.getTitle());
+        holder.desc.setText(e.getDescription());
+
+        holder.itemView.setOnClickListener(v -> listener.clicked(e));
+    }
+
+    @Override
+    public int getItemCount() {
+        return list.size();
+    }
+
+    public static class EventHolder extends RecyclerView.ViewHolder {
         TextView title, desc;
-        Holder(View v) {
-            super(v);
-            title = v.findViewById(R.id.event_title);
-            desc  = v.findViewById(R.id.event_desc);
+
+        public EventHolder(@NonNull View itemView) {
+            super(itemView);
+            title = itemView.findViewById(R.id.event_title);
+            desc = itemView.findViewById(R.id.event_desc);
         }
     }
 }

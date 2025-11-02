@@ -1,31 +1,23 @@
 package com.example.indeedgambling;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class HashUtil {
-
-    public static String generateHash(String input) {
+    public static String sha256(String input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(input.getBytes());
-
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = md.digest(input.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
             }
-            return hexString.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return input; // fallback
+            return sb.toString();
+        } catch (Exception e) {
+            return "";
         }
     }
 
-    // ✅ New function: makes hash from username + password
-    public static String generateId(String name, String password) {
-        return generateHash(name + password);
+    public static String generateId(String email, String password) {
+        return sha256(email + password);
     }
 }

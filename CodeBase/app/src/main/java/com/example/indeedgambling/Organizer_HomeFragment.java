@@ -27,30 +27,30 @@ public class Organizer_HomeFragment extends Fragment {
         //Logout button setup
         Button LogoutButton = view.findViewById(R.id.Organizer_HomeLogoutButton);
         LogoutButton.setOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigate(R.id.action_organizerHome_to_startup));
+                NavHostFragment.findNavController(this).navigate(R.id.action_orgHome_to_start));
 
         // Browse Button
         Button BrowseButton = view.findViewById(R.id.Organizer_HomeBrowseEventsButton);
         BrowseButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHome_to_Browse);
+            NavHostFragment.findNavController(this).navigate(R.id.action_orgHome_to_browse);
         });
 
         //Upcoming Events Button
         Button UpcomingEventsButton = view.findViewById(R.id.Organizer_HomeUpcomingEventsButton);
         UpcomingEventsButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHome_to_Upcoming);
+            NavHostFragment.findNavController(this).navigate(R.id.action_orgHome_to_upcoming);
         });
 
         //History Button Function
         Button HistoryButton = view.findViewById(R.id.Organizer_HomeHistoryButton);
         HistoryButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHomeFragment_to_organizerHistoryFragment);
+            NavHostFragment.findNavController(this).navigate(R.id.action_orgHome_to_history);
         });
 
         //Profile Button function
         Button ProfileButton = view.findViewById(R.id.Organizer_HomeProfileButton);
         ProfileButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).navigate(R.id.action_organizerHomeFragment_to_organizerProfileFragment);
+            NavHostFragment.findNavController(this).navigate(R.id.action_orgHome_to_profile);
         });
 
 
