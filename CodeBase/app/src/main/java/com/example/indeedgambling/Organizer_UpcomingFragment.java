@@ -62,6 +62,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         });
 
         // NEW CODE THAT TAKES YOU TO POTENTIALLY CREATE NEW EVENT
+        // Not needed, pop-up works.
 //        Button newEvent = view.findViewById(R.id.Organizer_Upcoming_NewEventButton);
 //
 //        newEvent.setOnClickListener(v ->
@@ -103,6 +104,8 @@ public class Organizer_UpcomingFragment extends Fragment {
         View EventOpen = popupView.findViewById(R.id.EventOpen);
         View EventClose = popupView.findViewById(R.id.EventClose);
 
+
+
         //Registration DateTime
         DatePicker RegStartDateInput = RegistrationOpen.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker RegStartTimeInput = RegistrationOpen.findViewById(R.id.DateTimePicker_TimeDialog);
@@ -115,6 +118,9 @@ public class Organizer_UpcomingFragment extends Fragment {
         DatePicker EventEndDateInput = EventClose.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker EventEndTimeInput = EventClose.findViewById(R.id.DateTimePicker_TimeDialog);
         EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
+        EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
+        EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
+        EditText LocationInput = popupView.findViewById(R.id.NewEventPopup_Location);
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
@@ -130,6 +136,9 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
                     String MaxEntInp = MaxEntrantsInput.getText().toString().trim();
+                    String Location = LocationInput.getText().toString().trim();
+                    String Description = DescriptionInput.getText().toString().trim();
+                    String Category = CategoryInput.getText().toString().trim();
 
                     //If there is a specificied WaitList Limit
                     if (!MaxEntInp.isEmpty()) {

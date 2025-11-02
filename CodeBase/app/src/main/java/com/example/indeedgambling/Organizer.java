@@ -7,4 +7,5 @@ public class Organizer extends Profile {
         super(profileId, name, email, phone, "organizer", passwordHash);
         setRoleVerified(false);
     }
+    public Organizer(){super();}
 }

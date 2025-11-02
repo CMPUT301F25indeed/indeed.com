@@ -1,84 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto">-->
-
-<!--    <ScrollView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent">-->
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content">-->
-<!--            <EditText-->
-<!--                android:id="@+id/NewEventPopup_NameDialog"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:hint="Event Name:"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent"/>-->
-
-
-<!--            <TextView-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:text="Registration Availability Time Range:"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog">-->
-<!--            </TextView>-->
-
-<!--            <include-->
-<!--                android:id="@+id/RegistrationOpen"-->
-<!--                layout="@layout/datetime_picker"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent">-->
-<!--            </include>-->
-
-
-<!--            <include-->
-<!--                android:id="@+id/RegistrationClose"-->
-<!--                android:layout_marginTop="-60sp"-->
-<!--                layout="@layout/datetime_picker"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_width="match_parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/RegistrationOpen">-->
-<!--            </include>-->
-
-
-<!--            <include-->
-<!--                android:id="@+id/EventOpen"-->
-<!--                android:layout_marginTop="-60sp"-->
-<!--                layout="@layout/datetime_picker"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_width="match_parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/RegistrationClose">-->
-<!--            </include>-->
-
-<!--            <include-->
-<!--                android:id="@+id/EventClose"-->
-<!--                android:layout_marginTop="-60sp"-->
-<!--                layout="@layout/datetime_picker"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_width="match_parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/EventOpen">-->
-<!--            </include>-->
-
-
-<!--            <EditText-->
-<!--                android:id="@+id/NewEventPopup_MaxEntrantsDialog"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:hint="(optional) maximum number of applicants:"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/EventClose"/>-->
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-<!--    </ScrollView>-->
-<!--</androidx.constraintlayout.widget.ConstraintLayout>-->
-
-<!--the following is amrit code:-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -123,18 +42,15 @@
 
         <include
             android:id="@+id/RegistrationClose"
-            layout="@layout/datetime_picker"
-            android:layout_marginTop="6dp"/>
+            layout="@layout/datetime_picker"/>
 
         <include
             android:id="@+id/EventOpen"
-            layout="@layout/datetime_picker"
-            android:layout_marginTop="6dp"/>
+            layout="@layout/datetime_picker"/>
 
         <include
             android:id="@+id/EventClose"
-            layout="@layout/datetime_picker"
-            android:layout_marginTop="6dp"/>
+            layout="@layout/datetime_picker" />
 
         <EditText
             android:id="@+id/NewEventPopup_MaxEntrantsDialog"
@@ -143,13 +59,5 @@
             android:hint="Capacity"
             android:inputType="number"
             android:layout_marginTop="10dp"/>
-
-        <Button
-            android:id="@+id/event_create_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Create Event"
-            android:layout_marginTop="16dp"
-            android:textStyle="bold"/>
     </LinearLayout>
 </ScrollView>
