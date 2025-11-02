@@ -29,7 +29,7 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         TextView title = v.findViewById(R.id.history_event_title);
         TextView status = v.findViewById(R.id.history_event_status);
 
-        title.setText(e.getTitle());
+        title.setText(e.getEventName());
         status.setText("Joined Event"); // later we can pull real status
 
         return v;

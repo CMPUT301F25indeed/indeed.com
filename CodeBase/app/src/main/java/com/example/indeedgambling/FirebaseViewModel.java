@@ -128,7 +128,7 @@ public class FirebaseViewModel extends ViewModel {
         if (e.getEventId() == null || e.getEventId().isEmpty()) {
             e.setEventId(UUID.randomUUID().toString());
         }
-        if (e.getTitle() == null) e.setTitle("");
+        if (e.getEventName() == null) e.setEventName("");
         if (e.getStatus() == null) e.setStatus("open");
         if (e.getWaitingList() == null) e.setWaitingList(new ArrayList<>());
 

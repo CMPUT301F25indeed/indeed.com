@@ -98,6 +98,12 @@ public class Organizer_UpcomingFragment extends Fragment {
         View popupView = inflater.inflate(R.layout.make_event, null);
 
         EditText NameInput = popupView.findViewById(R.id.NewEventPopup_NameDialog);
+        EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
+        EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
+        EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
+        EditText LocationInput = popupView.findViewById(R.id.NewEventPopup_Location);
+        EditText CriteriaInput = popupView.findViewById(R.id.NewEventPopup_Criteria);
+
 
         View RegistrationOpen = popupView.findViewById(R.id.RegistrationOpen);
         View RegistrationClose = popupView.findViewById(R.id.RegistrationClose);
@@ -117,10 +123,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         TimePicker EventStartTimeInput = EventOpen.findViewById(R.id.DateTimePicker_TimeDialog);
         DatePicker EventEndDateInput = EventClose.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker EventEndTimeInput = EventClose.findViewById(R.id.DateTimePicker_TimeDialog);
-        EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
-        EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
-        EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
-        EditText LocationInput = popupView.findViewById(R.id.NewEventPopup_Location);
+
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
@@ -139,16 +142,18 @@ public class Organizer_UpcomingFragment extends Fragment {
                     String Location = LocationInput.getText().toString().trim();
                     String Description = DescriptionInput.getText().toString().trim();
                     String Category = CategoryInput.getText().toString().trim();
+                    String Criteria = CriteriaInput.getText().toString().trim();
 
                     //If there is a specificied WaitList Limit
                     if (!MaxEntInp.isEmpty()) {
                         int MaxEntrants = Integer.parseInt(MaxEntrantsInput.getText().toString().trim());
-                        Event CreatedEvent = new Event(EventName, RegStartDate, RegEndDate, EventStartDate, EventEndDate, new Organizer("0", "billy bob", "test@test.ca", "123456789"), MaxEntrants);
+                        Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,organizerVM.getOrganizer().getValue().getProfileId(),Description,Category,Criteria);
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
                         Log.d("PopUp Test", "showNewEventPopup Contains" + Data.Contains(CreatedEvent));
                         Data.Add(CreatedEvent);
                     } else {
-                        Event CreatedEvent = new Event(EventName,RegStartDate, RegEndDate, EventStartDate, EventEndDate, new Organizer("0", "billy bob", "test@test.ca", "123456789"));
+                        Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,organizerVM.getOrganizer().getValue().getProfileId(),Description,Category,Criteria);
+                        CreatedEvent.setMaxEntrants(Integer.parseInt(MaxEntInp));
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
                         Log.d("PopUp Test", "showNewEventPopup Contains Result: " + Data.Contains(CreatedEvent));
                         Data.Add(CreatedEvent);
@@ -196,7 +201,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Waitlist Pop-up
         WaitListButton.setOnClickListener(v -> {
             View listView = inflater.inflate(R.layout.listview_popup, null);
-            ArrayAdapter<Entrant> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrants());
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
 
             new AlertDialog.Builder(requireContext())
                     .setTitle("Waitlist")

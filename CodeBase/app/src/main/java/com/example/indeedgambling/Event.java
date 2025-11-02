@@ -2,6 +2,8 @@ package com.example.indeedgambling;
 
 import android.util.Log;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -12,7 +14,6 @@ public class Event {
     private String eventName;
     private String description;
     private String organizerId; //Where are we getting the ID from, and how to we use to it refernce the organizer? Hashes are not unique.
-    private Organizer Owner; //Xans
     private String category;
     private String location;
     private Date eventStart;
@@ -24,9 +25,8 @@ public class Event {
     private String qrCodeURL;
     private String status;    // planned/open/closed/completed
     private String criteria;  // lottery notes
-    private List<String> waitingList; // entrant IDs
-    private ArrayList<Entrant> waitingEntrants; //Xans
-    private ArrayList<Entrant> invitedEntrants;
+    private ArrayList<String> waitingList; // entrant IDs
+    private ArrayList<String> invitedList; // Entrant IDs
 
 
     /**
@@ -37,12 +37,16 @@ public class Event {
      * @param RegistrationClose When entrant applications are no longer accepted
      * @param EventStart        When the actual event starts
      * @param EventEnd          When the actual event ends
-     * @param owner             Organizer
+     * @param OrgID             Creator's Organizer ID
+     * @param Description       Description of Event
+     * @param Critera           Critera (?)
+     * @param Category          Category of Event
+     * @param QRCodeURL         URL of the poster image for the event
      */
-    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, Organizer owner) {
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL) {
         //Potential profanity filter.
 
-        //Check if an exact match exists already ().
+        //TODO: Check if an exact match exists already ().
         eventName = EventName;
 
         //Raise error if open date after or equal end date & time
@@ -60,33 +64,30 @@ public class Event {
         eventStart = EventStart;
         eventEnd = EventEnd;
 
-        waitingEntrants = new ArrayList<Entrant>();
-        invitedEntrants = new ArrayList<Entrant>();
+        waitingList = new ArrayList<String>();
+        invitedList = new ArrayList<String>();
 
         //0 is value for no limit
         maxWaitingEntrants = 0;
 
         //Setting reference owner
-        Owner = owner;
-    }
+        organizerId = OrgID;
 
-    /**
-     * Creates an event. Enforces Open is before Closed with an IllegalArgumentException
-     *
-     * @param EventName         Title for the event
-     * @param RegistrationOpen  When entrants are allowed to apply
-     * @param RegistrationClose When entrant applications are no longer accepted
-     * @param EventStart        When the actual event starts
-     * @param EventEnd          When the actual event ends
-     * @param owner             Organizer
-     * @param MaxEntrants       Maximum number of waiting entrants
-     */
-    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, Organizer owner, int MaxEntrants) {
+        description = Description;
+
+        criteria = Critera;
+
+        category = Category;
+
+        qrCodeURL = QRCodeURL;
+
+        this.status = getStatus();
+    }
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
         //Potential profanity filter.
 
-        //Check if an exact match exists already ().
+        //TODO: Check if an exact match exists already ().
         eventName = EventName;
-
 
         //Raise error if open date after or equal end date & time
         if (RegistrationClose.before(RegistrationOpen)) {
@@ -103,25 +104,99 @@ public class Event {
         eventStart = EventStart;
         eventEnd = EventEnd;
 
-        //TODO: Throw error if MaxEntrants < 0
-        maxWaitingEntrants = MaxEntrants;
+        waitingList = new ArrayList<String>();
+        invitedList = new ArrayList<String>();
+
+        //0 is value for no limit. Can't have negative, so it sets to zero
+        maxWaitingEntrants = Math.max(0,MaxEntrants);
 
         //Setting reference owner
-        Owner = owner;
+        organizerId = OrgID;
+
+        description = Description;
+
+        criteria = Critera;
+
+        category = Category;
+
+        qrCodeURL = QRCodeURL;
+
+        this.status = getStatus();
     }
 
+    /** NO URL constructor, no Max entrants Constructor.
+     * @param EventName
+     * @param RegistrationOpen
+     * @param RegistrationClose
+     * @param EventStart
+     * @param EventEnd
+     * @param OrgID
+     * @param Description
+     * @param Criteria
+     * @param Category
+     */
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Criteria, String Category) {
+        //Potential profanity filter.
+
+        //TODO: Check if an exact match exists already ().
+        eventName = EventName;
+
+        //Raise error if open date after or equal end date & time
+        if (RegistrationClose.before(RegistrationOpen)) {
+            throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
+        }
+        //Raise error if open date after or equal end date & time
+        if (EventEnd.before(EventStart)) {
+            throw new IllegalArgumentException("Event Start cannot be after Event End");
+        }
+
+        registrationStart = RegistrationOpen;
+        registrationEnd = RegistrationClose;
+
+        eventStart = EventStart;
+        eventEnd = EventEnd;
+
+        waitingList = new ArrayList<String>();
+        invitedList = new ArrayList<String>();
+
+        //0 is value for no limit. Can't have negative, so it sets to zero
+        maxWaitingEntrants = 0;
+
+        //Setting reference owner
+        organizerId = OrgID;
+
+        description = Description;
+
+        criteria = Criteria;
+
+        category = Category;
+
+        qrCodeURL = "";
+
+        this.status = getStatus();
+    }
 
     //No arg constructor for Firebase
     Event() {
     }
 
-    /**
-     * Returns a set of all entrants on the waiting list
-     *
-     * @return Entrants???
+    //Returns the entrant names for the Entrants
+
+    /** WIP
+     * @return NOTHING RIGHT NOW
      */
-    public ArrayList<Entrant> getWaitingEntrants() {
-        return waitingEntrants;
+    public ArrayList<String> getWaitingEntrantNames() {
+        //Find the matching names from the IDS.
+
+        return waitingList;
+    }
+
+    /** Provides all Profile IDS for entrants who signed onto the Waitlist
+     *
+     * @return ArrayList of entrant's IDs
+     */
+    public ArrayList<String> getWaitingEntrantIDs() {
+        return waitingList;
     }
 
     public String getEventName() {
@@ -144,12 +219,33 @@ public class Event {
         this.registrationEnd = registrationEnd;
     }
 
-    public void setWaitingEntrants(ArrayList<Entrant> waitingEntrants) {
-        this.waitingEntrants = waitingEntrants;
+    /** Helper function that checks if RIGHT NOW is before reg period
+     *
+     * @return True if before Reg Open, false otherwise
+     */
+    public boolean BeforeRegPeriod(){
+        return new Date().before(this.registrationStart);
     }
 
-    public void setInvitedEntrants(ArrayList<Entrant> invitedEntrants) {
-        this.invitedEntrants = invitedEntrants;
+    /** Helper function that checks if RIGHT NOW is after the reg period
+     *
+     * @return True if after Reg Close, false otherwise
+     */
+    public boolean AfterRegPeriod(){
+        return new Date().after(this.registrationEnd);
+    }
+
+    /** Returns True if the event has finished**/
+    public boolean EventPassed(){
+        return this.eventEnd.before(new Date());
+    }
+
+    public void setWaitingEntrants(ArrayList<String> waitingEntrantIDs) {
+        this.waitingList = waitingEntrantIDs;
+    }
+
+    public void setInvitedEntrants(ArrayList<String> invitedEntrantIDs) {
+        this.invitedList = invitedEntrantIDs;
     }
 
     public int getMaxWaitingEntrants() {
@@ -160,8 +256,8 @@ public class Event {
         this.maxWaitingEntrants = maxWaitingEntrants;
     }
 
-    public ArrayList<Entrant> getInvitedEntrants() {
-        return invitedEntrants;
+    public ArrayList<String> getInvitedEntrantIDs() {
+        return invitedList;
     }
 
     public String getEventId() {
@@ -220,7 +316,29 @@ public class Event {
         this.qrCodeURL = qrCodeURL;
     }
 
+    /** Updates the status of the event to the current moment before returning.
+     *
+     * @return Current Status of event
+     */
     public String getStatus() {
+        //Checks if reg period is now
+        if (this.RegistrationOpen()){
+            status = "Open";
+        }
+        else if (!this.RegistrationOpen()){
+            status = "Closed";
+        }
+        //Checks if reg period is upcoming
+        else if (this.BeforeRegPeriod()){
+            status = "Planned";
+        }
+        //Checks if reg period has passed, and there are no invited entrants
+        else if (this.AfterRegPeriod() && !invitedList.isEmpty()){
+            status = "Completed";
+        }
+        else{
+            status = "Completed";
+        }
         return status;
     }
 
@@ -232,7 +350,7 @@ public class Event {
         return waitingList;
     }
 
-    public void setWaitingList(List<String> waitingList) {
+    public void setWaitingList(ArrayList<String> waitingList) {
         this.waitingList = waitingList;
     }
 
@@ -248,12 +366,12 @@ public class Event {
      * Adds an entrant to the waiting list of the event.
      * Duplicant signees are not added.
      *
-     * @param signee Entrant object type.
+     * @param signeeID Entrant ID.
      * @return True if entrant added, False otherwise
      */
-    public boolean addToWaitingList(Entrant signee) {
+    public boolean addToWaitingList(String signeeID) {
         if (!this.atCapacity()) {
-            waitingEntrants.add(signee);
+            waitingList.add(signeeID);
             //Push to cloud.
             return true;
         } else {
@@ -277,12 +395,12 @@ public class Event {
         this.eventName = eventName;
     }
 
-    public Organizer getOwner() {
-        return Owner;
+    public String getOwnerID() {
+        return organizerId;
     }
 
-    public void setOwner(Organizer owner) {
-        Owner = owner;
+    public void setOwner(String owner) {
+        organizerId = owner;
     }
 
     public Date getEventStart() {
@@ -337,7 +455,7 @@ public class Event {
      */
     public boolean atCapacity() {
         //0 check is for no-limit. 0 => no limit
-        return (this.maxWaitingEntrants >= this.waitingEntrants.size()) || this.maxWaitingEntrants == 0;
+        return (this.maxWaitingEntrants >= this.waitingList.size()) || this.maxWaitingEntrants == 0;
     }
 
     /**
@@ -358,223 +476,4 @@ public class Event {
         return (!this.atCapacity()) && this.RegistrationOpen();
 
     }
-
-
-// The following is Amrit's set up event
-// Main diff is the constructers and some attributes.
-    // I left some of it mostly because i do not know how certain things will react
-// I added a summary that chat made cuz im not ready every attribute
-
-    /*
-     * ────────────────────────────────────────────────────────────────
-     *  DIFFERENCES BETWEEN XAN (ACTIVE) AND AMRIT (COMMENT)
-     * ────────────────────────────────────────────────────────────────
-     * name changing
-     * 1️⃣ title        ← replaces  eventName
-     * 2️⃣ startDate    ← replaces  eventStart
-     * 3️⃣ endDate      ← replaces  eventEnd
-     * 4️⃣ capacity     ← replaces  maxWaitingEntrants
-     *
-     * 🟢 Variables removed from the first half:
-     *    - Organizer Owner
-     *    - ArrayList<Entrant> waitingEntrants
-     *    - ArrayList<Entrant> invitedEntrants
-     *
-     * 🟢 Variables unchanged (kept same name and type):
-     *    - eventId
-     *    - description
-     *    - organizerId
-     *    - category
-     *    - location
-     *    - registrationStart
-     *    - registrationEnd
-     *    - imageUrl
-     *    - qrCodeURL
-     *    - status
-     *    - criteria
-     *    - waitingList
-     *
-     *  Summary:
-     *  → The new version simplified naming (e.g., "title" instead of "eventName")
-     *    and removed complex object references like Organizer and Entrant lists,
-     *    making it Firestore-friendly.
-     */
-
-
-    //    private String eventId;
-//
-//    // Equivalent to: eventName (first half)
-    private String title;
-    //
-//    private String description;
-//    private String organizerId;
-//    private String category;
-//    private String location;
-//
-//    // Equivalent to: eventStart (first half)
-    private Date startDate;
-    //
-//    // Equivalent to: eventEnd (first half)
-    private Date endDate;
-    //
-//    private Date registrationStart;
-//    private Date registrationEnd;
-//
-//    // Equivalent to: maxWaitingEntrants (first half)
-    private int capacity;
-
-    //
-//    private String imageUrl;
-//    private String qrCodeURL;
-//    private String status;
-//    private String criteria;
-//    private List<String> waitingList;
-//
-//    public Event() {}
-//
-//    // Short constructor for creating new events inside the app
-    public Event(String title,
-                 String description,
-                 String organizerId,
-                 String category,
-                 String location,
-                 Date startDate,
-                 Date endDate,
-                 Date registrationStart,
-                 Date registrationEnd,
-                 int capacity) {
-
-        this.eventId = null;
-        this.title = title;
-        this.description = description;
-        this.organizerId = organizerId;
-        this.category = category;
-        this.location = location;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.registrationStart = registrationStart;
-        this.registrationEnd = registrationEnd;
-        this.capacity = capacity;
-
-        this.imageUrl = "";
-        this.qrCodeURL = "";
-        this.status = "open";
-        this.criteria = "";
-        this.waitingList = new java.util.ArrayList<>();
-    }
-
-    // Full constructor (Firestore)
-    public Event(String eventId,
-                 String title,
-                 String description,
-                 String organizerId,
-                 String category,
-                 String location,
-                 Date startDate,
-                 Date endDate,
-                 Date registrationStart,
-                 Date registrationEnd,
-                 int capacity,
-                 String imageUrl,
-                 String qrCodeURL,
-                 String status,
-                 String criteria,
-                 List<String> waitingList) {
-
-        this.eventId = eventId;
-        this.title = title;
-        this.description = description;
-        this.organizerId = organizerId;
-        this.category = category;
-        this.location = location;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.registrationStart = registrationStart;
-        this.registrationEnd = registrationEnd;
-        this.capacity = capacity;
-        this.imageUrl = imageUrl;
-        this.qrCodeURL = qrCodeURL;
-        this.status = status;
-        this.criteria = criteria;
-        this.waitingList = waitingList;
-    }
-
-    //
-//    // Getters and setters
-//    public String getEventId() { return eventId; }
-//    public void setEventId(String eventId) { this.eventId = eventId; }
-//
-//    // Equivalent to: getEventName / setEventName (first half)
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    //
-//    public String getDescription() { return description; }
-//    public void setDescription(String description) { this.description = description; }
-//
-//    public String getOrganizerId() { return organizerId; }
-//    public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
-//
-//    public String getCategory() { return category; }
-//    public void setCategory(String category) { this.category = category; }
-//
-//    public String getLocation() { return location; }
-//    public void setLocation(String location) { this.location = location; }
-//
-//    // Equivalent to: getEventStart / setEventStart (first half)
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    //
-//    // Equivalent to: getEventEnd / setEventEnd (first half)
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    //
-//    public Date getRegistrationStart() { return registrationStart; }
-//    public void setRegistrationStart(Date registrationStart) { this.registrationStart = registrationStart; }
-//
-//    public Date getRegistrationEnd() { return registrationEnd; }
-//    public void setRegistrationEnd(Date registrationEnd) { this.registrationEnd = registrationEnd; }
-//
-//    // Equivalent to: getMaxWaitingEntrants / setMaxWaitingEntrants (first half)
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-//
-//    public String getImageUrl() { return imageUrl; }
-//    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-//
-//    public String getQrCodeURL() { return qrCodeURL; }
-//    public void setQrCodeURL(String qrCodeURL) { this.qrCodeURL = qrCodeURL; }
-//
-//    public String getStatus() { return status; }
-//    public void setStatus(String status) { this.status = status; }
-//
-//    public String getCriteria() { return criteria; }
-//    public void setCriteria(String criteria) { this.criteria = criteria; }
-//
-//    public List<String> getWaitingList() { return waitingList; }
-//    public void setWaitingList(List<String> waitingList) { this.waitingList = waitingList; }
-//}
-
 }

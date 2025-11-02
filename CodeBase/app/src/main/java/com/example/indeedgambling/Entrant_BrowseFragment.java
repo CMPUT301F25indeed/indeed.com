@@ -68,7 +68,7 @@ public class Entrant_BrowseFragment extends Fragment {
 
 
     private void showEventPopup(Event event) {
-        Toast.makeText(getContext(), "Event: " + event.getTitle(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), "Event: " + event.getEventName(), Toast.LENGTH_SHORT).show();
         // We will add join/leave popup later
 
 }}

@@ -23,6 +23,13 @@
             android:layout_marginTop="8dp"/>
 
         <EditText
+            android:id="@+id/NewEventPopup_Criteria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Criteria for Sign-up"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
             android:id="@+id/NewEventPopup_Category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
