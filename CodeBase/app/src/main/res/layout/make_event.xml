@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/NewEventPopup_NameDialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Event Title" />
+
+        <EditText
+            android:id="@+id/NewEventPopup_Description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description"
+            android:minLines="3"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/NewEventPopup_Category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Category"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/NewEventPopup_Location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:layout_marginTop="8dp"/>
+
+        <include
+            android:id="@+id/RegistrationOpen"
+            layout="@layout/datetime_picker" />
+
+        <include
+            android:id="@+id/RegistrationClose"
+            layout="@layout/datetime_picker"
+            android:layout_marginTop="6dp"/>
+
+        <include
+            android:id="@+id/EventOpen"
+            layout="@layout/datetime_picker"
+            android:layout_marginTop="6dp"/>
+
+        <include
+            android:id="@+id/EventClose"
+            layout="@layout/datetime_picker"
+            android:layout_marginTop="6dp"/>
+
+        <EditText
+            android:id="@+id/NewEventPopup_MaxEntrantsDialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Capacity"
+            android:inputType="number"
+            android:layout_marginTop="10dp"/>
+
+        <Button
+            android:id="@+id/event_create_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create Event"
+            android:layout_marginTop="16dp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</ScrollView>

@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">indeedGambling</string>
     <string name="title_screen">Indeed Gambling</string>
+    <string-array name="user_roles">
+        <item>Entrant</item>
+        <item>Organizer</item>
+    </string-array>
+
 </resources>
