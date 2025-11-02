@@ -118,9 +118,6 @@
         <action
             android:id="@+id/action_orgHome_to_start"
             app:destination="@id/startUpFragment" />
-        <action
-            android:id="@+id/action_organizerHomeFragment_to_organizerCreateEventFragment"
-            app:destination="@id/organizerCreateEventFragment" />
     </fragment>
 
     <fragment
@@ -139,9 +136,6 @@
         <action
             android:id="@+id/action_organizerUpcomingFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
-        <action
-            android:id="@+id/action_organizerUpcomingFragment_to_organizerCreateEventFragment"
-            app:destination="@id/organizerCreateEventFragment" />
     </fragment>
 
     <fragment
@@ -159,15 +153,6 @@
         android:label="Organizer Profile">
         <action
             android:id="@+id/action_organizerProfileFragment_to_organizerHomeFragment"
-            app:destination="@id/organizerHomeFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/organizerCreateEventFragment"
-        android:name="com.example.indeedgambling.Organizer_CreateEventFragment"
-        android:label="Create Event">
-        <action
-            android:id="@+id/action_organizerCreateEventFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
     </fragment>
 

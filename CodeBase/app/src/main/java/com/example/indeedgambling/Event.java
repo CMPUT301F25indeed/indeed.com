@@ -271,7 +271,6 @@ public class Event {
     public void setMaxEntrants(int max) {
         //No negative max. 0 is unlimited entrants
         maxWaitingEntrants = Math.max(max, 0);
-
     }
 
     public void setEventName(String eventName) {
