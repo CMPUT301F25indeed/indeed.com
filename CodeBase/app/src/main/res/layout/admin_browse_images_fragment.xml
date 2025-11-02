@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="8dp"
+    android:padding="12dp"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/org_history_title"
+    <SearchView
+        android:id="@+id/admin_images_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="History / Notifications"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:layout_margin="8dp"/>
+        android:queryHint="Search images by uploader/event"/>
 
     <ListView
-        android:id="@+id/org_history_list"
+        android:id="@+id/admin_images_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"/>
 
     <Button
-        android:id="@+id/org_history_home"
+        android:id="@+id/admin_images_remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Home"/>
+        android:text="Remove Selected"/>
+
+    <Button
+        android:id="@+id/admin_images_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:layout_marginTop="8dp"/>
 </LinearLayout>

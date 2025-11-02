@@ -8,4 +8,9 @@
     <string name="organizer_home_HistoryText">History</string>
     <string name="organizer_home_BrowseText">Browse Events</string>
     <string name="organizer_HomeButton"><![CDATA[< Home]]></string>
+    <string-array name="user_roles">
+        <item>Entrant</item>
+        <item>Organizer</item>
+    </string-array>
+
 </resources>
