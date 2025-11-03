@@ -40,6 +40,13 @@ import com.google.firebase.firestore.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * Firebase ViewModel responsible for handling all Firestore operations
+ * including profiles, events, invitations, notifications, images, and logs.
+ *
+ * It also provides LiveData streams for real-time UI updates and helper
+ * methods for CRUD operations and waiting list functionality.
+ */
 public class FirebaseViewModel extends ViewModel {
 
     // ---- Firestore ----
@@ -58,6 +65,9 @@ public class FirebaseViewModel extends ViewModel {
     private ListenerRegistration profilesReg;
     private ListenerRegistration eventsReg;
 
+    /**
+     * Constructor: attaches real-time listeners to Firestore on init
+     */
     public FirebaseViewModel() {
         attachRealtimeListeners();
     }
@@ -72,6 +82,11 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Realtime listeners
     // -------------------------
+
+    /**
+     * Subscribes to Firestore changes for profiles and events
+     * and updates LiveData automatically.
+     */
     private void attachRealtimeListeners() {
         profilesReg = PROFILES.addSnapshotListener((snap, err) -> {
             if (err != null || snap == null) return;
@@ -86,10 +101,16 @@ public class FirebaseViewModel extends ViewModel {
         });
     }
 
+    /**
+     * @return LiveData list of profiles updated in real time
+     */
     public LiveData<List<Profile>> getProfilesLive() {
         return profilesLive;
     }
 
+    /**
+     * @return LiveData list of events updated in real time
+     */
     public LiveData<List<Event>> getEventsLive() {
         return eventsLive;
     }
@@ -97,6 +118,14 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Profile CRUD
     // -------------------------
+
+    /**
+     * Creates or updates a profile in Firestore.
+     *
+     * @param p Profile object
+     * @param onOk callback if success
+     * @param onErr callback if failure
+     */
     public void upsertProfile(Profile p, Runnable onOk, Consumer<Exception> onErr) {
         if (p.getProfileId() == null || p.getProfileId().isEmpty()) {
             onErr.accept(new IllegalArgumentException("profileId is required"));
@@ -107,12 +136,21 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    /**
+     * Updates specific fields of a profile in Firestore.
+     *
+     * @param profileId ID of profile
+     * @param updates fields to update
+     */
     public void updateProfile(String profileId, Map<String, Object> updates, Runnable onOk, Consumer<Exception> onErr) {
         PROFILES.document(profileId).update(updates)
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
 
+    /**
+     * Loads a profile based on email+password hash
+     */
     public void loadProfileByLogin(String userName, String password,
                                    Consumer<DocumentSnapshot> onDoc, Consumer<Exception> onErr) {
         String id = HashUtil.generateId(userName, password);
@@ -124,6 +162,10 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Events
     // -------------------------
+
+    /**
+     * Creates a new event in Firestore.
+     */
     public void createEvent(Event e, Runnable onOk, Consumer<Exception> onErr) {
         if (e.getEventId() == null || e.getEventId().isEmpty()) {
             e.setEventId(UUID.randomUUID().toString());
@@ -137,12 +179,18 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    /**
+     * Update event details
+     */
     public void updateEvent(String eventId, Map<String, Object> updates, Runnable onOk, Consumer<Exception> onErr) {
         EVENTS.document(eventId).update(updates)
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
 
+    /**
+     * Fetch open events where registration is still active
+     */
     public void fetchOpenEvents(Consumer<List<Event>> onResult, Consumer<Exception> onErr) {
         Date now = new Date();
         EVENTS.whereGreaterThan("registrationEnd", now)
@@ -155,6 +203,10 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Waiting List
     // -------------------------
+
+    /**
+     * Adds a user to event waiting list
+     */
     public void joinWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
         Map<String, Object> u = new HashMap<>();
         u.put("waitingList", FieldValue.arrayUnion(entrantId));
@@ -163,6 +215,9 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    /**
+     * Removes user from waiting list
+     */
     public void leaveWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
         Map<String, Object> u = new HashMap<>();
         u.put("waitingList", FieldValue.arrayRemove(entrantId));
@@ -174,6 +229,10 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Invitations
     // -------------------------
+
+    /**
+     * Create or update invitation for entrant
+     */
     public void upsertInvitation(Invitation inv, Runnable onOk, Consumer<Exception> onErr) {
         String docId = inv.getEventId() + "_" + inv.getEntrantId();
         INVITES.document(docId).set(inv)
@@ -181,6 +240,9 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    /**
+     * Update invitation (accept/decline etc)
+     */
     public void updateInvitationStatus(String eventId, String entrantId, String status,
                                        boolean responded, Date updatedAt,
                                        Runnable onOk, Consumer<Exception> onErr) {
@@ -197,6 +259,10 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Notifications
     // -------------------------
+
+    /**
+     * Sends an in-app notification to user
+     */
     public void sendNotification(Notification n, Runnable onOk, Consumer<Exception> onErr) {
         String docId = UUID.randomUUID().toString();
         Map<String, Object> map = new HashMap<>();
@@ -214,6 +280,10 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Images
     // -------------------------
+
+    /**
+     * Stores metadata for uploaded image
+     */
     public void saveImageMeta(ImageUpload img, Runnable onOk, Consumer<Exception> onErr) {
         String docId = UUID.randomUUID().toString();
         IMAGES.document(docId).set(img)
@@ -224,6 +294,10 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Logs
     // -------------------------
+
+    /**
+     * Saves logs of system actions (admin viewable)
+     */
     public void writeLog(LogEntry log, Runnable onOk, Consumer<Exception> onErr) {
         String docId = UUID.randomUUID().toString();
         LOGS.document(docId).set(log)
@@ -234,42 +308,52 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Helpers
     // -------------------------
+
+    /**
+     * @return hashed profile ID generated from email + password
+     */
     public String makeProfileId(String userName, String password) {
         return HashUtil.generateId(userName, password);
     }
 
+    /**
+     * Checks if a doc exists in a Firestore collection
+     */
     public void containsById(String collection, String id, Consumer<Boolean> onResult, Consumer<Exception> onErr) {
         db.collection(collection).document(id).get()
                 .addOnSuccessListener(doc -> onResult.accept(doc.exists()))
                 .addOnFailureListener(onErr::accept);
     }
 
-    // ✅ Added this method
+    /**
+     * @return Firebase DB instance
+     */
     public FirebaseFirestore getDb() {
         return db;
     }
 
 
-    // The following is chat coded cuz i dont care enough anymore good night!
+    // ======================= LOCAL CACHE SECTION (TEAM CODE BELOW) =======================
 
     /** Adds an object (Event or Profile) both locally and to Firestore */
     private final MutableLiveData<ArrayList<Event>> Events = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<ArrayList<Profile>> Profiles = new MutableLiveData<>(new ArrayList<>());
 
+    /**
+     * Adds event or profile to local cache and Firestore
+     */
     public void Add(Object item) {
         if (item instanceof Event) {
             Event e = (Event) item;
             if (e.getEventId() == null || e.getEventId().isEmpty())
                 e.setEventId(UUID.randomUUID().toString());
 
-            // Add locally
             ArrayList<Event> list = Events.getValue();
             if (list != null && !list.contains(e)) {
                 list.add(e);
                 Events.postValue(list);
             }
 
-            // Add to Firestore
             EVENTS.document(e.getEventId()).set(e)
                     .addOnSuccessListener(v -> Log.d("FirebaseViewModel", "Event added: " + e.getEventName()))
                     .addOnFailureListener(err -> Log.e("FirebaseViewModel", "Error adding event", err));
@@ -279,14 +363,12 @@ public class FirebaseViewModel extends ViewModel {
             if (p.getProfileId() == null || p.getProfileId().isEmpty())
                 p.setProfileId(UUID.randomUUID().toString());
 
-            // Add locally
             ArrayList<Profile> list = Profiles.getValue();
             if (list != null && !list.contains(p)) {
                 list.add(p);
                 Profiles.postValue(list);
             }
 
-            // Add to Firestore
             PROFILES.document(p.getProfileId()).set(p)
                     .addOnSuccessListener(v -> Log.d("FirebaseViewModel", "Profile added: " + p.getProfileId()))
                     .addOnFailureListener(err -> Log.e("FirebaseViewModel", "Error adding profile", err));
@@ -315,7 +397,7 @@ public class FirebaseViewModel extends ViewModel {
 
 }
 
-    //Local caches
+//Local caches
 //    private MutableLiveData<ArrayList<Event>> Events;
 //    private MutableLiveData<ArrayList<Profile>> Profiles;
 

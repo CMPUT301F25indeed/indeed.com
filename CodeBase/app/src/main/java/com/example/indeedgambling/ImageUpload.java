@@ -2,6 +2,24 @@ package com.example.indeedgambling;
 
 import java.util.Date;
 
+/**
+ * Represents metadata for an image uploaded to the system.
+ *
+ * This class does not store the actual image file, only the metadata:
+ * - eventId: ID of the event the image relates to (if applicable)
+ * - uploaderId: ID of the user who uploaded the image
+ * - url: where the image file is stored (ex: Firebase Storage URL)
+ * - uploadedAt: timestamp when the image was uploaded
+ * - approved: indicates whether the image has been reviewed and approved (ex: by admin/organizer)
+ *
+ * Firestore requires a no-argument constructor.
+ *
+ * Usage:
+ * - Used for storing profile pictures, event posters, or proof images if required by the system.
+ * - Usually paired with Firebase Storage for real file storage.
+ *
+ * Accessed via FirebaseViewModel using saveImageMeta() method.
+ */
 public class ImageUpload {
 
     private String eventId;
@@ -10,6 +28,7 @@ public class ImageUpload {
     private Date uploadedAt;
     private boolean approved;
 
+    /** Required empty constructor for Firestore deserialization */
     public ImageUpload() {}
 
     public String getEventId() { return eventId; }
