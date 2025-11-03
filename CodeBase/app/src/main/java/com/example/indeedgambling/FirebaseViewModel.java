@@ -6,39 +6,20 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import androidx.annotation.Nullable;
-
-import android.app.Application;
-import android.util.Log;
-
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
-import com.google.firebase.firestore.*;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 public class FirebaseViewModel extends ViewModel {
 
@@ -179,6 +160,54 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    /** Returns the waitlist for the event matching the eventID
+     * onResult is the
+     * @param eventID EventID to find waitlist of
+     * @param onResult code to be run after success
+     * @param onErr action on failure to find data
+     */
+    public void getEventWaitlist(String eventID, Consumer<List<Profile>> onResult, Consumer<Exception> onErr){
+        //Get the Profile IDs from the events waitlist
+        // Get the names from the profiles with those ids
+
+        //Gets matching event
+        EVENTS.whereEqualTo("eventId", eventID).get().addOnSuccessListener(e ->{
+            //Getting Profiles saved under event waitlist
+            List<String> result = e.toObjects(Event.class).get(0).getWaitingList();
+            if (!result.isEmpty()){
+                PROFILES.whereIn("profileId",result)
+                        .orderBy("personName")
+                        .get()
+                        .addOnSuccessListener(p -> {onResult.accept(p.toObjects(Profile.class));})
+                        .addOnFailureListener(onErr::accept);
+            }
+        });
+    }
+
+    /** Returns the
+     *
+     * @param eventID
+     * @param onResult
+     * @param onErr
+     */
+    public void getEventInvitedList(String eventID, Consumer<List<Profile>> onResult, Consumer<Exception> onErr){
+        //Get the Profile IDs from the events waitlist
+        // Get the names from the profiles with those ids
+
+        //Gets matching event
+        EVENTS.whereEqualTo("eventId", eventID).get().addOnSuccessListener(e ->{
+            //Getting Profiles saved under event waitlist
+            List<String> result = e.toObjects(Event.class).get(0).getInvitedListIDs();
+            if (!result.isEmpty()){
+                PROFILES.whereIn("profileId",result)
+                        .orderBy("personName")
+                        .get()
+                        .addOnSuccessListener(p -> {onResult.accept(p.toObjects(Profile.class));})
+                        .addOnFailureListener(onErr::accept);
+            }
+        });
+    }
+
     // -------------------------
     // Invitations
     // -------------------------
@@ -267,8 +296,6 @@ public class FirebaseViewModel extends ViewModel {
     public void Add(Object item) {
         if (item instanceof Event) {
             Event e = (Event) item;
-            if (e.getEventId() == null || e.getEventId().isEmpty())
-                e.setEventId(UUID.randomUUID().toString());
 
             // Add locally
             ArrayList<Event> list = Events.getValue();
@@ -322,263 +349,3 @@ public class FirebaseViewModel extends ViewModel {
     }
 
 }
-
-    //Local caches
-//    private MutableLiveData<ArrayList<Event>> Events;
-//    private MutableLiveData<ArrayList<Profile>> Profiles;
-
-
-//    public FirebaseViewModel() {
-//        super();
-//        Events = new MutableLiveData<>(new ArrayList<Event>());
-//        Profiles = new MutableLiveData<>(new ArrayList<Profile>());
-//        Sync();
-//    }
-
-
-    // Tej code aka chat
-//    public FirebaseViewModel() {
-//        super();
-//
-//        // Initialize both local caches
-//        Events = new MutableLiveData<>(new ArrayList<Event>());
-//        Profiles = new MutableLiveData<>(new ArrayList<Profile>());
-//
-//        // Start Firebase real-time listeners
-//        attachRealtimeListeners();
-//
-//        // Sync local data with cloud
-//        Sync();
-//    }
-//
-//    // ---------- Add (3 overloads) ----------
-//    public <T> void add(String collectionPath, String docName, T obj,
-//                        Runnable onOk, java.util.function.Consumer<Exception> onErr) {
-//        db.collection(collectionPath).document(docName).set(obj)
-//                .addOnSuccessListener(unused -> onOk.run())
-//                .addOnFailureListener(onErr::accept);
-//    }
-//
-//    public <T> void add(String docName, T obj, Runnable onOk,
-//                        java.util.function.Consumer<Exception> onErr) {
-//        String collection = collectionFor(obj);
-//        add(collection, docName, obj, onOk, onErr);
-//    }
-//
-//    public <T> void add(T obj, Runnable onOk,
-//                        java.util.function.Consumer<Exception> onErr) {
-//        String collection = collectionFor(obj);
-//        String name = nameFor(obj);
-//        add(collection, name, obj, onOk, onErr);
-//    }
-//
-//    // ---------- Delete ----------
-//    public void delete(String collectionPath, String docName,
-//                       Runnable onOk, java.util.function.Consumer<Exception> onErr) {
-//        db.collection(collectionPath).document(docName).delete()
-//                .addOnSuccessListener(unused -> onOk.run())
-//                .addOnFailureListener(onErr::accept);
-//    }
-//
-//    // ---------- Contains (by docName) ----------
-//    public void contains(String collectionPath, String docName,
-//                         java.util.function.Consumer<Boolean> onResult,
-//                         java.util.function.Consumer<Exception> onErr) {
-//        db.collection(collectionPath).document(docName).get()
-//                .addOnSuccessListener(d -> onResult.accept(d.exists()))
-//                .addOnFailureListener(onErr::accept);
-//    }
-//
-//    // ---------- Load profile by hashed id ----------
-////    public void loadProfileByLogin(String userName, String password,
-////                                   java.util.function.Consumer<DocumentSnapshot> onDoc,
-////                                   java.util.function.Consumer<Exception> onErr) {
-////        String id = HashUtil.generateId(userName, password);
-////        db.collection("profiles").document(id).get()
-////                .addOnSuccessListener(onDoc::accept)
-////                .addOnFailureListener(onErr::accept);
-////    }
-//
-//    // helpers
-//    private <T> String collectionFor(T obj) {
-//        String n = obj.getClass().getSimpleName();
-//        if (obj instanceof Profile || obj instanceof Entrant
-//                || obj instanceof Organizer || obj instanceof Admin) return "profiles";
-//        if (n.equals("Event")) return "events";
-//        if (n.equals("Invitation")) return "invitations";
-//        if (n.equals("AppNotification")) return "notifications";
-//        return n.toLowerCase() + "s";
-//    }
-//
-//    private <T> String nameFor(T obj) {
-//        if (obj instanceof Profile) return ((Profile) obj).getProfileId();
-//        if (obj instanceof Event) return ((Event) obj).getEventId();
-//        // fallback random
-//        return java.util.UUID.randomUUID().toString();
-//    }
-//
-//    //Xans code
-////
-////    /**
-////     * Sync local data with Firebase
-////     * Overwrites local information.
-////     */
-////    public void Sync() {
-////        //Overwriting local with cloud
-////
-////        //Events Syncing
-////        db.collection("Event").get().addOnCompleteListener(task -> {
-////            //Replace local with cloud
-////            ArrayList<Event> ResultArray = (ArrayList<Event>) task.getResult().toObjects(Event.class);
-////
-////            //Add difference to cloud.
-////            //If cloud result has all local, do nothing
-////
-////            //If the cloud is missing items, push
-////            if (!ResultArray.containsAll(Objects.requireNonNull(Events.getValue()))) {
-//                //Push all non-existants to cloud.
-//                for (Event e : Events.getValue()) {
-//                    if (!ResultArray.contains(e)) {
-//                        this.Add(e);
-//                    }
-//                }
-//            }
-//            //Updating local to cloud
-//            else {
-//                Events.setValue(ResultArray);
-//            }
-//        });
-//        //Profile sync
-//        db.collection("Profile").get().addOnCompleteListener(task -> {
-//            Profiles.setValue((ArrayList<Profile>) task.getResult().toObjects(Profile.class));
-//        });
-//    }
-//
-//    /**
-//     * Deletes an object from the firebase
-//     *
-//     * @param CollectionPath ex: event, profile, notification, etc.
-//     * @param InstanceName   Name of the object to delete
-//     */
-//    public void Delete(String CollectionPath, String InstanceName) {
-//        db.collection(CollectionPath).document(InstanceName);
-//    }
-//
-//    /**
-//     * Deletes an object from the firebase, path found automatically
-//     * Deletes an object locally
-//     *
-//     * @param ItemToDelete Object deleted from firebase
-//     */
-//    public void Delete(Object ItemToDelete) {
-//        db.collection(ItemToDelete.getClass().getSimpleName()).document(ItemToDelete.toString()).delete();
-//
-//        //Remove from local
-//        if (ItemToDelete.getClass() == Event.class) {
-//            Log.d("DEBUG Delete", Boolean.toString(Objects.requireNonNull(Events.getValue()).remove((Event) ItemToDelete)));
-//        } else if (ItemToDelete.getClass() == Profile.class) {
-//            Objects.requireNonNull(Profiles.getValue()).remove((Profile) ItemToDelete);
-//        }
-//    }
-//
-//
-//    /**
-//     * Saves the object under the document with the Class name
-//     *
-//     * @param InstanceName Save Name of the object
-//     * @param ItemToSave   Object to be saved
-//     */
-//    public void Add(String InstanceName, Object ItemToSave) {
-//        db.collection(ItemToSave.getClass().getSimpleName()).document(InstanceName).set(ItemToSave);
-//        //Adding to local
-//        if (ItemToSave.getClass() == Event.class) {
-//            Objects.requireNonNull(Events.getValue()).add((Event) ItemToSave);
-//        } else if (ItemToSave.getClass() == Profile.class) {
-//            Objects.requireNonNull(Profiles.getValue()).add((Profile) ItemToSave);
-//        }
-//    }
-//
-//    /**
-//     * Saves object to server using Object's name and Class Name.
-//     *
-//     * @param ItemToSave
-//     */
-//    public void Add(Object ItemToSave) {
-//
-//        //Event object
-//        if (ItemToSave.getClass() == Event.class) {
-//            //Adding to local for instant change
-//            Objects.requireNonNull(Events.getValue()).add((Event) ItemToSave);
-//            //Adding to server
-//            db.collection(ItemToSave.getClass().getSimpleName()).document(ItemToSave.toString()).set(ItemToSave);
-//        }
-//        //Profile object
-//        else if (ItemToSave.getClass() == Profile.class) {
-//            //Adding to local for instant change
-//            Objects.requireNonNull(Profiles.getValue()).add((Profile) ItemToSave);
-//            //Adding to server
-//            db.collection(ItemToSave.getClass().getSimpleName()).document(String.valueOf(ItemToSave.hashCode())).set(ItemToSave);
-//        }
-//    }
-//
-//    /**
-//     * Checks if the LocalCache contains the object
-//     *
-//     * @param ItemToCheck Object checking
-//     * @return True if object held, False otherwise. Returns FALSE if object not handled
-//     */
-//    public Boolean Contains(Object ItemToCheck) {
-//        //Checking Local
-//        //Will need to test some more
-//        if (ItemToCheck.getClass() == Event.class) {
-//            return Objects.requireNonNull(Events.getValue()).contains((Event) ItemToCheck);
-//        } else if (ItemToCheck.getClass() == Profile.class) {
-//            return Objects.requireNonNull(Profiles.getValue()).contains((Profile) ItemToCheck);
-//        }
-//        //Catch all. If we don't have a matching type, we definitely don't have it saved.
-//        return false;
-//    }
-//
-//    /**
-//     * Returns the local cache of Events, from last sync
-//     *
-//     * @return ArrayList of Events, sorted
-//     */
-//    public ArrayList<Event> getEvents() {
-//        Objects.requireNonNull(Events.getValue()).sort((Event1, Event2) -> Event1.getRegistrationEnd().compareTo(Event2.getRegistrationEnd()));
-//        return Events.getValue();
-//    }
-//
-//    public ArrayList<Profile> getProfiles() {
-//        return Profiles.getValue();
-//    }
-//
-//    /**
-//     * Returns all profiles that match the hash
-//     * May only return 1 profile since duplicate names are not supported in Firebase
-//     *
-//     * @return
-//     */
-//    private ArrayList<Profile> getMatchingProfiles(Profile profile) {
-//        ArrayList<Profile> ReturnArray = new ArrayList<>();
-//        for (Profile p : Profiles.getValue()) {
-//            if (p.hashCode() == profile.hashCode()) ReturnArray.add(p);
-//        }
-//        return ReturnArray;
-//    }
-//
-//    /**
-//     * Returns an ArrayList for events that are currently open to register and are not full on waiting Entrants.
-//     *
-//     * @return Events that can take registration to Waitlist.
-//     */
-//    private ArrayList<Event> getRegisterableEvents() {
-//        ArrayList<Event> ReturnArray = new ArrayList<>();
-//        for (Event e : Events.getValue()) {
-//            if (e.waitList_registrable()) {
-//                ReturnArray.add(e);
-//            }
-//        }
-//
-//        return ReturnArray;
-//    }

@@ -1,11 +1,6 @@
 package com.example.indeedgambling;
 
-import android.util.Log;
-
-import org.jetbrains.annotations.TestOnly;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -25,8 +20,8 @@ public class Event {
     private String qrCodeURL;
     private String status;    // planned/open/closed/completed
     private String criteria;  // lottery notes
-    private ArrayList<String> waitingList; // entrant IDs
-    private ArrayList<String> invitedList; // Entrant IDs
+    private ArrayList<String> waitingList = new ArrayList<>(); // entrant IDs
+    private ArrayList<String> invitedList = new ArrayList<>(); // Entrant IDs
 
 
     /**
@@ -82,6 +77,9 @@ public class Event {
         qrCodeURL = QRCodeURL;
 
         this.status = getStatus();
+
+        //Event ID : Hash of OrgIdEventnameEventstart
+        this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
     }
     Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
         //Potential profanity filter.
@@ -263,15 +261,11 @@ public class Event {
         return Integer.toString(maxWaitingEntrants);
     }
 
-    public ArrayList<String> getInvitedEntrantIDs() {
+    public ArrayList<String> getInvitedListIDs() {
         return invitedList;
     }
 
-    public ArrayList<String> getInvitedList() {
-        return invitedList;
-    }
-
-    public void setInvitedList(ArrayList<String> invitedList) {
+    public void setInvitedListIDs(ArrayList<String> invitedList) {
         this.invitedList = invitedList;
     }
 
@@ -377,6 +371,8 @@ public class Event {
         this.criteria = criteria;
     }
 
+
+    //Superseded by FirebaseViewModel function
     /**
      * Adds an entrant to the waiting list of the event.
      * Duplicant signees are not added.
@@ -384,7 +380,7 @@ public class Event {
      * @param signeeID Entrant ID.
      * @return True if entrant added, False otherwise
      */
-    public boolean addToWaitingList(String signeeID) {
+    /*public boolean addToWaitingList(String signeeID) {
         if (!this.atCapacity()) {
             waitingList.add(signeeID);
             //Push to cloud.
@@ -393,7 +389,7 @@ public class Event {
             Log.d("Event Debug", "addToWaitingList: " + "Event full");
             return false;
         }
-    }
+    }*/
 
     /**
      * Updates the current maximum number of signees.

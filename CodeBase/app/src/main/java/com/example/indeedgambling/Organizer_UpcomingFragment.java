@@ -2,8 +2,6 @@ package com.example.indeedgambling;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.text.format.DateFormat;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,28 +16,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import android.os.Bundle;
-import android.view.*;
-import android.widget.Button;
-import android.widget.ListView;
-
-import androidx.annotation.NonNull;
-import androidx.credentials.exceptions.domerrors.ConstraintError;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.api.ResourceDescriptor;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.type.DateTime;
-
-import org.w3c.dom.Text;
-
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -209,9 +189,13 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Waitlist Pop-up
         WaitListButton.setOnClickListener(v -> {
+
+            Log.d("DEBUG","PRE BUILDPOPUP");
             View listView = inflater.inflate(R.layout.listview_popup, null);
+            Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,listView.findViewById(R.id.popUp_Listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
 
+            Log.d("DEBUG","Building POPUP");
             new AlertDialog.Builder(requireContext())
                     .setTitle("Waitlist")
                     .setView(listView)
@@ -225,9 +209,14 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Invited List Pop-up
         InviteListButton.setOnClickListener(v -> {
-            View listView = inflater.inflate(R.layout.listview_popup, null);
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getInvitedEntrantIDs());
+            Log.d("DEBUG","PRE BUILDPOPUP");
 
+
+            View listView = inflater.inflate(R.layout.listview_popup, null);
+            Data.getEventInvitedList(event.getEventId(),p->{UpdateProfileList(p,listView.findViewById(R.id.popUp_Listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1);
+
+            Log.d("DEBUG","Building POPUP");
             new AlertDialog.Builder(requireContext())
                     .setTitle("Invited Entrants")
                     .setView(listView)
@@ -249,5 +238,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         ArrayAdapter<Event> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventsToShow);
         EventList.setAdapter(adapter);
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
+    }
+
+    private void UpdateProfileList(List<Profile> itemsToShow, ListView EventList){
+        ArrayAdapter<Profile> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, itemsToShow);
+        EventList.setAdapter(adapter);
+        Log.d("DEBUG Updated List", "Organizer Profile List update ran");
     }
 }

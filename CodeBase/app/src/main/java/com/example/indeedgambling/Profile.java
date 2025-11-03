@@ -60,6 +60,22 @@ public class Profile {
 
     public String getDeviceId() { return deviceId; }
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+
+
+    /** Ovverride of toString() that returns the profile name.
+     * @return Profilename
+     */
+    @Override
+    public String toString(){
+        if (this.personName != null) {
+            return this.personName;
+        }
+        else if (this.email != null){
+            return this.email;
+        }
+        //Catch all
+        return profileId;
+    }
 }
 
 // Tj commented out Xan code from Xan branch
@@ -118,13 +134,4 @@ public class Profile {
 
 //     //TODO: Equals function to use in Firebase Contains()
 
-
-//     /** Ovverride of toString() that returns the profile name.
-//      * @return Profilename
-//      */
-//     @NonNull
-//     @Override
-//     public String toString(){
-//         return this.profileName;
-//     }
 // }
