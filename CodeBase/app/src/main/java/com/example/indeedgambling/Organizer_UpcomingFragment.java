@@ -211,12 +211,35 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
         });
 
+        //WaitList Button
+        Button InviteListButton = popupView.findViewById(R.id.Organizer_EventPopup_InvList);
+
+        //Waitlist Pop-up
+        InviteListButton.setOnClickListener(v -> {
+            View listView = inflater.inflate(R.layout.listview_popup, null);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getInvitedEntrantIDs());
+
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Invited Entrants")
+                    .setView(listView)
+                    .setAdapter(adapter, null)
+                    .setNegativeButton("Close", null)
+                    .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+        });
+
+
+
+
 
         new AlertDialog.Builder(requireContext()).setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", ((dialog, which) -> {}))
                 .show();
 
+
+    }
+
+    private boid showWaitList(){
 
     }
 }

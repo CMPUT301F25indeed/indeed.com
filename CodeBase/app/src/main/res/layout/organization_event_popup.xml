@@ -39,6 +39,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+
+        <Button
+            android:id="@+id/Organizer_EventPopup_InvList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Invited List">
+        </Button>
+
         <Button
             android:id="@+id/Organizer_EventPopup_WaitList"
             android:layout_width="match_parent"
