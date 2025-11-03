@@ -12,14 +12,15 @@
             android:id="@+id/NewEventPopup_NameDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Title" />
+            android:hint="Event Title"
+            />
 
         <EditText
             android:id="@+id/NewEventPopup_Description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Description"
-            android:minLines="3"
+            android:minLines="2"
             android:layout_marginTop="8dp"/>
 
         <EditText
@@ -43,17 +44,41 @@
             android:hint="Location"
             android:layout_marginTop="8dp"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registration Start"
+            android:layout_marginBottom="-20sp"/>
+
         <include
             android:id="@+id/RegistrationOpen"
             layout="@layout/datetime_picker" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registration End"
+            android:layout_marginBottom="-20sp"/>
 
         <include
             android:id="@+id/RegistrationClose"
             layout="@layout/datetime_picker"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Start"
+            android:layout_marginBottom="-20sp"/>
+
         <include
             android:id="@+id/EventOpen"
             layout="@layout/datetime_picker"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event End"
+            android:layout_marginBottom="-20sp"/>
 
         <include
             android:id="@+id/EventClose"
@@ -63,7 +88,7 @@
             android:id="@+id/NewEventPopup_MaxEntrantsDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Capacity"
+            android:hint="Capacity (optional)"
             android:inputType="number"
             android:layout_marginTop="10dp"/>
     </LinearLayout>

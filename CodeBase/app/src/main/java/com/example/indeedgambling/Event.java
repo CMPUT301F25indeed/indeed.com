@@ -252,12 +252,27 @@ public class Event {
         return maxWaitingEntrants;
     }
 
-    public void setMaxWaitingEntrants(int maxWaitingEntrants) {
-        this.maxWaitingEntrants = maxWaitingEntrants;
+    /**
+     *
+     * @return
+     */
+    public String getMaxWaitingEntrantsString(){
+        if (maxWaitingEntrants == 0){
+            return "Unlimited";
+        }
+        return Integer.toString(maxWaitingEntrants);
     }
 
     public ArrayList<String> getInvitedEntrantIDs() {
         return invitedList;
+    }
+
+    public ArrayList<String> getInvitedList() {
+        return invitedList;
+    }
+
+    public void setInvitedList(ArrayList<String> invitedList) {
+        this.invitedList = invitedList;
     }
 
     public String getEventId() {
@@ -475,5 +490,13 @@ public class Event {
     public boolean waitList_registrable() {
         return (!this.atCapacity()) && this.RegistrationOpen();
 
+    }
+
+    /** Returns if the event has a defined location
+     * May be removed if locations are mandatory
+     * @return True if Location defined.
+     */
+    public boolean hasLocation(){
+        return !(location == null);
     }
 }

@@ -145,7 +145,15 @@ public class FirebaseViewModel extends ViewModel {
 
     public void fetchOpenEvents(Consumer<List<Event>> onResult, Consumer<Exception> onErr) {
         Date now = new Date();
-        EVENTS.whereGreaterThan("registrationEnd", now)
+        EVENTS.whereGreaterThan("registrationStart", now)
+                .orderBy("registrationEnd", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(q -> onResult.accept(q.toObjects(Event.class)))
+                .addOnFailureListener(onErr::accept);
+    }
+
+    public void fetchOrgsEvents(String OrgID, Consumer<List<Event>> onResult, Consumer<Exception> onErr){
+        EVENTS.whereEqualTo("organizerId",OrgID)
                 .orderBy("registrationEnd", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(q -> onResult.accept(q.toObjects(Event.class)))
