@@ -7,6 +7,11 @@ android {
     namespace = "com.example.indeedgambling"
     compileSdk = 36
 
+    buildFeatures {
+        viewBinding = true
+    }
+
+
     defaultConfig {
         applicationId = "com.example.indeedgambling"
         minSdk = 24
@@ -26,14 +31,17 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    tasks.withType<Test>{
+    tasks.withType<Test> {
         useJUnitPlatform()
     }
+
+
 }
 
 dependencies {
@@ -44,19 +52,23 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    // Firebase BOM
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    // Testing
+    // Tests
+    testImplementation(libs.junit)
+
+    /*implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")*/
+
+
+
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.0.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.0.1")
-
-    // JavaDocs
-    //implementation(files("C:/Users/Tejj/AppData/Local/Android/Sdk/platforms/android-36/android.jar"))
-
 }

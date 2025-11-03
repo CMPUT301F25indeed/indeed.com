@@ -1,79 +1,70 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-    <ScrollView
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/NewEventPopup_NameDialog"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <EditText
-                android:id="@+id/NewEventPopup_NameDialog"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Event Name:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+            android:layout_height="wrap_content"
+            android:hint="Event Title" />
 
+        <EditText
+            android:id="@+id/NewEventPopup_Description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description"
+            android:minLines="3"
+            android:layout_marginTop="8dp"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Registration Availability Time Range:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog">
-            </TextView>
+        <EditText
+            android:id="@+id/NewEventPopup_Criteria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Criteria for Sign-up"
+            android:layout_marginTop="8dp"/>
 
-            <include
-                android:id="@+id/RegistrationOpen"
-                layout="@layout/datetime_picker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/NewEventPopup_NameDialog"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-            </include>
+        <EditText
+            android:id="@+id/NewEventPopup_Category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Category"
+            android:layout_marginTop="8dp"/>
 
+        <EditText
+            android:id="@+id/NewEventPopup_Location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:layout_marginTop="8dp"/>
 
-            <include
-                android:id="@+id/RegistrationClose"
-                android:layout_marginTop="-60sp"
-                layout="@layout/datetime_picker"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                app:layout_constraintTop_toBottomOf="@id/RegistrationOpen">
-            </include>
+        <include
+            android:id="@+id/RegistrationOpen"
+            layout="@layout/datetime_picker" />
 
+        <include
+            android:id="@+id/RegistrationClose"
+            layout="@layout/datetime_picker"/>
 
-            <include
-                android:id="@+id/EventOpen"
-                android:layout_marginTop="-60sp"
-                layout="@layout/datetime_picker"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                app:layout_constraintTop_toBottomOf="@id/RegistrationClose">
-            </include>
+        <include
+            android:id="@+id/EventOpen"
+            layout="@layout/datetime_picker"/>
 
-            <include
-                android:id="@+id/EventClose"
-                android:layout_marginTop="-60sp"
-                layout="@layout/datetime_picker"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                app:layout_constraintTop_toBottomOf="@id/EventOpen">
-            </include>
+        <include
+            android:id="@+id/EventClose"
+            layout="@layout/datetime_picker" />
 
-
-            <EditText
-                android:id="@+id/NewEventPopup_MaxEntrantsDialog"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="(optional) maximum number of applicants:"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/EventClose"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <EditText
+            android:id="@+id/NewEventPopup_MaxEntrantsDialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Capacity"
+            android:inputType="number"
+            android:layout_marginTop="10dp"/>
+    </LinearLayout>
+</ScrollView>

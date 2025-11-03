@@ -33,3 +33,31 @@
     </GridLayout>
 
 </LinearLayout>
+
+<!--Amrit code -->
+<!--<LinearLayout-->
+<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:orientation="horizontal"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:paddingEnd="8dp"-->
+<!--    android:gravity="center_vertical">-->
+
+<!--    <DatePicker-->
+<!--        android:id="@+id/DateTimePicker_DateDialog"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:calendarViewShown="false"-->
+<!--        android:datePickerMode="spinner"-->
+<!--        android:scaleX="0.9"-->
+<!--        android:scaleY="0.9"/>-->
+
+<!--    <TimePicker-->
+<!--        android:id="@+id/DateTimePicker_TimeDialog"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:timePickerMode="spinner"-->
+<!--        android:layout_marginStart="8dp"-->
+<!--        android:scaleX="0.9"-->
+<!--        android:scaleY="0.9"/>-->
+<!--</LinearLayout>-->

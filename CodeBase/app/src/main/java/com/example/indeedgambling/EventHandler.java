@@ -33,11 +33,11 @@ public class EventHandler {
      */
     public ArrayList<Event> EventsOfOrganizer(Organizer owner){
         ArrayList<Event> ReturnArray = new ArrayList<Event>();
-        for (Event instance: Events) {
-            if (instance.getOwner() == owner){
-                ReturnArray.add(instance);
-            }
-        }
+//        for (Event instance: Events) {
+//            if (instance.getOwner() == owner){
+//                ReturnArray.add(instance);
+//            }
+//        }
 
         //Sort by earliest closedate first
         ReturnArray.sort((Event1, Event2) ->
@@ -53,12 +53,12 @@ public class EventHandler {
     public ArrayList<Event> UpcomingEventsOfOrganizer(Organizer owner){
         ArrayList<Event> ReturnArray = new ArrayList<Event>();
 
-        //Adds events which end later than now, and are owned by the argument owner
-        for (Event instance: Events) {
-            if (instance.getOwner() == owner && instance.getRegistrationEnd().after(new Date())){
-                ReturnArray.add(instance);
-            }
-        }
+//        //Adds events which end later than now, and are owned by the argument owner
+//        for (Event instance: Events) {
+//            if (instance.getOwner() == owner && instance.getRegistrationEnd().after(new Date())){
+//                ReturnArray.add(instance);
+//            }
+//        }
 
         //Sort by closedate Desc (latest close first)
         ReturnArray.sort((Event1, Event2) ->

@@ -1,36 +1,10 @@
 package com.example.indeedgambling;
 
-public class Entrant extends Profile{
+public class Entrant extends Profile {
+    public Entrant() { super(); }
 
-    private String realName;
-    private String email;
-    private String phoneNum;
-
-    public Entrant(String password, String profileName) {
-        super(password, profileName);
-    }
-
-    public String getRealName() {
-        return realName;
-    }
-
-    public void setRealName(String realName) {
-        this.realName = realName;
-    }
-
-    public String getPhoneNum() {
-        return phoneNum;
-    }
-
-    public void setPhoneNum(String phoneNum) {
-        this.phoneNum = phoneNum;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public Entrant(String profileId, String name, String email, String phone, String passwordHash) {
+        super(profileId, name, email, phone, "entrant", passwordHash);
+        setRoleVerified(true);
     }
 }

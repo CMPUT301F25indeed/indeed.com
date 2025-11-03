@@ -18,6 +18,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import android.os.Bundle;
+import android.view.*;
+import android.widget.Button;
+import android.widget.ListView;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -39,14 +45,15 @@ import java.util.List;
 
 public class Organizer_UpcomingFragment extends Fragment {
 
-    private FireBaseViewModel Data;
-
+    private FirebaseViewModel Data;
+    private OrganizerViewModel organizerVM;
     private View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
-        Data = new ViewModelProvider(requireActivity()).get(FireBaseViewModel.class);
+        Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
+        organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
 
         //HomeButton Function
         Button Home = view.findViewById(R.id.Organizer_Upcoming_HomeButton);
@@ -54,6 +61,13 @@ public class Organizer_UpcomingFragment extends Fragment {
             NavHostFragment.findNavController(this).navigate(R.id.action_organizerUpcomingFragment_to_organizerHomeFragment);
         });
 
+        // NEW CODE THAT TAKES YOU TO POTENTIALLY CREATE NEW EVENT
+        // Not needed, pop-up works.
+//        Button newEvent = view.findViewById(R.id.Organizer_Upcoming_NewEventButton);
+//
+//        newEvent.setOnClickListener(v ->
+//                NavHostFragment.findNavController(this).navigate(R.id.organizerCreateEventFragment)
+//        );
 
         //Displaying Organizer's events
         ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
@@ -84,11 +98,19 @@ public class Organizer_UpcomingFragment extends Fragment {
         View popupView = inflater.inflate(R.layout.make_event, null);
 
         EditText NameInput = popupView.findViewById(R.id.NewEventPopup_NameDialog);
+        EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
+        EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
+        EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
+        EditText LocationInput = popupView.findViewById(R.id.NewEventPopup_Location);
+        EditText CriteriaInput = popupView.findViewById(R.id.NewEventPopup_Criteria);
+
 
         View RegistrationOpen = popupView.findViewById(R.id.RegistrationOpen);
         View RegistrationClose = popupView.findViewById(R.id.RegistrationClose);
         View EventOpen = popupView.findViewById(R.id.EventOpen);
         View EventClose = popupView.findViewById(R.id.EventClose);
+
+
 
         //Registration DateTime
         DatePicker RegStartDateInput = RegistrationOpen.findViewById(R.id.DateTimePicker_DateDialog);
@@ -101,7 +123,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         TimePicker EventStartTimeInput = EventOpen.findViewById(R.id.DateTimePicker_TimeDialog);
         DatePicker EventEndDateInput = EventClose.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker EventEndTimeInput = EventClose.findViewById(R.id.DateTimePicker_TimeDialog);
-        EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
+
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
@@ -117,22 +139,21 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
                     String MaxEntInp = MaxEntrantsInput.getText().toString().trim();
-
-                    Log.d("DEBUG", "showNewEventPopup: " + EventName);
-                    Log.d("DEBUG", "showNewEventPopup: " + RegStartDate);
-                    Log.d("DEBUG", "showNewEventPopup: " + RegEndDate);
-                    Log.d("DEBUG", "showNewEventPopup: " + EventStartDate);
-                    Log.d("DEBUG", "showNewEventPopup: " + EventEndDate);
+                    String Location = LocationInput.getText().toString().trim();
+                    String Description = DescriptionInput.getText().toString().trim();
+                    String Category = CategoryInput.getText().toString().trim();
+                    String Criteria = CriteriaInput.getText().toString().trim();
 
                     //If there is a specificied WaitList Limit
                     if (!MaxEntInp.isEmpty()) {
                         int MaxEntrants = Integer.parseInt(MaxEntrantsInput.getText().toString().trim());
-                        Event CreatedEvent = new Event(EventName, RegStartDate, RegEndDate, EventStartDate, EventEndDate, new Organizer("billy","bob"), MaxEntrants);
+                        Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,organizerVM.getOrganizer().getValue().getProfileId(),Description,Category,Criteria);
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
                         Log.d("PopUp Test", "showNewEventPopup Contains" + Data.Contains(CreatedEvent));
                         Data.Add(CreatedEvent);
                     } else {
-                        Event CreatedEvent = new Event(EventName,RegStartDate, RegEndDate, EventStartDate, EventEndDate, new Organizer("billy","bob"));
+                        Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,organizerVM.getOrganizer().getValue().getProfileId(),Description,Category,Criteria);
+                        CreatedEvent.setMaxEntrants(Integer.parseInt(MaxEntInp));
                         Log.d("PopUp Test", "showNewEventPopup: " + CreatedEvent);
                         Log.d("PopUp Test", "showNewEventPopup Contains Result: " + Data.Contains(CreatedEvent));
                         Data.Add(CreatedEvent);
@@ -180,7 +201,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Waitlist Pop-up
         WaitListButton.setOnClickListener(v -> {
             View listView = inflater.inflate(R.layout.listview_popup, null);
-            ArrayAdapter<Entrant> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrants());
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
 
             new AlertDialog.Builder(requireContext())
                     .setTitle("Waitlist")
@@ -195,6 +216,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setView(popupView)
                 .setNegativeButton("Close", ((dialog, which) -> {}))
                 .show();
+
 
     }
 }
