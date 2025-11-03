@@ -238,8 +238,4 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
     }
-
-    private boid showWaitList(){
-
-    }
 }
