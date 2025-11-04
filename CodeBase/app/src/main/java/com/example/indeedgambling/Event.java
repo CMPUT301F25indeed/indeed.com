@@ -27,6 +27,7 @@ public class Event {
     private String criteria;  // lottery notes
     private ArrayList<String> waitingList; // entrant IDs
     private ArrayList<String> invitedList; // Entrant IDs
+    private ArrayList<String> cancelledEntrants; //invited entrants who declined or were removed
 
 
     /**
@@ -66,6 +67,7 @@ public class Event {
 
         waitingList = new ArrayList<String>();
         invitedList = new ArrayList<String>();
+        cancelledEntrants = new ArrayList<String>();
 
         //0 is value for no limit
         maxWaitingEntrants = 0;
@@ -106,6 +108,7 @@ public class Event {
 
         waitingList = new ArrayList<String>();
         invitedList = new ArrayList<String>();
+        cancelledEntrants = new ArrayList<String>();
 
         //0 is value for no limit. Can't have negative, so it sets to zero
         maxWaitingEntrants = Math.max(0,MaxEntrants);
@@ -158,6 +161,7 @@ public class Event {
 
         waitingList = new ArrayList<String>();
         invitedList = new ArrayList<String>();
+        cancelledEntrants = new ArrayList<String>();
 
         //0 is value for no limit. Can't have negative, so it sets to zero
         maxWaitingEntrants = 0;
@@ -178,6 +182,8 @@ public class Event {
 
     //No arg constructor for Firebase
     Event() {
+        this.cancelledEntrants = new ArrayList<>();
+
     }
 
     //Returns the entrant names for the Entrants
@@ -352,6 +358,16 @@ public class Event {
 
     public void setWaitingList(ArrayList<String> waitingList) {
         this.waitingList = waitingList;
+    }
+    public ArrayList<String> getCancelledEntrants() {
+        if (cancelledEntrants == null) {
+            cancelledEntrants = new ArrayList<>();
+        }
+        return cancelledEntrants;
+    }
+
+    public void setCancelledEntrants(ArrayList<String> cancelledEntrants) {
+        this.cancelledEntrants = cancelledEntrants;
     }
 
     public String getCriteria() {

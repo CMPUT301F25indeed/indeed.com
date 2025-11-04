@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send Notifications"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/edit_text_notification_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your notification message here"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/button_notify_waiting_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notify Waiting List"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/button_notify_selected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notify Selected Entrants"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/button_notify_cancelled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notify Cancelled Entrants" />
+
+</LinearLayout>

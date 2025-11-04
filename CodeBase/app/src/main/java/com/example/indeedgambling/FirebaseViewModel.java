@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import androidx.annotation.Nullable;
@@ -276,7 +277,106 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
+    /**
+     * Notify all entrants on waiting list (US 02.07.01)
+     */
+    public void notifyWaitingList(String eventId, String message, Runnable onOk, Consumer<Exception> onErr) {
+        EVENTS.document(eventId).get().addOnSuccessListener(documentSnapshot -> {
+            Event event = documentSnapshot.toObject(Event.class);
+            if (event != null && event.getWaitingList() != null && !event.getWaitingList().isEmpty()) {
+                AtomicInteger completedCount = new AtomicInteger(0);
+                int totalEntrants = event.getWaitingList().size();
 
+                for (String entrantId : event.getWaitingList()) {
+                    Notification notification = new Notification();
+                    notification.setSenderId("system");
+                    notification.setReceiverId(entrantId);
+                    notification.setEventId(eventId);
+                    notification.setType("waiting_list_update");
+                    notification.setMessage(message);
+                    notification.setTimestamp(new Date());
+
+                    sendNotification(notification,
+                            () -> {
+                                if (completedCount.incrementAndGet() == totalEntrants) {
+                                    onOk.run();
+                                }
+                            },
+                            onErr
+                    );
+                }
+            } else {
+                onOk.run(); // No waiting list entrants is not an error
+            }
+        }).addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * US 02.07.02 - Notify all selected entrants
+     */
+    public void notifySelectedEntrants(String eventId, String message, Runnable onOk, Consumer<Exception> onErr) {
+        EVENTS.document(eventId).get().addOnSuccessListener(documentSnapshot -> {
+            Event event = documentSnapshot.toObject(Event.class);
+            if (event != null && event.getInvitedEntrantIDs() != null && !event.getInvitedEntrantIDs().isEmpty()) {
+                AtomicInteger completedCount = new AtomicInteger(0);
+                int totalEntrants = event.getInvitedEntrantIDs().size();
+
+                for (String entrantId : event.getInvitedEntrantIDs()) {
+                    Notification notification = new Notification();
+                    notification.setSenderId("system");
+                    notification.setReceiverId(entrantId);
+                    notification.setEventId(eventId);
+                    notification.setType("selection_notice");
+                    notification.setMessage("Congratulations! You've been selected for: " + message);
+                    notification.setTimestamp(new Date());
+
+                    sendNotification(notification,
+                            () -> {
+                                if (completedCount.incrementAndGet() == totalEntrants) {
+                                    onOk.run();
+                                }
+                            },
+                            onErr
+                    );
+                }
+            } else {
+                onOk.run(); // No selected entrants is not an error
+            }
+        }).addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * US 02.07.03 - Notify all cancelled entrants
+     */
+    public void notifyCancelledEntrants(String eventId, List<String> cancelledEntrantIds, String message,
+                                        Runnable onOk, Consumer<Exception> onErr) {
+        if (cancelledEntrantIds == null || cancelledEntrantIds.isEmpty()) {
+            onOk.run();
+            return;
+        }
+
+        AtomicInteger completedCount = new AtomicInteger(0);
+        int totalEntrants = cancelledEntrantIds.size();
+
+        for (String entrantId : cancelledEntrantIds) {
+            Notification notification = new Notification();
+            notification.setSenderId("system");
+            notification.setReceiverId(entrantId);
+            notification.setEventId(eventId);
+            notification.setType("cancellation_notice");
+            notification.setMessage("Update: " + message);
+            notification.setTimestamp(new Date());
+
+            sendNotification(notification,
+                    () -> {
+                        if (completedCount.incrementAndGet() == totalEntrants) {
+                            onOk.run();
+                        }
+                    },
+                    onErr
+            );
+        }
+    }
     // -------------------------
     // Images
     // -------------------------

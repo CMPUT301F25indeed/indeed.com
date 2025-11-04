@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -55,5 +57,25 @@ public class Organizer_HomeFragment extends Fragment {
 
 
         return view;
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        //viewModel = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
+
+        setupNotificationButton(view); // 🎯 ADD THIS LINE
+
+        // ... your existing code ...
+    }
+    private void setupNotificationButton(View view) {
+        view.findViewById(R.id.button_open_notifications).setOnClickListener(v -> {
+            // Navigate to NotificationSenderFragment
+            NotificationSenderFragment fragment = new NotificationSenderFragment();
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment) // Use your actual container ID
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 }
