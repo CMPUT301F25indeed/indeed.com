@@ -3,6 +3,8 @@ package com.example.indeedgambling;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class Event {
     private String eventId;
@@ -120,6 +122,9 @@ public class Event {
         qrCodeURL = QRCodeURL;
 
         this.status = getStatus();
+
+        //Event ID : Hash of OrgIdEventnameEventstart
+        this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
     }
 
     /** NO URL constructor, no Max entrants Constructor.
@@ -172,22 +177,26 @@ public class Event {
         qrCodeURL = "";
 
         this.status = getStatus();
+
+        //Event ID : Hash of OrgIdEventnameEventstart
+        this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
     }
 
     //No arg constructor for Firebase
     Event() {
     }
 
-    //Returns the entrant names for the Entrants
-
-    /** WIP
-     * @return NOTHING RIGHT NOW
+    /** Randomly chooses entrants from the waitlist. Does not interact with server
      */
-    public ArrayList<String> getWaitingEntrantNames() {
-        //Find the matching names from the IDS.
-
-        return waitingList;
+    public ArrayList<String> ChooseInvitedEntrants(int number){
+        //Loop until
+        ArrayList<String> ReturnArray = new ArrayList<>();
+        for (int i = 0; i < number && i < waitingList.size(); i++){
+            ReturnArray.add(waitingList.get(new Random().nextInt(0,waitingList.size())));
+        }
+        return ReturnArray;
     }
+    //Returns the entrant names for the Entrants
 
     /** Provides all Profile IDS for entrants who signed onto the Waitlist
      *
@@ -238,21 +247,13 @@ public class Event {
         return this.eventEnd.before(new Date());
     }
 
-    public void setWaitingEntrants(ArrayList<String> waitingEntrantIDs) {
-        this.waitingList = waitingEntrantIDs;
-    }
-
-    public void setInvitedEntrants(ArrayList<String> invitedEntrantIDs) {
-        this.invitedList = invitedEntrantIDs;
-    }
-
     public int getMaxWaitingEntrants() {
         return maxWaitingEntrants;
     }
 
     /**
      *
-     * @return
+     * @return String of Max Waiting Entrants. Returns "Unlimited" instead of 0.
      */
     public String getMaxWaitingEntrantsString(){
         if (maxWaitingEntrants == 0){
@@ -261,11 +262,11 @@ public class Event {
         return Integer.toString(maxWaitingEntrants);
     }
 
-    public ArrayList<String> getInvitedListIDs() {
+    public ArrayList<String> getInvitedList() {
         return invitedList;
     }
 
-    public void setInvitedListIDs(ArrayList<String> invitedList) {
+    public void setInvitedList(ArrayList<String> invitedList) {
         this.invitedList = invitedList;
     }
 
@@ -404,10 +405,6 @@ public class Event {
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
-    }
-
-    public String getOwnerID() {
-        return organizerId;
     }
 
     public void setOwner(String owner) {
