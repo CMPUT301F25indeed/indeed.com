@@ -1,10 +1,16 @@
 package com.example.indeedgambling;
 
+import android.util.Log;
+
+import org.jetbrains.annotations.TestOnly;
+
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class Event {
+public class Event implements Serializable {
     private String eventId;
     private String eventName;
     private String description;
@@ -20,8 +26,9 @@ public class Event {
     private String qrCodeURL;
     private String status;    // planned/open/closed/completed
     private String criteria;  // lottery notes
-    private ArrayList<String> waitingList = new ArrayList<>(); // entrant IDs
-    private ArrayList<String> invitedList = new ArrayList<>(); // Entrant IDs
+    private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs
+    private ArrayList<String> invitedList = new ArrayList<String>(); // Entrant IDs
+    private ArrayList<String> cancelledEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
 
 
     /**
@@ -61,6 +68,7 @@ public class Event {
 
         waitingList = new ArrayList<String>();
         invitedList = new ArrayList<String>();
+        cancelledEntrants = new ArrayList<String>();
 
         //0 is value for no limit
         maxWaitingEntrants = 0;
@@ -81,46 +89,6 @@ public class Event {
         //Event ID : Hash of OrgIdEventnameEventstart
         this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
     }
-    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
-        //Potential profanity filter.
-
-        //TODO: Check if an exact match exists already ().
-        eventName = EventName;
-
-        //Raise error if open date after or equal end date & time
-        if (RegistrationClose.before(RegistrationOpen)) {
-            throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
-        }
-        //Raise error if open date after or equal end date & time
-        if (EventEnd.before(EventStart)) {
-            throw new IllegalArgumentException("Event Start cannot be after Event End");
-        }
-
-        registrationStart = RegistrationOpen;
-        registrationEnd = RegistrationClose;
-
-        eventStart = EventStart;
-        eventEnd = EventEnd;
-
-        waitingList = new ArrayList<String>();
-        invitedList = new ArrayList<String>();
-
-        //0 is value for no limit. Can't have negative, so it sets to zero
-        maxWaitingEntrants = Math.max(0,MaxEntrants);
-
-        //Setting reference owner
-        organizerId = OrgID;
-
-        description = Description;
-
-        criteria = Critera;
-
-        category = Category;
-
-        qrCodeURL = QRCodeURL;
-
-        this.status = getStatus();
-    }
 
     /** NO URL constructor, no Max entrants Constructor.
      * @param EventName
@@ -139,12 +107,13 @@ public class Event {
         //TODO: Check if an exact match exists already ().
         eventName = EventName;
 
+
         //Raise error if open date after or equal end date & time
-        if (RegistrationClose.before(RegistrationOpen)) {
+        if (RegistrationClose.before(RegistrationOpen)){
             throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
         }
         //Raise error if open date after or equal end date & time
-        if (EventEnd.before(EventStart)) {
+        if (EventEnd.before(EventStart)){
             throw new IllegalArgumentException("Event Start cannot be after Event End");
         }
 
@@ -156,6 +125,7 @@ public class Event {
 
         waitingList = new ArrayList<String>();
         invitedList = new ArrayList<String>();
+        cancelledEntrants = new ArrayList<String>();
 
         //0 is value for no limit. Can't have negative, so it sets to zero
         maxWaitingEntrants = 0;
@@ -172,6 +142,10 @@ public class Event {
         qrCodeURL = "";
 
         this.status = getStatus();
+
+        //Event ID : Hash of OrgIdEventnameEventstart
+        this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
+
     }
 
     //No arg constructor for Firebase
@@ -385,7 +359,8 @@ public class Event {
             waitingList.add(signeeID);
             //Push to cloud.
             return true;
-        } else {
+        }
+        else{
             Log.d("Event Debug", "addToWaitingList: " + "Event full");
             return false;
         }
@@ -394,7 +369,6 @@ public class Event {
     /**
      * Updates the current maximum number of signees.
      * Enforces positive values, minimum is 0
-     *
      * @param max New maximum number of entrants for waiting list
      */
     public void setMaxEntrants(int max) {
@@ -432,7 +406,6 @@ public class Event {
 
     /**
      * Overriding toString's function on Events to return the name of the event instead.
-     *
      * @return Name of event
      */
     @Override
@@ -440,6 +413,9 @@ public class Event {
         return eventName;
     }
 
+    public ArrayList<String> getCancelledEntrants() {
+        return cancelledEntrants;
+    }
 
     /**
      * Overriding equals function for Events to compare name only

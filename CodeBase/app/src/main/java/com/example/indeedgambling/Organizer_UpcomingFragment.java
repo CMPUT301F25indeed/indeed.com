@@ -28,7 +28,6 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     private FirebaseViewModel Data;
     private OrganizerViewModel organizerVM;
-
     private String orgID;
     private View view;
     @Override
@@ -192,6 +191,9 @@ public class Organizer_UpcomingFragment extends Fragment {
 
             Log.d("DEBUG","PRE BUILDPOPUP");
             View listView = inflater.inflate(R.layout.listview_popup, null);
+
+            //Get fresh waitlist data
+
             Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,listView.findViewById(R.id.popUp_Listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
 

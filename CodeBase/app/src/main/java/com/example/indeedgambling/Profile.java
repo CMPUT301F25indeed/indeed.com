@@ -2,6 +2,24 @@ package com.example.indeedgambling;
 
 import java.util.List;
 
+/**
+ * Represents a user profile in the Event Lottery System.
+ *
+ * This model is synced with Firestore and stores all relevant
+ * user information including identity, role, login hash, and preferences.
+ *
+ * Fields include:
+ * - Basic identity (name, email, phone)
+ * - Role (entrant / organizer / admin)
+ * - Notification preference
+ * - Events joined history
+ * - Security fields (password hash, optional deviceId)
+ *
+ * Notes:
+ * - Firestore requires a no-argument constructor (provided below)
+ * - passwordHash stores SHA-256 hash, not plain password
+ * - deviceId is reserved for future device-based authentication
+ */
 public class Profile {
 
     private String profileId;
@@ -16,8 +34,21 @@ public class Profile {
     private String passwordHash; // added
     private String deviceId;     // added for device login later
 
+    /**
+     * Required empty constructor for Firestore data mapping.
+     */
     public Profile() {}
 
+    /**
+     * Creates a new Profile instance.
+     *
+     * @param profileId Unique hash-based ID generated from email + password
+     * @param personName User's display name
+     * @param email User's email address
+     * @param phone Optional phone number
+     * @param role User role: "entrant", "organizer", or "admin"
+     * @param passwordHash SHA-256 hashed password
+     */
     public Profile(String profileId, String personName, String email, String phone, String role, String passwordHash) {
         this.profileId = profileId;
         this.personName = personName;
@@ -60,22 +91,6 @@ public class Profile {
 
     public String getDeviceId() { return deviceId; }
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
-
-
-    /** Ovverride of toString() that returns the profile name.
-     * @return Profilename
-     */
-    @Override
-    public String toString(){
-        if (this.personName != null) {
-            return this.personName;
-        }
-        else if (this.email != null){
-            return this.email;
-        }
-        //Catch all
-        return profileId;
-    }
 }
 
 // Tj commented out Xan code from Xan branch
@@ -134,4 +149,13 @@ public class Profile {
 
 //     //TODO: Equals function to use in Firebase Contains()
 
+
+//     /** Ovverride of toString() that returns the profile name.
+//      * @return Profilename
+//      */
+//     @NonNull
+//     @Override
+//     public String toString(){
+//         return this.profileName;
+//     }
 // }
