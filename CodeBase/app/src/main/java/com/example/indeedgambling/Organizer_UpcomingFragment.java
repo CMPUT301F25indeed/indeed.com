@@ -240,9 +240,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setView(helperView)
                     .setPositiveButton("Confirm",((dialog, which) -> {
                         int number = Integer.parseInt(numberInp.getText().toString().trim());;
-                        Data.InviteEntrants(event.getEventId(),event.ChooseInvitedEntrants(number),
+                        //Send out invite
+                        /*Data.InviteEntrants(event.getEventId(),event.ChooseInvitedEntrants(number),
                                 ()->{},e -> Log.d("FIREBASE Error", "Org_UpcomingFrag:".concat(e.toString())));
-                        RefreshWaitlist(event);
+                        RefreshWaitlist(event);*/
 
                     }))
                     .setNegativeButton("Cancel",null)

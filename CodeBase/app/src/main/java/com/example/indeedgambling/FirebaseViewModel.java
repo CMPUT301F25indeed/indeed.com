@@ -404,11 +404,11 @@ public class FirebaseViewModel extends ViewModel {
     public void notifySelectedEntrants(String eventId, String message, Runnable onOk, Consumer<Exception> onErr) {
         EVENTS.document(eventId).get().addOnSuccessListener(documentSnapshot -> {
             Event event = documentSnapshot.toObject(Event.class);
-            if (event != null && event.getInvitedListIDs() != null && !event.getInvitedListIDs().isEmpty()) {
+            if (event != null && event.getInvitedList() != null && !event.getInvitedList().isEmpty()) {
                 AtomicInteger completedCount = new AtomicInteger(0);
-                int totalEntrants = event.getInvitedListIDs().size();
+                int totalEntrants = event.getInvitedList().size();
 
-                for (String entrantId : event.getInvitedListIDs()) {
+                for (String entrantId : event.getInvitedList()) {
                     Notification notification = new Notification();
                     notification.setSenderId("system");
                     notification.setReceiverId(entrantId);
@@ -581,6 +581,13 @@ public class FirebaseViewModel extends ViewModel {
         if (list == null) return new ArrayList<>();
         list.sort((e1, e2) -> e1.getRegistrationEnd().compareTo(e2.getRegistrationEnd()));
         return list;
+    }
+
+    public void signUpForEvent(String eventId, String entrantId, Runnable onSuccess, Consumer<Exception> onFailure) {
+        db.collection("events").document(eventId)
+                .update("participants", FieldValue.arrayUnion(entrantId))
+                .addOnSuccessListener(aVoid -> onSuccess.run())
+                .addOnFailureListener(onFailure::accept);
     }
 
 }
