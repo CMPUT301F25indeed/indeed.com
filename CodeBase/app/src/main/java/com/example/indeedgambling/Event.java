@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class Event implements Serializable {
     private String eventId;
@@ -89,6 +91,49 @@ public class Event implements Serializable {
         //Event ID : Hash of OrgIdEventnameEventstart
         this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
     }
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
+        //Potential profanity filter.
+
+        //TODO: Check if an exact match exists already ().
+        eventName = EventName;
+
+        //Raise error if open date after or equal end date & time
+        if (RegistrationClose.before(RegistrationOpen)) {
+            throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
+        }
+        //Raise error if open date after or equal end date & time
+        if (EventEnd.before(EventStart)) {
+            throw new IllegalArgumentException("Event Start cannot be after Event End");
+        }
+
+        registrationStart = RegistrationOpen;
+        registrationEnd = RegistrationClose;
+
+        eventStart = EventStart;
+        eventEnd = EventEnd;
+
+        waitingList = new ArrayList<String>();
+        invitedList = new ArrayList<String>();
+
+        //0 is value for no limit. Can't have negative, so it sets to zero
+        maxWaitingEntrants = Math.max(0,MaxEntrants);
+
+        //Setting reference owner
+        organizerId = OrgID;
+
+        description = Description;
+
+        criteria = Critera;
+
+        category = Category;
+
+        qrCodeURL = QRCodeURL;
+
+        this.status = getStatus();
+
+        //Event ID : Hash of OrgIdEventnameEventstart
+        this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
+    }
 
     /** NO URL constructor, no Max entrants Constructor.
      * @param EventName
@@ -107,13 +152,12 @@ public class Event implements Serializable {
         //TODO: Check if an exact match exists already ().
         eventName = EventName;
 
-
         //Raise error if open date after or equal end date & time
-        if (RegistrationClose.before(RegistrationOpen)){
+        if (RegistrationClose.before(RegistrationOpen)) {
             throw new IllegalArgumentException("registrationOpen cannot be after registrationClose");
         }
         //Raise error if open date after or equal end date & time
-        if (EventEnd.before(EventStart)){
+        if (EventEnd.before(EventStart)) {
             throw new IllegalArgumentException("Event Start cannot be after Event End");
         }
 
@@ -153,15 +197,6 @@ public class Event implements Serializable {
     }
 
     //Returns the entrant names for the Entrants
-
-    /** WIP
-     * @return NOTHING RIGHT NOW
-     */
-    public ArrayList<String> getWaitingEntrantNames() {
-        //Find the matching names from the IDS.
-
-        return waitingList;
-    }
 
     /** Provides all Profile IDS for entrants who signed onto the Waitlist
      *
@@ -212,21 +247,13 @@ public class Event implements Serializable {
         return this.eventEnd.before(new Date());
     }
 
-    public void setWaitingEntrants(ArrayList<String> waitingEntrantIDs) {
-        this.waitingList = waitingEntrantIDs;
-    }
-
-    public void setInvitedEntrants(ArrayList<String> invitedEntrantIDs) {
-        this.invitedList = invitedEntrantIDs;
-    }
-
     public int getMaxWaitingEntrants() {
         return maxWaitingEntrants;
     }
 
     /**
      *
-     * @return
+     * @return String of Max Waiting Entrants. Returns "Unlimited" instead of 0.
      */
     public String getMaxWaitingEntrantsString(){
         if (maxWaitingEntrants == 0){
@@ -235,11 +262,11 @@ public class Event implements Serializable {
         return Integer.toString(maxWaitingEntrants);
     }
 
-    public ArrayList<String> getInvitedListIDs() {
+    public ArrayList<String> getInvitedList() {
         return invitedList;
     }
 
-    public void setInvitedListIDs(ArrayList<String> invitedList) {
+    public void setInvitedList(ArrayList<String> invitedList) {
         this.invitedList = invitedList;
     }
 
@@ -378,10 +405,6 @@ public class Event implements Serializable {
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
-    }
-
-    public String getOwnerID() {
-        return organizerId;
     }
 
     public void setOwner(String owner) {

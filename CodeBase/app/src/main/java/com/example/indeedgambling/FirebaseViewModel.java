@@ -209,7 +209,65 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /** Returns the profiles of the waitlist for the event matching the eventID
+    public void fetchOrgsUpcomingEvents(String OrgID, Consumer<List<Event>> onResult, Consumer<Exception> onErr){
+        EVENTS.whereEqualTo("organizerId",OrgID).whereGreaterThan("eventEnd",new Date())
+                .orderBy("registrationEnd", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(q -> onResult.accept(q.toObjects(Event.class)))
+                .addOnFailureListener(onErr::accept);
+    }
+
+    // -------------------------
+    // Waiting List
+    // -------------------------
+    public void joinWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
+        Map<String, Object> u = new HashMap<>();
+        u.put("waitingList", FieldValue.arrayUnion(entrantId));
+        EVENTS.document(eventId).update(u)
+                .addOnSuccessListener(v -> onOk.run())
+                .addOnFailureListener(onErr::accept);
+    }
+
+    public void leaveWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
+        Map<String, Object> u = new HashMap<>();
+        u.put("waitingList", FieldValue.arrayRemove(entrantId));
+        EVENTS.document(eventId).update(u)
+                .addOnSuccessListener(v -> onOk.run())
+                .addOnFailureListener(onErr::accept);
+    }
+
+/*
+    /**
+     *
+     * @param eventId Event to move entrants between lists on
+     * @param entrantIds List of entrants to move
+     * @param onOk
+     * @param onErr
+     *//*
+    public void InviteEntrants(String eventId, List<String> entrantIds, Runnable onOk, Consumer<Exception> onErr) {
+        for (String ID : entrantIds){
+            Map<String, Object> removeFromWaiting = new HashMap<>();
+            removeFromWaiting.put("waitingList", FieldValue.arrayRemove(ID));
+
+            //Only adds to invitelist if removal works
+            EVENTS.document(eventId).update(removeFromWaiting)
+                    .addOnSuccessListener(v -> {
+                        //Add to invited list after removal succeeds
+                        Map<String,Object> addToInvited = new HashMap<>();
+                        addToInvited.put("invitedList", FieldValue.arrayUnion(ID));
+
+                        EVENTS.document(eventId).update(addToInvited)
+                                .addOnSuccessListener(v2 -> onOk.run())
+                                .addOnFailureListener(onErr::accept);
+                    })
+                    .addOnFailureListener(onErr::accept);
+        }
+
+
+    }*/
+
+    /** Returns the waitlist for the event matching the eventID
+     * onResult is the
      * @param eventID EventID to find waitlist of
      * @param onResult code to be run after success with the Profile Data.
      * @param onErr action on failure to find data
@@ -245,7 +303,7 @@ public class FirebaseViewModel extends ViewModel {
         //Gets matching event
         EVENTS.document(eventID).get().addOnSuccessListener(e ->{
             //Getting Profiles saved under event waitlist
-            List<String> result = e.toObject(Event.class).getInvitedListIDs();
+            List<String> result = e.toObject(Event.class).getInvitedList();
             if (!result.isEmpty()){
                 PROFILES.whereIn("profileId",result)
                         .orderBy("personName")
@@ -254,40 +312,6 @@ public class FirebaseViewModel extends ViewModel {
                         .addOnFailureListener(onErr::accept);
             }
         }).addOnFailureListener(onErr::accept);
-    }
-
-    public void signUpForEvent(String eventId, String entrantId, Runnable onSuccess, Consumer<Exception> onFailure) {
-        db.collection("events").document(eventId)
-                .update("participants", FieldValue.arrayUnion(entrantId))
-                .addOnSuccessListener(aVoid -> onSuccess.run())
-                .addOnFailureListener(onFailure::accept);
-    }
-
-
-    // -------------------------
-    // Waiting List
-    // -------------------------
-
-    /**
-     * Adds a user to event waiting list
-     */
-    public void joinWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
-        Map<String, Object> u = new HashMap<>();
-        u.put("waitingList", FieldValue.arrayUnion(entrantId));
-        EVENTS.document(eventId).update(u)
-                .addOnSuccessListener(v -> onOk.run())
-                .addOnFailureListener(onErr::accept);
-    }
-
-    /**
-     * Removes user from waiting list
-     */
-    public void leaveWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
-        Map<String, Object> u = new HashMap<>();
-        u.put("waitingList", FieldValue.arrayRemove(entrantId));
-        EVENTS.document(eventId).update(u)
-                .addOnSuccessListener(v -> onOk.run())
-                .addOnFailureListener(onErr::accept);
     }
 
     // -------------------------
@@ -521,7 +545,8 @@ public class FirebaseViewModel extends ViewModel {
                     .addOnSuccessListener(v -> Log.d("FirebaseViewModel", "Event added: " + e.getEventName()))
                     .addOnFailureListener(err -> Log.e("FirebaseViewModel", "Error adding event", err));
 
-        } else if (item instanceof Profile) {
+        }
+        else if (item instanceof Profile) {
             Profile p = (Profile) item;
             if (p.getProfileId() == null || p.getProfileId().isEmpty())
                 p.setProfileId(UUID.randomUUID().toString());

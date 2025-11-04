@@ -134,7 +134,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                     //Displaying Organizer's events
                     ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-                    Data.fetchOrgsEvents(orgID,events -> {UpdateEventList(events);}, e -> {
+                    Data.fetchOrgsUpcomingEvents(orgID,events -> {UpdateEventList(events);}, e -> {
                         Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
                     });
 
@@ -179,7 +179,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         }
 
         //Event Capacity: 12/40, 12/Unlimited
-        Capacity.setText("Event Capacity: ".concat(Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+        Capacity.setText("Waitlist Capacity: ".concat(Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
 
 
         //WaitList Button
@@ -188,22 +188,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Waitlist Pop-up
         WaitListButton.setOnClickListener(v -> {
-
-            Log.d("DEBUG","PRE BUILDPOPUP");
-            View listView = inflater.inflate(R.layout.listview_popup, null);
-
-            //Get fresh waitlist data
-
-            Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,listView.findViewById(R.id.popUp_Listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
-
-            Log.d("DEBUG","Building POPUP");
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Waitlist")
-                    .setView(listView)
-                    .setAdapter(adapter, null)
-                    .setNegativeButton("Close", null)
-                    .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+            WaitListPopup(event);
         });
 
         //Invited List Button
@@ -212,8 +197,6 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Invited List Pop-up
         InviteListButton.setOnClickListener(v -> {
             Log.d("DEBUG","PRE BUILDPOPUP");
-
-
             View listView = inflater.inflate(R.layout.listview_popup, null);
             Data.getEventInvitedList(event.getEventId(),p->{UpdateProfileList(p,listView.findViewById(R.id.popUp_Listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1);
@@ -227,12 +210,53 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
         });
 
-
-
         new AlertDialog.Builder(requireContext()).setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", ((dialog, which) -> {}))
                 .show();
+    }
+
+    private void WaitListPopup(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View popupView = inflater.inflate(R.layout.organization_event_popup, null);
+        Log.d("DEBUG","PRE BUILDPOPUP");
+        View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlistView.findViewById(R.id.waitlistpopup_listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+            }
+        });
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
+
+
+        Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
+        inviteEntrants.setOnClickListener(v1 -> {
+            View helperView = inflater.inflate(R.layout.text_input_helper,null);
+            EditText numberInp = helperView.findViewById(R.id.EditText_helper);
+            //Building integer input dialog
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Number of entrants to invite (Upto ".concat(event.getMaxWaitingEntrantsString()).concat(")"))
+                    .setView(helperView)
+                    .setPositiveButton("Confirm",((dialog, which) -> {
+                        int number = Integer.parseInt(numberInp.getText().toString().trim());;
+                        Data.InviteEntrants(event.getEventId(),event.ChooseInvitedEntrants(number),
+                                ()->{},e -> Log.d("FIREBASE Error", "Org_UpcomingFrag:".concat(e.toString())));
+                        RefreshWaitlist(event);
+
+                    }))
+                    .setNegativeButton("Cancel",null)
+                    .show();
+
+        });
+
+        //Waitlist Actual popup
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Waitlist")
+                .setView(waitlistView)
+                .setAdapter(adapter, null)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
     private void UpdateEventList(List<Event> eventsToShow){
@@ -242,9 +266,23 @@ public class Organizer_UpcomingFragment extends Fragment {
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
     }
 
+    /** Updates the passed ListView with the array passed. Sets the adapter
+     *
+     * @param itemsToShow
+     * @param EventList
+     */
     private void UpdateProfileList(List<Profile> itemsToShow, ListView EventList){
         ArrayAdapter<Profile> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, itemsToShow);
         EventList.setAdapter(adapter);
         Log.d("DEBUG Updated List", "Organizer Profile List update ran");
+    }
+
+    private void RefreshWaitlist(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
+        Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlistView.findViewById(R.id.waitlistpopup_listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingEntrantIDs());
+        ListView waitlist = waitlistView.findViewById(R.id.waitlistpopup_listview);
+        waitlist.setAdapter(adapter);
     }
 }
