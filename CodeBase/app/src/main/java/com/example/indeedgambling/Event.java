@@ -4,12 +4,13 @@ import android.util.Log;
 
 import org.jetbrains.annotations.TestOnly;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-public class Event {
+public class Event implements Serializable {
     private String eventId;
     private String eventName;
     private String description;
@@ -29,6 +30,7 @@ public class Event {
     private ArrayList<String> invitedList; // Entrant IDs
     private ArrayList<String> cancelledEntrants; //invited entrants who declined or were removed
 
+    
 
     /**
      * Creates an event. Enforces Open is before Closed with an IllegalArgumentException

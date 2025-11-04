@@ -1,18 +1,13 @@
 package com.example.indeedgambling;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -21,55 +16,45 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-public class Entrant_BrowseFragment extends Fragment {
-
-    public Entrant_BrowseFragment() {}
+public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.OnEventClick {
 
     private FirebaseViewModel firebaseVM;
-    private EntrantViewModel entrantVM;
     private EventsAdapter adapter;
 
+    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.entrant_browse_fragment, container, false);
+        View v = inflater.inflate(R.layout.entrant_browse_fragment, container, false);
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
-        entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
 
-        Button HomeButton = view.findViewById(R.id.entrant_home_button_browse);
-        HomeButton.setOnClickListener(v ->
-                NavHostFragment.findNavController(this).navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment));
+        RecyclerView recyclerView = v.findViewById(R.id.entrant_events_browse);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        RecyclerView rv = view.findViewById(R.id.entrant_events_browse);
-        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        adapter = new EventsAdapter(event -> showEventPopup(event));
-        rv.setAdapter(adapter);
+        adapter = new EventsAdapter(this);
+        recyclerView.setAdapter(adapter);
 
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {
             if (events != null) adapter.setData(events);
         });
 
+        Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
+        homeBtn.setOnClickListener(view ->
+                NavHostFragment.findNavController(Entrant_BrowseFragment.this)
+                        .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment));
 
-
-        return view;
+        return v;
     }
 
-
-    private void showEventPopup(Event event) {
-        Toast.makeText(getContext(), "Event: " + event.getEventName(), Toast.LENGTH_SHORT).show();
-        // We will add join/leave popup later
-
-}}
-
+    @Override
+    public void clicked(Event e) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("event", e);
+        NavHostFragment.findNavController(this)
+                .navigate(R.id.action_entrant_BrowseFragment_to_eventDetailsFragment, bundle);
+    }
+}
