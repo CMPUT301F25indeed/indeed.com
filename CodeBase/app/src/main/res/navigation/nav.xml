@@ -51,6 +51,9 @@
         <action
             android:id="@+id/action_signupFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_signupFragment_to_organizerHomeFragment"
+            app:destination="@id/organizerHomeFragment" />
     </fragment>
 
     <!-- ENTRANT -->
@@ -70,6 +73,9 @@
         <action
             android:id="@+id/action_entrantHomeFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_entrant_GuidelinesFragment"
+            app:destination="@id/entrant_GuidelinesFragment" />
     </fragment>
 
     <fragment
@@ -239,6 +245,14 @@
         <action
             android:id="@+id/action_adminLogsFragment_to_adminManageProfilesFragment"
             app:destination="@id/adminManageProfilesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/entrant_GuidelinesFragment"
+        android:name="com.example.indeedgambling.Entrant_GuidelinesFragment"
+        android:label="Entrant_GuidelinesFragment" >
+        <action
+            android:id="@+id/action_entrant_GuidelinesFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
     </fragment>
 
 </navigation>

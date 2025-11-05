@@ -138,6 +138,40 @@ public class FirebaseViewModel extends ViewModel {
     }
 
     /**
+     * Checks if a given email already exists in the Profiles collection.
+     *
+     * @param email The email to check.
+     * @param onResult Callback invoked with true if the email exists, false otherwise.
+     * @param onErr Callback invoked if an error occurs while querying Firestore.
+     */
+    public void checkEmailExists(String email, Consumer<Boolean> onResult, Consumer<Exception> onErr) {
+        PROFILES.whereEqualTo("email", email)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    boolean exists = !querySnapshot.isEmpty();
+                    onResult.accept(exists);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * Creates or updates an entrant in Firestore.
+     *
+     * @param e entrant object
+     * @param onOk callback if success
+     * @param onErr callback if failure
+     */
+    public void upsertEntrant(Entrant e, Runnable onOk, Consumer<Exception> onErr) {
+        if (e.getProfileId() == null || e.getProfileId().isEmpty()) {
+            onErr.accept(new IllegalArgumentException("profileId is required"));
+            return;
+        }
+        PROFILES.document(e.getProfileId()).set(e)
+                .addOnSuccessListener(v -> onOk.run())
+                .addOnFailureListener(onErr::accept);
+    }
+
+    /**
      * Updates specific fields of a profile in Firestore.
      *
      * @param profileId ID of profile

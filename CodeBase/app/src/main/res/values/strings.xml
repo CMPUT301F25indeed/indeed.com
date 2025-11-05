@@ -12,5 +12,11 @@
         <item>Entrant</item>
         <item>Organizer</item>
     </string-array>
+    <string name="Guidelines_for_Entrant">1. Follow the event rules carefully.\n\n
+2. Respect other participants — no cheating or harassment.\n\n
+3. Ensure you have a stable internet connection before joining any event.\n\n
+4. Notification settings will help you stay updated — enable them in your profile.\n\n
+5. Contact support if you encounter any technical issues.\n\n
+6. Have fun and good luck!</string>
 
 </resources>

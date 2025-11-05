@@ -1,5 +1,8 @@
 package com.example.indeedgambling;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents an Entrant user in the Event Lottery System.
  *
@@ -12,11 +15,26 @@ package com.example.indeedgambling;
  * - Used when mapping profile data to an Entrant-specific object
  */
 public class Entrant extends Profile {
+    private List<String> waitlistedEvents;
 
     /**
      * Empty constructor required for Firestore data mapping.
      */
-    public Entrant() { super(); }
+    public Entrant() { super();
+        this.waitlistedEvents = new ArrayList<>();
+        setRoleVerified(true);
+        setRole("entrant");}
+
+
+
+
+    public List<String> getWaitlistedEvents() {
+        return waitlistedEvents;
+    }
+
+    public void setWaitlistedEvents(List<String> waitlistedEvents) {
+        this.waitlistedEvents = waitlistedEvents;
+    }
 
     /**
      * Creates a new Entrant profile.
@@ -30,5 +48,8 @@ public class Entrant extends Profile {
     public Entrant(String profileId, String name, String email, String phone, String passwordHash) {
         super(profileId, name, email, phone, "entrant", passwordHash);
         setRoleVerified(true);
+        this.waitlistedEvents = new ArrayList<>();
     }
+
+
 }
