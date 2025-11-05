@@ -220,12 +220,32 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Waiting List
     // -------------------------
+
+    /** Attempts to add the entrant to the waitinglist for the event.
+     * Does not add the entrant if there is not room.
+     * @param eventId Event to attempt to add to
+     * @param entrantId Entrant to try to add
+     * @param onOk What to be done on success
+     * @param onErr What to be done on failure
+     */
     public void joinWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
-        Map<String, Object> u = new HashMap<>();
-        u.put("waitingList", FieldValue.arrayUnion(entrantId));
-        EVENTS.document(eventId).update(u)
-                .addOnSuccessListener(v -> onOk.run())
-                .addOnFailureListener(onErr::accept);
+        //Does not allow signup if past set limit: US: 02.03.01
+        EVENTS.document(eventId).get().addOnSuccessListener(e -> {
+            //If there is room to signup
+            if (!e.toObject(Event.class).atCapacity()){
+                //Adding change to server
+                Map<String, Object> u = new HashMap<>();
+                u.put("waitingList", FieldValue.arrayUnion(entrantId));
+                EVENTS.document(eventId).update(u)
+                        .addOnSuccessListener(v -> onOk.run())
+                        .addOnFailureListener(onErr::accept);
+            }
+            else{
+                onErr.accept(new Exception("Waitlist is at capacity!"));
+            }
+        }).addOnFailureListener(onErr::accept);
+
+
     }
 
     public void leaveWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
@@ -235,36 +255,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
-
-/*
-    /**
-     *
-     * @param eventId Event to move entrants between lists on
-     * @param entrantIds List of entrants to move
-     * @param onOk
-     * @param onErr
-     *//*
-    public void InviteEntrants(String eventId, List<String> entrantIds, Runnable onOk, Consumer<Exception> onErr) {
-        for (String ID : entrantIds){
-            Map<String, Object> removeFromWaiting = new HashMap<>();
-            removeFromWaiting.put("waitingList", FieldValue.arrayRemove(ID));
-
-            //Only adds to invitelist if removal works
-            EVENTS.document(eventId).update(removeFromWaiting)
-                    .addOnSuccessListener(v -> {
-                        //Add to invited list after removal succeeds
-                        Map<String,Object> addToInvited = new HashMap<>();
-                        addToInvited.put("invitedList", FieldValue.arrayUnion(ID));
-
-                        EVENTS.document(eventId).update(addToInvited)
-                                .addOnSuccessListener(v2 -> onOk.run())
-                                .addOnFailureListener(onErr::accept);
-                    })
-                    .addOnFailureListener(onErr::accept);
-        }
-
-
-    }*/
 
     /** Returns the waitlist for the event matching the eventID
      * onResult is the

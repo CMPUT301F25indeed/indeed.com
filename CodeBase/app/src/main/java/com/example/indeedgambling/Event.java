@@ -2,6 +2,8 @@ package com.example.indeedgambling;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +21,7 @@ public class Event implements Serializable {
     private Date eventEnd;
     private Date registrationStart;
     private Date registrationEnd;
+    //US: 02.03.01
     private int maxWaitingEntrants;
     private String imageUrl;
     private String qrCodeURL;
@@ -192,72 +195,81 @@ public class Event implements Serializable {
     Event() {
     }
 
+                                                //--------------------Setters / Getters ----------------------//
+    /** Retrieves the event's display name
+     * @return String: Events name
+     */
     public String getEventName() {
         return eventName;
     }
 
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
+
+    /** Retrieves the open date and time for waitlist registration
+     * @return Date object of registrationStart
+     */
     public Date getRegistrationStart() {
         return registrationStart;
     }
 
+    /** Assigns the object's registrationStart attribute to the value of the Date object passed.
+     * @param registrationStart
+     */
     public void setRegistrationStart(Date registrationStart) {
         this.registrationStart = registrationStart;
     }
 
+    /** Retrieves the datetime that the Waitlist Registration closes at.
+     * @return Date Object
+     */
     public Date getRegistrationEnd() {
         return registrationEnd;
     }
 
+    /** Assigns the object's datetime for when the Waitlist Registration will close.
+     * @param registrationEnd
+     */
     public void setRegistrationEnd(Date registrationEnd) {
         this.registrationEnd = registrationEnd;
     }
 
-    /** Helper function that checks if RIGHT NOW is before reg period
-     *
-     * @return True if before Reg Open, false otherwise
+    /** Returns the objects attribute that determines the number of entrants who can sign up to the waitlist
+     * @return Integer of the maximum waitlist size
      */
-    public boolean BeforeRegPeriod(){
-        return new Date().before(this.registrationStart);
-    }
-
-    /** Helper function that checks if RIGHT NOW is after the reg period
-     *
-     * @return True if after Reg Close, false otherwise
-     */
-    public boolean AfterRegPeriod(){
-        return new Date().after(this.registrationEnd);
-    }
-
-    /** Returns True if the event has finished**/
-    public boolean EventPassed(){
-        return this.eventEnd.before(new Date());
-    }
-
     public int getMaxWaitingEntrants() {
         return maxWaitingEntrants;
     }
 
+
     /**
-     *
-     * @return String of Max Waiting Entrants. Returns "Unlimited" instead of 0.
+     * Updates the current maximum number of signees.
+     * Enforces positive values, minimum is 0
+     * @param max New maximum number of entrants for waiting list
      */
-    public String getMaxWaitingEntrantsString(){
-        if (maxWaitingEntrants == 0){
-            return "Unlimited";
-        }
-        return Integer.toString(maxWaitingEntrants);
+    public void setMaxWaitingEntrants(int max) {
+        //No negative max. 0 is unlimited entrants
+        maxWaitingEntrants = Math.max(max, 0);
     }
 
+    /** Returns the ProfileIDs of all Entrants who have been invited
+     * @return Array of Strings IDs.
+     */
     public List<String> getInvitedList() {
         return invitedList;
     }
 
+    /** Sets the object's record of invited entrants to match the passed object
+     * @param invitedList ArrayList of strings to set invitedList to
+     */
     public void setInvitedList(ArrayList<String> invitedList) {
         this.invitedList = invitedList;
     }
 
     /** Returns the events generated ID.
-     * @return Event ID hash
+     * @return Event ID hash String
      */
     public String getEventId() {
         return eventId;
@@ -271,6 +283,9 @@ public class Event implements Serializable {
         this.eventId = eventId;
     }
 
+    /** Retrieves the description of the event as a String object.
+     * @return String description
+     */
     public String getDescription() {
         return description;
     }
@@ -364,101 +379,90 @@ public class Event implements Serializable {
         this.criteria = criteria;
     }
 
-
-    //Superseded by FirebaseViewModel function
-    /**
-     * Adds an entrant to the waiting list of the event.
-     * Duplicant signees are not added.
-     *
-     * @param signeeID Entrant ID.
-     * @return True if entrant added, False otherwise
-     */
-    /*public boolean addToWaitingList(String signeeID) {
-        if (!this.atCapacity()) {
-            waitingList.add(signeeID);
-            //Push to cloud.
-            return true;
-        }
-        else{
-            Log.d("Event Debug", "addToWaitingList: " + "Event full");
-            return false;
-        }
-    }*/
-
-    /**
-     * Updates the current maximum number of signees.
-     * Enforces positive values, minimum is 0
-     * @param max New maximum number of entrants for waiting list
-     */
-    public void setMaxEntrants(int max) {
-        //No negative max. 0 is unlimited entrants
-        maxWaitingEntrants = Math.max(max, 0);
-    }
-
-    public void setEventName(String eventName) {
-        this.eventName = eventName;
-    }
-
-    public void setOwner(String owner) {
-        organizerId = owner;
-    }
-
     public Date getEventStart() {
         return eventStart;
     }
 
+    /** Overwrites the start of the event in the object locally.
+     *
+     * @param eventStart
+     */
     public void setEventStart(Date eventStart) {
         this.eventStart = eventStart;
     }
 
+    /** Retrieves the datetime that the event Ends at.
+     * @return Date object
+     */
     public Date getEventEnd() {
         return eventEnd;
     }
 
+    /** Overwrites the ending datetime for the Event with the passed eventEnd object.
+     * @param eventEnd Date object that is the new endtime for the event
+     */
     public void setEventEnd(Date eventEnd) {
         this.eventEnd = eventEnd;
     }
 
-    /**
-     * Overriding toString's function on Events to return the name of the event instead.
-     * @return Name of event
+    /** Retrieves the list of IDs for Entrants who cancelled
+     * @return
      */
-    @Override
-    public String toString() {
-        return eventName;
-    }
-
     public ArrayList<String> getCancelledEntrants() {
         return cancelledEntrants;
     }
 
-    /**
-     * Overriding equals function for Events to compare name only
-     *
-     * @param obj Object to compare
-     * @return True if they match names
+    /** Sets the ID list of cancelled Entrants to the passed ArrayList Object locally. No server changes
+     * @param cancelledEntrants ArrayList that overwrites objects'
      */
-    @Override
-    public boolean equals(Object obj) {
-        //If perfectly equal, return true
-        if (this == obj) return true;
-
-        //If types do not match, return false
-        if (obj == null || this.getClass() != obj.getClass()) return false;
-
-        return this.getEventName().equals(((Event) obj).eventName);
-
+    public void setCancelledEntrants(ArrayList<String> cancelledEntrants) {
+        this.cancelledEntrants = cancelledEntrants;
     }
 
-    /**
-     * Returns true if the WaitingList is out of room for entrants
-     *
-     * @return True if waitlist CANNOT accept any more entrants
+//---------------------------------------------------- Helpers ---------------------------//
+    /** Helper function that checks if RIGHT NOW is before reg period opens
+     * @return True if before Reg Open, false otherwise
+     */
+    public boolean BeforeRegPeriod(){
+        return new Date().before(this.registrationStart);
+    }
+
+    /** Helper function that checks if RIGHT NOW is after the reg period closes
+     * @return True if after Reg Close, false otherwise
+     */
+    public boolean AfterRegPeriod(){
+        return new Date().after(this.registrationEnd);
+    }
+
+    /** Returns True if the event's runtime has finished**/
+    public boolean EventPassed(){
+        return this.eventEnd.before(new Date());
+    }
+
+
+    /** Help function that will return the meaning of the max. 0 => unlimited, normal otherwise.
+     * @return String of Max Waiting Entrants. Returns "Unlimited" instead of 0.
+     */
+    public String getMaxWaitingEntrantsString(){
+        if (maxWaitingEntrants == 0){
+            return "Unlimited";
+        }
+        return Integer.toString(maxWaitingEntrants);
+    }
+
+
+    /** Answers if the event object can take another entrant on the waitList.
+     * @return True if waitlist CANNOT accept 1 more Entrant, FALSE if it is able.
      */
     public boolean atCapacity() {
-        //0 check is for no-limit. 0 => no limit
-        return (this.maxWaitingEntrants >= this.waitingList.size()) || this.maxWaitingEntrants == 0;
+        // 0 == unlimited, and thus event cannot be at capacity.
+        // If limit is met, we cannot fit anybody more, and are at capacity.
+        if (this.maxWaitingEntrants == 0 || (this.maxWaitingEntrants <= this.waitingList.size())){
+            return false;
+        }
+        return true;
     }
+
 
     /**
      * Returns true if the Event registration period is open now.
@@ -488,31 +492,72 @@ public class Event implements Serializable {
     }
 
     /** Moves a random selection of entrants from the waitlist to the invited list.
-     * @param number How many entrants to move.
+     * @param number How many entrants to move. Will not throw error if limit exceeded
      */
     public void InviteEntrants(int number){
-
-        Log.d("Invitation Debug", "number: ".concat(Integer.toString(number)));
-        Log.d("Invitation Debug", "waitlist: ".concat(waitingList.toString()));
-        Log.d("Invitation Debug", "invlist: ".concat(invitedList.toString()));
-
+        //Skip if number passed is 0
+        if (number == 0){
+            return;
+        }
 
         //Will stop moving entrants if there are no more to invite
         for (int i = 0; i < number && !waitingList.isEmpty(); i++){
             //Randomly choose an entrant
+            int random_index = new Random().nextInt(0,waitingList.size() - 1);
+            //Check if entrant not already invited.
+            if (invitedList.contains(waitingList.get(random_index))){
+                throw new RuntimeException("User in two waitlist and invitedlist!");
+            }
+
 
             //Random is not allowed on a range of 1 int
             if (waitingList.size() == 1){
                 invitedList.add(waitingList.remove(0));
             }
             else{
-
-                invitedList.add(waitingList.remove(new Random().nextInt(0,waitingList.size() - 1)));
+                //Check if the invitedList has the entrant already.
+                invitedList.add(waitingList.remove(random_index));
             }
 
         }
-
-        Log.d("Invitation Debug", "waitlist after: ".concat(waitingList.toString()));
-        Log.d("Invitation Debug", "invlist after: ".concat(invitedList.toString()));
     }
+
+
+
+
+
+
+                                            //-----------------------------Overrides--------------------//
+
+    /**
+     * Overriding toString's function on Events to return the name of the event instead.
+     * @return Name of event
+     */
+    @NonNull
+    @Override
+    public String toString() {
+        return eventName;
+    }
+
+
+
+    /**
+     * Overriding equals function for Events to compare name only
+     *
+     * @param obj Object to compare
+     * @return True if they match names
+     */
+    @Override
+    public boolean equals(Object obj) {
+        //If perfectly equal, return true
+        if (this == obj) return true;
+
+        //If types do not match, return false
+        if (obj == null || this.getClass() != obj.getClass()) return false;
+
+        return this.getEventName().equals(((Event) obj).eventName);
+
+    }
+
+
 }

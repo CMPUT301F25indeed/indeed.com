@@ -32,6 +32,8 @@ public class Organizer_UpcomingFragment extends Fragment {
     private OrganizerViewModel organizerVM;
     private String orgID;
     private View view;
+    private ListView EventList;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -48,8 +50,8 @@ public class Organizer_UpcomingFragment extends Fragment {
         });
 
         //Displaying Organizer's events
-        ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-        Data.fetchOrgsEvents(orgID,events -> {UpdateEventList(events);}, e -> {
+        EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
+        Data.fetchOrgsUpcomingEvents(orgID,events -> {UpdateEventList(events);}, e -> {
             Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
         });
 
@@ -69,11 +71,14 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
 
+    //---------------- POPUPS -------------//
+
     private void showNewEventPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.make_event, null);
 
         EditText NameInput = popupView.findViewById(R.id.NewEventPopup_NameDialog);
+        //US 02.01.04
         EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
         EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
         EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
@@ -100,6 +105,16 @@ public class Organizer_UpcomingFragment extends Fragment {
         DatePicker EventEndDateInput = EventClose.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker EventEndTimeInput = EventClose.findViewById(R.id.DateTimePicker_TimeDialog);
 
+        //Preventing making events in the past
+        Long CurrentTime = new Date().getTime();
+        EventStartDateInput.setMinDate(CurrentTime);
+        EventEndDateInput.setMinDate(CurrentTime);
+
+        //Prevent Registration in the past
+        RegEndDateInput.setMinDate(CurrentTime);
+        RegStartDateInput.setMinDate(CurrentTime);
+
+
         //New Event Making Dialog
         new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
@@ -120,6 +135,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                     String Category = CategoryInput.getText().toString().trim();
                     String Criteria = CriteriaInput.getText().toString().trim();
 
+                    //US 02.01.04 : Optional for unlimited
 
                     Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,orgID,Description,Category,Criteria);
                     //Optionals
@@ -127,16 +143,12 @@ public class Organizer_UpcomingFragment extends Fragment {
                         CreatedEvent.setLocation(Location);
                     }
                     if (!MaxEnt.isBlank()){
-                        CreatedEvent.setMaxEntrants(Integer.parseInt(MaxEnt));
+                        CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
                     }
                     Data.Add(CreatedEvent);
 
-
-                    //Update Adapter on main page.
-
                     //Displaying Organizer's events
-                    ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-                    Data.fetchOrgsUpcomingEvents(orgID,events -> {UpdateEventList(events);}, e -> {
+                    Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
                         Log.d("FIREBASE Error", "onCreateView: Error with Event results".concat(e.toString()));
                     });
 
@@ -153,6 +165,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         View popupView = inflater.inflate(R.layout.organization_event_popup, null);
 
         //Setting References
+        TextView Description = popupView.findViewById(R.id.Organizer_EventPopup_Description);
         ImageButton EventPoster = popupView.findViewById(R.id.Organizer_EventPopup_View_Event_Poster);
         ImageView QRCode = popupView.findViewById(R.id.Organizer_EventPopup_QR_Code);
         TextView RegPeriod = popupView.findViewById(R.id.Organizer_EventPopup_RegistrationPeriod);
@@ -161,6 +174,10 @@ public class Organizer_UpcomingFragment extends Fragment {
         TextView Capacity = popupView.findViewById(R.id.Organizer_EventPopup_Capacity);
 
         //Setting pop-up to event data
+
+        Log.d("DEBUG ERROR", event.getDescription());
+        Description.setText(event.getDescription());
+
 
 
         //TODO: EVENTPOSTER
@@ -180,7 +197,7 @@ public class Organizer_UpcomingFragment extends Fragment {
             Location.setText("Location: ".concat(event.getLocation()));
         }
 
-        //Event Capacity: 12/40, 12/Unlimited
+        //Event Capacity: 12/40, 3/Unlimited, 0/30
         Capacity.setText("Waitlist Capacity: ".concat(Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
 
 
@@ -219,6 +236,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
+    //US 02.02.01 && US 02.06.01
     private void WaitListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.organization_event_popup, null);
@@ -226,30 +244,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
 
         Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlistView.findViewById(R.id.waitlistpopup_listview));},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
         inviteEntrants.setOnClickListener(v1 -> {
-            View helperView = inflater.inflate(R.layout.text_input_helper,null);
-            EditText numberInp = helperView.findViewById(R.id.EditText_helper);
-            //Building integer input dialog
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Number of entrants to invite (Upto ".concat(event.getMaxWaitingEntrantsString()).concat(")"))
-                    .setView(helperView)
-                    .setPositiveButton("Confirm",((dialog, which) -> {
-                        int number = Integer.parseInt(numberInp.getText().toString().trim());
-                        //Send out invites
-                        event.InviteEntrants(number);
-
-                        Map<String, Object> update = new HashMap<>();
-                        update.put("waitingList",event.getWaitingList());
-                        update.put("invitedList",event.getInvitedList());
-
-                        Data.updateEvent(event.getEventId(), update, ()->{RefreshWaitlist(event);}, e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
-
-                    }))
-                    .setNegativeButton("Cancel",null)
-                    .show();
-
+            InviteNumberPopup(event, inflater);
         });
 
         //Waitlist Actual popup
@@ -260,8 +259,43 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
+    private void InviteNumberPopup(Event event, LayoutInflater inflater){
+        View helperView = inflater.inflate(R.layout.text_input_helper,null);
+        EditText numberInp = helperView.findViewById(R.id.EditText_helper);
+        //Building integer input dialog
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Number of entrants to invite (Up to ".concat(event.getMaxWaitingEntrantsString()).concat(")"))
+                .setView(helperView)
+                .setPositiveButton("Confirm",((dialog, which) -> {
+                    //Preventing non-numbers from being used
+                    int number;
+                    try {
+                        number = Integer.parseInt(numberInp.getText().toString().trim());
+                    //If a non-int was passed, do nothing
+                    } catch (Exception e) {
+                        number = 0;
+                        //throw new RuntimeException(e);
+                    }
+
+
+                    //Send out invites
+                    event.InviteEntrants(number);
+
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("waitingList",event.getWaitingList());
+                    update.put("invitedList",event.getInvitedList());
+
+                    Data.updateEvent(event.getEventId(), update, ()->{RefreshWaitlist(event);}, e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+
+                }))
+                .setNegativeButton("Cancel",null)
+                .show();
+    }
+
+
+    // -------------------- UPDATING LISTVIEWS -------------//
+
     private void UpdateEventList(List<Event> eventsToShow){
-        ListView EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
         ArrayAdapter<Event> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventsToShow);
         EventList.setAdapter(adapter);
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
@@ -277,6 +311,10 @@ public class Organizer_UpcomingFragment extends Fragment {
         EventList.setAdapter(adapter);
     }
 
+    /** TODO: FIX
+     *
+     * @param event
+     */
     private void RefreshWaitlist(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
