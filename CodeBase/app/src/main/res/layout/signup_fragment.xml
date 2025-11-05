@@ -20,7 +20,7 @@
 
     <EditText
         android:id="@+id/signUpName"
-        android:hint="Full Name"
+        android:hint="Personal Name (required)"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
@@ -30,7 +30,7 @@
 
     <EditText
         android:id="@+id/signUpEmail"
-        android:hint="Email"
+        android:hint="Email (required)"
         android:inputType="textEmailAddress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
 
     <EditText
         android:id="@+id/signUpPhone"
-        android:hint="Phone Number"
+        android:hint="Phone Number (optional)"
         android:inputType="phone"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
 
     <EditText
         android:id="@+id/signUpPassword"
-        android:hint="Password"
+        android:hint="Password (required)"
         android:inputType="textPassword"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

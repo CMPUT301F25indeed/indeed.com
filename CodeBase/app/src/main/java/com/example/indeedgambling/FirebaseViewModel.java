@@ -137,6 +137,16 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    public void upsertEntrant(Entrant e, Runnable onOk, Consumer<Exception> onErr) {
+        if (e.getProfileId() == null || e.getProfileId().isEmpty()) {
+            onErr.accept(new IllegalArgumentException("profileId is required"));
+            return;
+        }
+        PROFILES.document(e.getProfileId()).set(e)
+                .addOnSuccessListener(v -> onOk.run())
+                .addOnFailureListener(onErr::accept);
+    }
+
     /**
      * Updates specific fields of a profile in Firestore.
      *

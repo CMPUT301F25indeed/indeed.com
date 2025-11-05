@@ -1,7 +1,10 @@
 package com.example.indeedgambling;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * ViewModel for Entrant user.
@@ -18,6 +21,7 @@ public class EntrantViewModel extends ViewModel {
 
     /** Stores the event currently selected by entrant (when browsing or joining) */
     private final MutableLiveData<Event> selectedEvent = new MutableLiveData<>();
+
 
     /**
      * Sets the logged-in entrant profile

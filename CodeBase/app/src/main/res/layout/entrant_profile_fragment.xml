@@ -1,68 +1,114 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="top">
 
-    <TextView
-        android:id="@+id/entrant_name_profile"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Profile: Name"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/entrant_edit_button_profile"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintHorizontal_chainStyle="packed" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:id="@+id/entrant_title_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Profile"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/entrant_notification_switch_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Notifications" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Name:"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/entrant_name_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Enter name"
+            android:text="John Doe" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Email:"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/entrant_email_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Enter email"
+            android:text="john@example.com" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Phone:"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/entrant_phone_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Enter phone"
+            android:text="123-456-7890" />
+    </LinearLayout>
 
     <Button
-        android:id="@+id/entrant_edit_button_profile"
-        android:layout_width="wrap_content"
+        android:id="@+id/entrant_save_profile"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit"
-        app:layout_constraintTop_toTopOf="@id/entrant_name_profile"
-        app:layout_constraintBottom_toBottomOf="@id/entrant_name_profile"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="8dp" />
-
-    <ListView
-        android:id="@+id/entrant_activity_profile"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:choiceMode="singleChoice"
-        android:listSelector="#999999"
-        app:layout_constraintTop_toBottomOf="@id/entrant_name_profile"
-        app:layout_constraintBottom_toTopOf="@id/entrant_delete_profile"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:text="Save Changes"
+        android:layout_marginBottom="12dp" />
 
     <Button
         android:id="@+id/entrant_delete_profile"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="DELETE PROFILE"
-        android:textStyle="bold"
-        android:backgroundTint="#FF0000"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@id/entrant_home_button_profile"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:text="Delete"
+        android:layout_marginBottom="12dp"
+        android:backgroundTint="@android:color/holo_red_light" />
 
     <Button
-        android:id="@+id/entrant_home_button_profile"
-        android:layout_width="0dp"
+        android:id="@+id/entrant_home_profile"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Home"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="Home" />
+</LinearLayout>

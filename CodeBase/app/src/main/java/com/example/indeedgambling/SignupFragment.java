@@ -6,10 +6,13 @@ import android.widget.*;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.lifecycle.ViewModelProvider;
+import android.util.Patterns;
 
 public class SignupFragment extends Fragment {
 
     private FirebaseViewModel firebaseVM;
+    private EntrantViewModel entrantVM;
+    private OrganizerViewModel organizerVM;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,10 +35,33 @@ public class SignupFragment extends Fragment {
             String p = pass.getText().toString().trim();
             String r = role.getSelectedItem().toString();
 
-            if (n.isEmpty() || e.isEmpty() || ph.isEmpty() || p.isEmpty()) {
-                Toast.makeText(getContext(), "Fill all fields", Toast.LENGTH_SHORT).show();
+
+            if (n.isEmpty()) {
+                name.setError("Name Required");
+                name.requestFocus();
                 return;
             }
+
+            if (p.isEmpty()) {
+                pass.setError("Password Required");
+                pass.requestFocus();
+                return;
+            }
+
+            if (e.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(e).matches()) {
+                email.setError("Valid Email required");
+                email.requestFocus();
+                return;
+            }
+
+            if (!ph.isEmpty()){
+                if (!Patterns.PHONE.matcher(ph).matches() || ph.length() < 10) {
+                    phone.setError("Valid phone number required");
+                    phone.requestFocus();
+                    return;
+                }
+            }
+
 
             String profileId = HashUtil.generateId(e, p); // email + password hash
             String passwordHash = HashUtil.sha256(p);
@@ -45,7 +71,22 @@ public class SignupFragment extends Fragment {
             firebaseVM.upsertProfile(prof,
                     () -> {
                         Toast.makeText(getContext(), "Account created", Toast.LENGTH_SHORT).show();
-                        NavHostFragment.findNavController(this).navigate(R.id.startUpFragment);
+                        if (r.equalsIgnoreCase("Entrant")) {
+                            entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
+
+                            entrantVM.setEntrant(prof);
+                            NavHostFragment.findNavController(this)
+                                    .navigate(R.id.action_signupFragment_to_entrantHomeFragment);
+
+                        } else if (r.equalsIgnoreCase("Organizer")) {
+                            organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
+
+                            organizerVM.setOrganizer(prof);
+                            NavHostFragment.findNavController(this)
+                                    .navigate(R.id.action_signupFragment_to_organizerHomeFragment);
+                        }
+
+
                     },
                     err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
             );

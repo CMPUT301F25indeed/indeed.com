@@ -27,7 +27,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 public class Entrant_HomeFragment extends Fragment {
 
     public Entrant_HomeFragment() {}
-
+    private EntrantViewModel entrantVM;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,18 +37,18 @@ public class Entrant_HomeFragment extends Fragment {
         ListView options = view.findViewById(R.id.entrant_home_buttons);
         Button LogoutButton = view.findViewById(R.id.entrant_logout_button_home);
         TextView greeting = view.findViewById(R.id.entrant_greeting_home);
-        String[] optionsString = {"Browse", "History", "Profile"};
+        String[] optionsString = {"Browse", "History", "Profile","Guidelines"};
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, optionsString);
         options.setAdapter(adapter);
 
-        EntrantViewModel EVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
+        EntrantViewModel entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
         FirebaseViewModel FVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
 
-//        Entrant e = EVM.getEntrant();
+        Profile e =  entrantVM.getCurrentEntrant();
 //        if (e != null && e.getPersonName() != null) {
-//            greeting.setText("Hi " + e.getPersonName());
+        greeting.setText("Hi " + e.getPersonName());
 //        }
 
         options.setOnItemClickListener((parent, itemView, position, id) -> {
@@ -58,6 +58,8 @@ public class Entrant_HomeFragment extends Fragment {
                 NavHostFragment.findNavController(this).navigate(R.id.action_entrantHomeFragment_to_entrant_HistoryFragment);
             } else if (position == 2) {
                 NavHostFragment.findNavController(this).navigate(R.id.action_entrantHomeFragment_to_entrant_ProfileFragment);
+            }else if (position == 3) {
+                NavHostFragment.findNavController(this).navigate(R.id.action_entrantHomeFragment_to_entrant_GuidelinesFragment);
             }
 
         });
