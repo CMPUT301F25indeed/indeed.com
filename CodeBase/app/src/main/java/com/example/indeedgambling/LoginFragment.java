@@ -53,7 +53,10 @@ public class LoginFragment extends Fragment {
 
                             // store in viewmodel
                             if (role.equalsIgnoreCase("Entrant")) {
-                                entrantVM.setEntrant(pObj);
+
+                                // stories entrant object ver
+                                Entrant entrant = q.getDocuments().get(0).toObject(Entrant.class);
+                                entrantVM.setEntrant(entrant);
                                 Navigation.findNavController(view).navigate(R.id.entrantHomeFragment);
                             }
                             else if (role.equalsIgnoreCase("Organizer")) {

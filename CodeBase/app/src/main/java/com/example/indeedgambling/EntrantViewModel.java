@@ -4,48 +4,42 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import kotlinx.coroutines.CoroutineScope;
-
 /**
  * ViewModel for Entrant user.
  *
  * Holds the logged-in Entrant profile and the currently selected Event.
  * Used to share data between fragments without passing arguments manually.
  *
- * LiveData makes sure UI updates automatically when values change.
+ * LiveData ensures UI updates automatically when data changes.
  */
 public class EntrantViewModel extends ViewModel {
 
     /** Stores the currently logged-in entrant profile */
-    private final MutableLiveData<Profile> entrant = new MutableLiveData<>();
+    private final MutableLiveData<Entrant> entrant = new MutableLiveData<>();
 
     /** Stores the event currently selected by entrant (when browsing or joining) */
     private final MutableLiveData<Event> selectedEvent = new MutableLiveData<>();
 
-
     /**
      * Sets the logged-in entrant profile
      *
-     * @param p Profile object of the logged-in entrant
+     * @param e Entrant object of the logged-in user
      */
-    // set currently logged in entrant
-    public void setEntrant(Profile p) {
-        entrant.setValue(p);
+    public void setEntrant(@NonNull Entrant e) {
+        entrant.setValue(e);
     }
 
     /**
-     * @return Profile of current logged-in entrant (non LiveData direct getter)
+     * @return Entrant object for direct access (not observable)
      */
-    // get currently logged in entrant
-    public Profile getCurrentEntrant() {
+    public Entrant getCurrentEntrant() {
         return entrant.getValue();
     }
 
     /**
      * @return LiveData for observing entrant profile changes from UI
      */
-    // LiveData getter if UI wants to observe
-    public MutableLiveData<Profile> getEntrant() {
+    public MutableLiveData<Entrant> getEntrant() {
         return entrant;
     }
 
@@ -54,7 +48,6 @@ public class EntrantViewModel extends ViewModel {
      *
      * @param e event selected
      */
-    // event selection storage
     public void setSelectedEvent(Event e) {
         selectedEvent.setValue(e);
     }
