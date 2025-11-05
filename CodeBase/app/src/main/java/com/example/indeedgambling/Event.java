@@ -2,15 +2,11 @@ package com.example.indeedgambling;
 
 import android.util.Log;
 
-import org.jetbrains.annotations.TestOnly;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.random.RandomGenerator;
 
 public class Event implements Serializable {
     private String eventId;
@@ -196,16 +192,6 @@ public class Event implements Serializable {
     Event() {
     }
 
-    //Returns the entrant names for the Entrants
-
-    /** Provides all Profile IDS for entrants who signed onto the Waitlist
-     *
-     * @return ArrayList of entrant's IDs
-     */
-    public ArrayList<String> getWaitingEntrantIDs() {
-        return waitingList;
-    }
-
     public String getEventName() {
         return eventName;
     }
@@ -262,7 +248,7 @@ public class Event implements Serializable {
         return Integer.toString(maxWaitingEntrants);
     }
 
-    public ArrayList<String> getInvitedList() {
+    public List<String> getInvitedList() {
         return invitedList;
     }
 
@@ -270,10 +256,17 @@ public class Event implements Serializable {
         this.invitedList = invitedList;
     }
 
+    /** Returns the events generated ID.
+     * @return Event ID hash
+     */
     public String getEventId() {
         return eventId;
     }
 
+    /** Sets the EventID
+     *  Needed by Firebase to create the object
+     * @return
+     */
     public void setEventId(String eventId) {
         this.eventId = eventId;
     }
@@ -327,7 +320,6 @@ public class Event implements Serializable {
     }
 
     /** Updates the status of the event to the current moment before returning.
-     *
      * @return Current Status of event
      */
     public String getStatus() {
@@ -493,5 +485,34 @@ public class Event implements Serializable {
      */
     public boolean hasLocation(){
         return !(location == null);
+    }
+
+    /** Moves a random selection of entrants from the waitlist to the invited list.
+     * @param number How many entrants to move.
+     */
+    public void InviteEntrants(int number){
+
+        Log.d("Invitation Debug", "number: ".concat(Integer.toString(number)));
+        Log.d("Invitation Debug", "waitlist: ".concat(waitingList.toString()));
+        Log.d("Invitation Debug", "invlist: ".concat(invitedList.toString()));
+
+
+        //Will stop moving entrants if there are no more to invite
+        for (int i = 0; i < number && !waitingList.isEmpty(); i++){
+            //Randomly choose an entrant
+
+            //Random is not allowed on a range of 1 int
+            if (waitingList.size() == 1){
+                invitedList.add(waitingList.remove(0));
+            }
+            else{
+
+                invitedList.add(waitingList.remove(new Random().nextInt(0,waitingList.size() - 1)));
+            }
+
+        }
+
+        Log.d("Invitation Debug", "waitlist after: ".concat(waitingList.toString()));
+        Log.d("Invitation Debug", "invlist after: ".concat(invitedList.toString()));
     }
 }

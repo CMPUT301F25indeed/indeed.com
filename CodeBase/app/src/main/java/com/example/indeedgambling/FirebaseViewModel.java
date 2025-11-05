@@ -280,6 +280,7 @@ public class FirebaseViewModel extends ViewModel {
         EVENTS.document(eventID).get().addOnSuccessListener(e ->{
             //Getting Profiles saved under event waitlist
             List<String> result = e.toObject(Event.class).getWaitingList();
+            Log.d("FIREBASE TEST", result.toString());
             if (!result.isEmpty()){
                 PROFILES.whereIn("profileId",result)
                         .orderBy("personName")
@@ -290,11 +291,10 @@ public class FirebaseViewModel extends ViewModel {
         }).addOnFailureListener(onErr::accept);
     }
 
-    /** Returns the
-     *
-     * @param eventID
-     * @param onResult
-     * @param onErr
+    /** Returns the Entrant objects of the invitedList from the ID for the event.
+     * @param eventID Event whose invitedList is being used
+     * @param onResult Action to take on success
+     * @param onErr Action to take on failure
      */
     public void getEventInvitedList(String eventID, Consumer<List<Profile>> onResult, Consumer<Exception> onErr){
         //Get the Profile IDs from the events waitlist
@@ -317,6 +317,7 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Invitations
     // -------------------------
+
 
     /**
      * Create or update invitation for entrant
