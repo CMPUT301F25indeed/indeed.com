@@ -581,4 +581,55 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onFailure::accept);
     }
 
+    // Simpler local filtering version (no Firestore index needed)
+    public void fetchEventsByCategoryAndDate(String category, Date start, Date end,
+                                             Consumer<List<Event>> onResult,
+                                             Consumer<Exception> onErr) {
+
+        Query query = EVENTS;
+
+        if (category != null && !category.equalsIgnoreCase("All")) {
+            query = query.whereEqualTo("category", category);
+        }
+
+        query.get()
+                .addOnSuccessListener(q -> {
+                    List<Event> allEvents = q.toObjects(Event.class);
+                    List<Event> filtered = new ArrayList<>();
+
+                    for (Event e : allEvents) {
+                        Date startTime = e.getEventStart();
+                        Date endTime = e.getEventEnd();
+                        boolean valid = true;
+
+                        if (start != null && startTime != null && startTime.before(start))
+                            valid = false;
+                        if (end != null && endTime != null && endTime.after(end))
+                            valid = false;
+
+                        if (valid) filtered.add(e);
+                    }
+
+                    onResult.accept(filtered);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+    //  Fetch all unique categories from "events" collection
+    public void fetchAllCategories(Consumer<List<String>> onResult, Consumer<Exception> onErr) {
+        EVENTS.get()
+                .addOnSuccessListener(q -> {
+                    List<String> categories = new ArrayList<>();
+                    for (DocumentSnapshot doc : q.getDocuments()) {
+                        String cat = doc.getString("category");
+                        if (cat != null && !categories.contains(cat)) {
+                            categories.add(cat);
+                        }
+                    }
+                    categories.add(0, "All");
+                    onResult.accept(categories);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
 }
