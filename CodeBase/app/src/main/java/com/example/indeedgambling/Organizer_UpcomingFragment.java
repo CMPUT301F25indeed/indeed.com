@@ -1,7 +1,15 @@
 package com.example.indeedgambling;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+
+
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,15 +25,19 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 public class Organizer_UpcomingFragment extends Fragment {
 
@@ -35,9 +47,16 @@ public class Organizer_UpcomingFragment extends Fragment {
     private View view;
     private ListView EventList;
 
+    private static final int PICK_IMAGE_REQUEST = 999;
+    private Uri selectedImageUri;
+    private Event currentEventForUpdate;
+
+    private Uri selectedPosterUri;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
         Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
@@ -77,6 +96,15 @@ public class Organizer_UpcomingFragment extends Fragment {
     private void showNewEventPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.make_event, null);
+
+        Button uploadPosterButton = popupView.findViewById(R.id.NewEventPopup_UploadPosterButton);
+        ImageView posterPreview = popupView.findViewById(R.id.NewEventPopup_PosterPreview);
+
+        uploadPosterButton.setOnClickListener(v -> {
+            Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            pickIntent.setType("image/*");
+            startActivityForResult(Intent.createChooser(pickIntent, "Select Event Poster"), PICK_IMAGE_REQUEST);
+        });
 
         EditText NameInput = popupView.findViewById(R.id.NewEventPopup_NameDialog);
         //US 02.01.04
@@ -167,6 +195,28 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
             Data.Add(CreatedEvent);
 
+            if (selectedImageUri != null) {
+                try {
+                    InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos); // compress to reduce size
+                    String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+
+                    CreatedEvent.setImageUrl(base64String);
+                    Data.updateEvent(CreatedEvent.getEventId(),
+                            Map.of("imageUrl", base64String),
+                            () -> Toast.makeText(requireContext(), "Poster saved!", Toast.LENGTH_SHORT).show(),
+                            e -> Toast.makeText(requireContext(), "Failed to save poster!", Toast.LENGTH_SHORT).show());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Toast.makeText(requireContext(), "Image convert failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
+
             //Displaying Organizer's events
             Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
                 Log.d("FIREBASE Error", "onCreateView: Error with Event results".concat(e.toString()));
@@ -187,7 +237,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Setting References
         TextView Description = popupView.findViewById(R.id.Organizer_EventPopup_Description);
-        ImageButton EventPoster = popupView.findViewById(R.id.Organizer_EventPopup_View_Event_Poster);
+
         ImageView QRCode = popupView.findViewById(R.id.Organizer_EventPopup_QR_Code);
         TextView RegPeriod = popupView.findViewById(R.id.Organizer_EventPopup_RegistrationPeriod);
         TextView RunTime = popupView.findViewById(R.id.Organizer_EventPopup_EventRuntime);
@@ -202,6 +252,48 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
         //TODO: EVENTPOSTER
+        Button updatePosterButton = popupView.findViewById(R.id.btnUpdatePoster);
+        if (updatePosterButton != null) {
+            updatePosterButton.setOnClickListener(v -> {
+                currentEventForUpdate = event;
+                Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                pickIntent.setType("image/*");
+                startActivityForResult(Intent.createChooser(pickIntent, "Select New Poster"), PICK_IMAGE_REQUEST);
+            });
+        }
+
+        Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
+
+        if (viewPosterButton != null) {
+            if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+                viewPosterButton.setVisibility(View.VISIBLE);
+                viewPosterButton.setOnClickListener(v -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                    ImageView posterView = new ImageView(requireContext());
+                    posterView.setAdjustViewBounds(true);
+                    posterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                    try {
+                        byte[] decoded = Base64.decode(event.getImageUrl(), Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                        posterView.setImageBitmap(bitmap);
+                    } catch (Exception e) {
+                        posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
+
+                    builder.setView(posterView)
+                            .setNegativeButton("Close", null)
+                            .show();
+                });
+            } else {
+                viewPosterButton.setVisibility(View.GONE);
+            }
+        }
+
+
+
+
+
         //TODO:QR CODE
 
 
@@ -251,11 +343,97 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
         });
 
+        if (updatePosterButton != null) {
+            updatePosterButton.setOnClickListener(v -> {
+                currentEventForUpdate = event;
+                Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                pickIntent.setType("image/*");
+                startActivityForResult(Intent.createChooser(pickIntent, "Select New Poster"), PICK_IMAGE_REQUEST);
+            });
+        }
+
+        if (viewPosterButton != null) {
+            if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
+                viewPosterButton.setVisibility(View.VISIBLE);
+                viewPosterButton.setOnClickListener(v -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                    ImageView posterView = new ImageView(requireContext());
+                    posterView.setAdjustViewBounds(true);
+                    posterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                    try {
+                        byte[] decoded = Base64.decode(event.getImageUrl(), Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                        posterView.setImageBitmap(bitmap);
+                    } catch (Exception e) {
+                        posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+                    }
+
+                    builder.setView(posterView)
+                            .setNegativeButton("Close", null)
+                            .show();
+                });
+            } else {
+                viewPosterButton.setVisibility(View.GONE);
+            }
+        }
+
         new AlertDialog.Builder(requireContext()).setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", ((dialog, which) -> {}))
                 .show();
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            selectedImageUri = data.getData();
+
+            if (selectedImageUri == null) {
+                Toast.makeText(requireContext(), "No image selected!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            //  Only handle updates here, not new-event uploads
+            if (currentEventForUpdate != null) {
+                try {
+                    InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 60, baos);
+                    String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
+
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("imageUrl", base64String);
+
+                    Data.updateEvent(currentEventForUpdate.getEventId(), update,
+                            () -> {
+                                Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
+
+                                // 🔄 Refresh the event from Firestore so Base64 stays in sync
+                                Data.getDb().collection("events")
+                                        .document(currentEventForUpdate.getEventId())
+                                        .get()
+                                        .addOnSuccessListener(doc -> {
+                                            Event updated = doc.toObject(Event.class);
+                                            if (updated != null) {
+                                                currentEventForUpdate.setImageUrl(updated.getImageUrl());
+                                            }
+                                        });
+                            },
+                            e -> Toast.makeText(requireContext(), "Failed to update poster!", Toast.LENGTH_SHORT).show());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(requireContext(), "Image convert failed", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }
+    }
+
 
     //US 02.02.01 && US 02.06.01
     private void WaitListPopup(Event event){

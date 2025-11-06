@@ -95,6 +95,38 @@
                     android:layout_columnWeight="1"
                     android:text="View Accepted List"/>
 
+                <!-- New: Update poster button inside grid -->
+                <Button
+                    android:id="@+id/btnUpdatePoster"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Update Event Poster"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="8dp"
+                    android:padding="10dp" />
+
+                <Button
+                    android:id="@+id/btnViewPoster"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="View Event Poster"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="8dp"
+                    android:padding="10dp" />
+
+
         </GridLayout>
+<!--        &lt;!&ndash; NEW: Button to update event poster &ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/Organizer_EventPopup_UpdatePosterButton"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Update Event Poster"-->
+<!--            android:textAllCaps="false"-->
+<!--            android:layout_marginTop="12dp"-->
+<!--            android:padding="10dp" />-->
+
     </LinearLayout>
 </ScrollView>
