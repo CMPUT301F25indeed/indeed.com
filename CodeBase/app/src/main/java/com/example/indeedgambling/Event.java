@@ -526,12 +526,12 @@ public class Event implements Serializable {
                 int random_index = new Random().nextInt(0,waitingList.size() - 1);
 
                 //Check if entrant not already invited. if so, remove from waitlist only.
-                if (invitedList.contains(waitingList.get(random_index))){
+                /*if (invitedList.contains(waitingList.get(random_index))){
                     waitingList.remove(random_index);
-                }
-                else{
+                }*/
+                //else{
                     invitedList.add(waitingList.remove(random_index));
-                }
+                //}
 
             }
         }
