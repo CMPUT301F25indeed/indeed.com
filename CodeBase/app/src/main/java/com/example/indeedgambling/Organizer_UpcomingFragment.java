@@ -200,20 +200,47 @@ public class Organizer_UpcomingFragment extends Fragment {
                     InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
+// prevent giant posters
+                    if (bitmap.getByteCount() > 2_000_000) { // only compress if very big
+                        bitmap = Bitmap.createScaledBitmap(bitmap, 600, 600, true);
+                        Toast.makeText(requireContext(), "Poster compressed to fit upload size.", Toast.LENGTH_SHORT).show();
+                    } else if (bitmap.getByteCount() > 800_000) { // moderate resize
+                        bitmap = Bitmap.createScaledBitmap(bitmap, 800, 800, true);
+                    }
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos); // compress to reduce size
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
-                    CreatedEvent.setImageUrl(base64String);
-                    Data.updateEvent(CreatedEvent.getEventId(),
-                            Map.of("imageUrl", base64String),
-                            () -> Toast.makeText(requireContext(), "Poster saved!", Toast.LENGTH_SHORT).show(),
-                            e -> Toast.makeText(requireContext(), "Failed to save poster!", Toast.LENGTH_SHORT).show());
+                    // Create image data document
+                    Map<String, Object> imageData = new HashMap<>();
+                    imageData.put("eventId", CreatedEvent.getEventId());
+                    imageData.put("uploaderId", orgID);
+                    imageData.put("url", base64String);
+                    imageData.put("uploadedAt", new Date());
+                    imageData.put("approved", true);
+
+                    // Store Base64 image inside /images collection
+                    Data.getDb().collection("images")
+                            .add(imageData)
+                            .addOnSuccessListener(docRef -> {
+                                String imageDocId = docRef.getId();
+
+                                // Save imageDocId into event.imageUrl
+                                Data.updateEvent(CreatedEvent.getEventId(),
+                                        Map.of("imageUrl", imageDocId),
+                                        () -> {
+                                            CreatedEvent.setImageUrl(imageDocId);
+                                            Toast.makeText(requireContext(), "Poster saved!", Toast.LENGTH_SHORT).show();
+                                        },
+                                        e -> Toast.makeText(requireContext(), "Failed to link poster!", Toast.LENGTH_SHORT).show());
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     Toast.makeText(requireContext(), "Image convert failed", Toast.LENGTH_SHORT).show();
                 }
             }
+
 
 
 
@@ -263,32 +290,52 @@ public class Organizer_UpcomingFragment extends Fragment {
         }
 
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
-
         if (viewPosterButton != null) {
             if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
                 viewPosterButton.setVisibility(View.VISIBLE);
                 viewPosterButton.setOnClickListener(v -> {
+                    String imageDocId = event.getImageUrl();
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                     ImageView posterView = new ImageView(requireContext());
                     posterView.setAdjustViewBounds(true);
-                    posterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    posterView.setImageResource(android.R.drawable.stat_sys_download);
+                    builder.setView(posterView);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
 
-                    try {
-                        byte[] decoded = Base64.decode(event.getImageUrl(), Base64.DEFAULT);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-                        posterView.setImageBitmap(bitmap);
-                    } catch (Exception e) {
-                        posterView.setImageResource(android.R.drawable.ic_menu_report_image);
-                    }
+                    // Fetch image from Firestore /images
+                    Data.getDb().collection("images").document(imageDocId)
+                            .addSnapshotListener((doc, err) -> {
+                                if (!dialog.isShowing()) return;
+                                if (err != null || doc == null || !doc.exists()) {
+                                    Toast.makeText(requireContext(), "Poster not found!", Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                    return;
+                                }
 
-                    builder.setView(posterView)
-                            .setNegativeButton("Close", null)
-                            .show();
+                                String base64 = doc.getString("url");
+                                if (base64 == null || base64.isEmpty()) {
+                                    Toast.makeText(requireContext(), "Poster empty!", Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                    return;
+                                }
+
+                                try {
+                                    byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+                                    Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                                    posterView.setImageBitmap(bitmap);
+                                } catch (Exception e) {
+                                    posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+                                    Toast.makeText(requireContext(), "Decode failed!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 });
             } else {
                 viewPosterButton.setVisibility(View.GONE);
             }
         }
+
 
 
 
@@ -343,41 +390,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
         });
 
-        if (updatePosterButton != null) {
-            updatePosterButton.setOnClickListener(v -> {
-                currentEventForUpdate = event;
-                Intent pickIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                pickIntent.setType("image/*");
-                startActivityForResult(Intent.createChooser(pickIntent, "Select New Poster"), PICK_IMAGE_REQUEST);
-            });
-        }
-
-        if (viewPosterButton != null) {
-            if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
-                viewPosterButton.setVisibility(View.VISIBLE);
-                viewPosterButton.setOnClickListener(v -> {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                    ImageView posterView = new ImageView(requireContext());
-                    posterView.setAdjustViewBounds(true);
-                    posterView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
-                    try {
-                        byte[] decoded = Base64.decode(event.getImageUrl(), Base64.DEFAULT);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-                        posterView.setImageBitmap(bitmap);
-                    } catch (Exception e) {
-                        posterView.setImageResource(android.R.drawable.ic_menu_report_image);
-                    }
-
-                    builder.setView(posterView)
-                            .setNegativeButton("Close", null)
-                            .show();
-                });
-            } else {
-                viewPosterButton.setVisibility(View.GONE);
-            }
-        }
-
         new AlertDialog.Builder(requireContext()).setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", ((dialog, which) -> {}))
@@ -402,29 +414,39 @@ public class Organizer_UpcomingFragment extends Fragment {
                     InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
+                    if (bitmap.getByteCount() > 2_000_000) { // only compress if very big
+                        bitmap = Bitmap.createScaledBitmap(bitmap, 600, 600, true);
+                        Toast.makeText(requireContext(), "Poster compressed to fit upload size.", Toast.LENGTH_SHORT).show();
+                    } else if (bitmap.getByteCount() > 800_000) { // moderate resize
+                        bitmap = Bitmap.createScaledBitmap(bitmap, 800, 800, true);
+                    }
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 60, baos);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
-                    Map<String, Object> update = new HashMap<>();
-                    update.put("imageUrl", base64String);
+                    // Upload updated image to /images collection
+                    Map<String, Object> imageData = new HashMap<>();
+                    imageData.put("eventId", currentEventForUpdate.getEventId());
+                    imageData.put("uploaderId", orgID);
+                    imageData.put("url", base64String);
+                    imageData.put("uploadedAt", new Date());
+                    imageData.put("approved", true);
 
-                    Data.updateEvent(currentEventForUpdate.getEventId(), update,
-                            () -> {
-                                Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
+                    Data.getDb().collection("images")
+                            .add(imageData)
+                            .addOnSuccessListener(docRef -> {
+                                String imageDocId = docRef.getId();
 
-                                // 🔄 Refresh the event from Firestore so Base64 stays in sync
-                                Data.getDb().collection("events")
-                                        .document(currentEventForUpdate.getEventId())
-                                        .get()
-                                        .addOnSuccessListener(doc -> {
-                                            Event updated = doc.toObject(Event.class);
-                                            if (updated != null) {
-                                                currentEventForUpdate.setImageUrl(updated.getImageUrl());
-                                            }
-                                        });
-                            },
-                            e -> Toast.makeText(requireContext(), "Failed to update poster!", Toast.LENGTH_SHORT).show());
+                                Data.updateEvent(currentEventForUpdate.getEventId(),
+                                        Map.of("imageUrl", imageDocId),
+                                        () -> {
+                                            currentEventForUpdate.setImageUrl(imageDocId);
+                                            Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
+                                        },
+                                        e -> Toast.makeText(requireContext(), "Failed to link new poster!", Toast.LENGTH_SHORT).show());
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show());
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(requireContext(), "Image convert failed", Toast.LENGTH_SHORT).show();
@@ -471,7 +493,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                     int number;
                     try {
                         number = Integer.parseInt(numberInp.getText().toString().trim());
-                    //If a non-int was passed, do nothing
+                        //If a non-int was passed, do nothing
                     } catch (Exception e) {
                         number = 0;
                         //throw new RuntimeException(e);
