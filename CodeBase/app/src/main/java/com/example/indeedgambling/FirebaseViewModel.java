@@ -602,6 +602,12 @@ public class FirebaseViewModel extends ViewModel {
                         Date endTime = e.getEventEnd();
                         boolean valid = true;
 
+                        // Only show OPEN events
+                        if (e.getStatus() == null || !e.getStatus().equalsIgnoreCase("Open")) {
+                            valid = false;
+                        }
+
+                        // Date range filters
                         if (start != null && startTime != null && startTime.before(start))
                             valid = false;
                         if (end != null && endTime != null && endTime.after(end))
@@ -609,6 +615,7 @@ public class FirebaseViewModel extends ViewModel {
 
                         if (valid) filtered.add(e);
                     }
+
 
                     onResult.accept(filtered);
                 })
