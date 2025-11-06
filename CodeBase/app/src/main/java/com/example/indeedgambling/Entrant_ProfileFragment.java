@@ -142,7 +142,7 @@ public class Entrant_ProfileFragment extends Fragment {
             if (!newEmail.equals(e.getEmail())) {
                 fvm.checkEmailExists(newEmail, exists -> {
                     if (exists) {
-                        emailEdit.setError("Valid email required");
+                        emailEdit.setError("Email already in use");
                         emailEdit.requestFocus();
                     } else {
                         performProfileUpdate(e, profileId, newName, newEmail, newPhone, updates);
