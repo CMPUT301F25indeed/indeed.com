@@ -15,7 +15,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="View Event Poster"
-
             android:contentDescription="Event Poster"/>
 
         <ImageView
@@ -65,31 +64,35 @@
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
             android:orientation="horizontal"
             android:columnCount="2">
                 <Button
                     android:id="@+id/Organizer_EventPopup_WaitList"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
                     android:text="View Waiting List">
                 </Button>
 
                 <Button
                     android:id="@+id/Organizer_EventPopup_InvList"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
                     android:text="View Invited List">
                 </Button>
 
                 <Button
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
                     android:text="View Cancelled List"/>
 
                 <Button
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
                     android:text="View Accepted List"/>
 
         </GridLayout>

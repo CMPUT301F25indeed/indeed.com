@@ -30,7 +30,7 @@ public class Event implements Serializable {
     private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs
     private ArrayList<String> invitedList = new ArrayList<String>(); // Entrant IDs
     private ArrayList<String> cancelledEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
-
+    private ArrayList<String> acceptedEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
 
     /**
      * Creates an event. Enforces Open is before Closed with an IllegalArgumentException
@@ -419,7 +419,21 @@ public class Event implements Serializable {
         this.cancelledEntrants = cancelledEntrants;
     }
 
-//---------------------------------------------------- Helpers ---------------------------//
+    /**
+     * @return the current ID list of accepted Entrants
+     */
+    public ArrayList<String> getAcceptedEntrants() {
+        return acceptedEntrants;
+    }
+
+    /** Overwrites the local Event's list of AcceptedEntrants with the passed Argument
+     * @param acceptedEntrants Overwrites the object's acceptedEntrants list.
+     */
+    public void setAcceptedEntrants(ArrayList<String> acceptedEntrants) {
+        this.acceptedEntrants = acceptedEntrants;
+    }
+
+    //---------------------------------------------------- Helpers ---------------------------//
     /** Helper function that checks if RIGHT NOW is before reg period opens
      * @return True if before Reg Open, false otherwise
      */
@@ -502,23 +516,24 @@ public class Event implements Serializable {
 
         //Will stop moving entrants if there are no more to invite
         for (int i = 0; i < number && !waitingList.isEmpty(); i++){
-            //Randomly choose an entrant
-            int random_index = new Random().nextInt(0,waitingList.size() - 1);
-            //Check if entrant not already invited.
-            if (invitedList.contains(waitingList.get(random_index))){
-                throw new RuntimeException("User in two waitlist and invitedlist!");
-            }
-
 
             //Random is not allowed on a range of 1 int
             if (waitingList.size() == 1){
                 invitedList.add(waitingList.remove(0));
             }
             else{
-                //Check if the invitedList has the entrant already.
-                invitedList.add(waitingList.remove(random_index));
-            }
+                //Randomly choose an entrant
+                int random_index = new Random().nextInt(0,waitingList.size() - 1);
 
+                //Check if entrant not already invited. if so, remove from waitlist only.
+                if (invitedList.contains(waitingList.get(random_index))){
+                    waitingList.remove(random_index);
+                }
+                else{
+                    invitedList.add(waitingList.remove(random_index));
+                }
+
+            }
         }
     }
 
