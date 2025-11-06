@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
         <ImageButton
             android:id="@+id/Organizer_EventPopup_View_Event_Poster"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="View Event Poster"
-
             android:contentDescription="Event Poster"/>
 
         <ImageView
@@ -18,6 +22,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:contentDescription="Event QR Code"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:text="Description: "
+                    android:textStyle="italic">
+                </TextView>
+
+                <TextView
+                    android:id="@+id/Organizer_EventPopup_Description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
@@ -39,95 +61,40 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/Organizer_EventPopup_WaitList"
+        <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="View Waiting List">
-        </Button>
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:columnCount="2">
+                <Button
+                    android:id="@+id/Organizer_EventPopup_WaitList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="View Waiting List">
+                </Button>
 
-</LinearLayout>
-<!--The following is amrit ver of this xml-->
-<!--<ScrollView-->
-<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content">-->
+                <Button
+                    android:id="@+id/Organizer_EventPopup_InvList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="View Invited List">
+                </Button>
 
-<!--    <LinearLayout-->
-<!--        android:padding="20dp"-->
-<!--        android:orientation="vertical"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content">-->
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="View Cancelled List"/>
 
-<!--        <TextView-->
-<!--            android:id="@+id/org_popup_title"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Event Title"-->
-<!--            android:textStyle="bold"-->
-<!--            android:textSize="18sp"/>-->
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="View Accepted List"/>
 
-<!--        <TextView-->
-<!--            android:id="@+id/org_popup_desc"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Description"-->
-<!--            android:layout_marginTop="4dp"/>-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/org_popup_poster"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="150dp"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            android:src="@android:drawable/ic_menu_gallery"-->
-<!--            android:contentDescription="Poster"/>-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/org_popup_qrcode"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="150dp"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            android:src="@android:drawable/ic_menu_share"-->
-<!--            android:contentDescription="QR Code"/>-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/org_popup_reg_period"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Registration:"-->
-<!--            android:layout_marginTop="6dp"/>-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/org_popup_runtime"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Runtime:"/>-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/org_popup_location"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Location:"/>-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/org_popup_capacity"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Capacity:"/>-->
-
-<!--        <Button-->
-<!--            android:id="@+id/org_popup_waitinglist_btn"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="View Waiting List"-->
-<!--            android:layout_marginTop="10dp"/>-->
-
-<!--        <Button-->
-<!--            android:id="@+id/org_popup_close_btn"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Close"-->
-<!--            android:layout_marginTop="6dp"/>-->
-
-<!--    </LinearLayout>-->
-<!--</ScrollView>-->
+        </GridLayout>
+    </LinearLayout>
+</ScrollView>

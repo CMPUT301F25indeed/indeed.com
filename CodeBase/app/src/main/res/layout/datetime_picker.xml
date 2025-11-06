@@ -4,12 +4,12 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:rowCount="1"
-        android:paddingEnd="10sp">
+        android:layout_marginTop="-30sp"
+        android:layout_marginBottom="-30sp">
 
         <DatePicker
             android:id="@+id/DateTimePicker_DateDialog"
@@ -17,18 +17,19 @@
             android:layout_height="wrap_content"
             android:calendarViewShown="false"
             android:datePickerMode="spinner"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
-            android:layout_marginLeft="-30sp"
-            android:layout_marginRight="-30sp"/>
+            android:scaleX="0.65"
+            android:scaleY="0.65"
+            android:layout_marginLeft="-40sp"
+            android:layout_marginRight="-40sp"/>
 
         <TimePicker
             android:id="@+id/DateTimePicker_TimeDialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
-            android:timePickerMode="spinner"/>
+            android:scaleX="0.65"
+            android:scaleY="0.65"
+            android:timePickerMode="spinner"
+            android:layout_marginLeft="-50sp"/>
 
     </GridLayout>
 
