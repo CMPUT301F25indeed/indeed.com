@@ -127,6 +127,7 @@
         android:id="@+id/organizerHomeFragment"
         android:name="com.example.indeedgambling.Organizer_HomeFragment"
         android:label="Organizer Home">
+
         <action
             android:id="@+id/action_orgHome_to_browse"
             app:destination="@id/organizerBrowseFragment" />
