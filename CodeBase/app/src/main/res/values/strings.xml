@@ -12,11 +12,17 @@
         <item>Entrant</item>
         <item>Organizer</item>
     </string-array>
-    <string name="Guidelines_for_Entrant">1. Follow the event rules carefully.\n\n
-2. Respect other participants — no cheating or harassment.\n\n
-3. Ensure you have a stable internet connection before joining any event.\n\n
-4. Notification settings will help you stay updated — enable them in your profile.\n\n
-5. Contact support if you encounter any technical issues.\n\n
-6. Have fun and good luck!</string>
+    <string name="Guidelines_for_Entrant">
+1. Ensure your profile information (name, email, phone) is accurate and up to date. This is how organizers will contact you.\n\n
+2. You may only join the waiting list once per event. Duplicate entries will be removed to ensure fairness.\n\n
+3. Joining a waiting list does not guarantee selection. Entrants are randomly chosen after the registration period ends.\n\n
+4. If you are selected ("win" the lottery), confirm or decline your spot promptly to allow others a fair chance.\n\n
+5. Enable notifications in your profile view to stay informed about event results and updates.\n\n
+6. Respect event rules, organizers, and other entrants. Harassment or misuse of the app will result in removal.\n\n
+7. If you need to cancel or update your participation, do so as soon as possible.\n\n
+8. Always verify event details, such as time and location, before attending.\n\n
+9. Participate responsibly and enjoy the community events fairly!
+</string>
+
 
 </resources>
