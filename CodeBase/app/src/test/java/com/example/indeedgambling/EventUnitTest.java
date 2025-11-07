@@ -6,11 +6,18 @@ import java.util.*;
 
 class EventUnitTest {
 
+    Event MockEvent(){
+        Date now = new Date();
+        Date past = new Date(now.getTime() - 1);
+        Date later = new Date(now.getTime() + 10000);
+        return new Event("SampleEvent", past, later, past, later, "ORG1", "desc", "criteria", "Music", "qr.png", "location");
+
+        //Phony waitlist implementon next
+    }
+
     @Test
     void testToStringReturnsName() {
-        Date now = new Date();
-        Date later = new Date(now.getTime() + 10000);
-        Event e = new Event("SampleEvent", now, later, now, later, "ORG1", "desc", "criteria", "Music", "qr.png");
+        Event e = MockEvent();
         assertEquals("SampleEvent", e.toString());
     }
 
@@ -24,12 +31,66 @@ class EventUnitTest {
 
     @Test
     void testRegistrationOpenTrue() {
-        Date now = new Date();
-        Event e = new Event("OpenEvent",
-                new Date(now.getTime() - 1000 * 60),
-                new Date(now.getTime() + 1000 * 60),
-                now, new Date(now.getTime() + 1000 * 120),
-                "ORG2", "desc", "criteria", "Music", "qr.png");
+        Event e = MockEvent();
         assertTrue(e.RegistrationOpen());
+    }
+
+    @Test
+    void testOpenStatus(){
+        Date now = new Date();
+        Event e = MockEvent();
+        assertEquals("Open",e.getStatus());
+
+    }
+
+    @Test
+    void testClosedStatus(){
+        Date now = new Date();
+        Event e = MockEvent();
+        //Setting registration in the past.
+        e.setRegistrationStart(new Date(now.getTime() - 10));
+        e.setRegistrationEnd(new Date(now.getTime() - 5));
+        assertEquals("Closed",e.getStatus());
+
+    }
+
+    @Test
+    void testCompletedStatus(){
+        Date now = new Date();
+        Date recent = new Date(now.getTime() - 5);
+        Date Before = new Date(now.getTime() - 10);
+        Event e = MockEvent();
+
+        //Setting event to be ended already.
+        e.setEventStart(Before);
+        e.setEventEnd(recent);
+        e.setRegistrationStart(Before);
+        e.setRegistrationEnd(recent);
+
+        assertEquals("Completed",e.getStatus());
+    }
+
+    @Test
+    void testPlannedStatus(){
+        Date now = new Date();
+        Event e = MockEvent();
+
+        //Setting registration in the future
+        e.setRegistrationStart(new Date(now.getTime() + 20));
+        e.setRegistrationEnd(new Date(e.getRegistrationStart().getTime() + 20));
+
+        assertEquals("Planned",e.getStatus());
+    }
+
+    @Test
+    void testUnknownStatus(){
+        Date now = new Date();
+        Event e = MockEvent();
+
+        //Setting registration in the future
+        e.setRegistrationEnd(new Date(now.getTime() + 20));
+        e.setRegistrationStart(new Date(now.getTime() + 40));
+
+        assertEquals("Planned",e.getStatus());
     }
 }

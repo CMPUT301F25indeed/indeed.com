@@ -387,7 +387,12 @@ public class Event implements Serializable {
     }
 
     /** Updates the status of the event to the current moment before returning.
-     * @return Current Status of event
+     * Registration not yet open: Planned
+     * Registration Open and not yet closed: Open
+     * After Registration end and before Event end: Closed
+     * After Event End: Completed
+     * Otherwise: Unknown
+     * @return Current Status of event, based on the above
      */
     public String getStatus() {
         Date now = new Date();
