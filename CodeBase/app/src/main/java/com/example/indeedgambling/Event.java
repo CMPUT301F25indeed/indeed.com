@@ -348,26 +348,31 @@ public class Event implements Serializable {
      * @return Current Status of event
      */
     public String getStatus() {
-        //Checks if reg period is now
-        if (this.RegistrationOpen()){
-            status = "Open";
+        Date now = new Date();
+
+        if (registrationStart == null || registrationEnd == null || eventStart == null || eventEnd == null) {
+            return "Unknown";
         }
-        else if (!this.RegistrationOpen()){
-            status = "Closed";
+
+        if (now.before(registrationStart)) {
+            status = "Planned"; // registration not started
         }
-        //Checks if reg period is upcoming
-        else if (this.BeforeRegPeriod()){
-            status = "Planned";
+        else if (now.after(registrationStart) && now.before(registrationEnd)) {
+            status = "Open"; // registration ongoing
         }
-        //Checks if reg period has passed, and there are no invited entrants
-        else if (this.AfterRegPeriod() && !invitedList.isEmpty()){
-            status = "Completed";
+        else if (now.after(registrationEnd) && now.before(eventEnd)) {
+            status = "Closed"; // registration closed, event not yet done
         }
-        else{
-            status = "Completed";
+        else if (now.after(eventEnd)) {
+            status = "Completed"; // event is over
         }
+        else {
+            status = "Unknown";
+        }
+
         return status;
     }
+
 
     public void setStatus(String status) {
         this.status = status;
