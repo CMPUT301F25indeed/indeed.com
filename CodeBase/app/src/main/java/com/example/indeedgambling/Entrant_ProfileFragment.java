@@ -160,9 +160,34 @@ public class Entrant_ProfileFragment extends Fragment {
         );
 
         // delete
-        deleteButton.setOnClickListener(b ->
-                Toast.makeText(getContext(), "Delete TBD", Toast.LENGTH_SHORT).show()
-        );
+        deleteButton.setOnClickListener(v -> {
+            if (e == null || profileId == null) {
+                Toast.makeText(getContext(), "No profile loaded", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            new android.app.AlertDialog.Builder(getContext())
+                    .setTitle("Confirm Delete")
+                    .setMessage("Are you sure you want to delete your profile? This action cannot be undone.")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        fvm.deleteProfileAndCleanOpenEvents(
+                                e, // pass the full entrant object (Profile-compatible)
+                                () -> {
+                                    entrantVM.setEntrant(null);
+                                    Toast.makeText(getContext(), "Profile deleted successfully", Toast.LENGTH_SHORT).show();
+                                    NavHostFragment.findNavController(this)
+                                            .navigate(R.id.action_entrant_ProfileFragment_to_startUpFragment);
+                                },
+                                err -> Toast.makeText(getContext(),
+                                        "Failed to delete: " + err.getMessage(),
+                                        Toast.LENGTH_LONG).show()
+                        );
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
+
+
 
         // matches colors to noti settings
         updateSwitchColor(notiSwitch, notiSwitch.isChecked());

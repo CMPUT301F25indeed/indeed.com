@@ -76,6 +76,7 @@
         <action
             android:id="@+id/action_entrantHomeFragment_to_entrant_GuidelinesFragment"
             app:destination="@id/entrant_GuidelinesFragment" />
+
     </fragment>
 
     <fragment
@@ -120,6 +121,9 @@
         <action
             android:id="@+id/action_entrant_ProfileFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_entrant_ProfileFragment_to_startUpFragment"
+            app:destination="@id/startUpFragment" />
     </fragment>
 
     <!-- ORGANIZER -->
