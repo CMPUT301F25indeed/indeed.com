@@ -41,6 +41,7 @@
                     android:layout_height="wrap_content"/>
         </LinearLayout>
 
+
         <TextView
             android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
             android:layout_width="match_parent"
@@ -118,7 +119,19 @@
 
 
         </GridLayout>
-<!--        &lt;!&ndash; NEW: Button to update event poster &ndash;&gt;-->
+
+        <Button
+            android:id="@+id/btnSendNotifications"
+            android:layout_width="173dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="84dp"
+            android:padding="16dp"
+            android:text="Send Notifications"
+            android:textColor="@android:color/white" />
+
+        <!--        &lt;!&ndash; NEW: Button to update event poster &ndash;&gt;-->
 <!--        <Button-->
 <!--            android:id="@+id/Organizer_EventPopup_UpdatePosterButton"-->
 <!--            android:layout_width="match_parent"-->
