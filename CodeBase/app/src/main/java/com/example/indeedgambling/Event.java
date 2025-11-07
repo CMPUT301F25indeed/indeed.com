@@ -486,7 +486,7 @@ public class Event implements Serializable {
     public boolean atCapacity() {
         // 0 == unlimited, and thus event cannot be at capacity.
         // If limit is met, we cannot fit anybody more, and are at capacity.
-        if (this.maxWaitingEntrants == 0 || (this.maxWaitingEntrants <= this.waitingList.size())){
+        if (this.maxWaitingEntrants == 0 || (this.maxWaitingEntrants >= this.waitingList.size())){
             return false;
         }
         return true;
