@@ -1,5 +1,7 @@
 package com.example.indeedgambling;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -80,6 +82,7 @@ public class OrganizerViewModel extends ViewModel {
         notification.put("type", "waiting_list");
         notification.put("status", "sent");
 
+        Log.d("FIREBASE", "Sending notification to Firestore: " + notification);
         db.collection("notifications").add(notification)
                 .addOnSuccessListener(documentReference -> onSuccess.onSuccess(null))
                 .addOnFailureListener(onFailure);
