@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav"
-    app:startDestination="@id/startUpFragment">
+    app:startDestination="@id/startUpFragment" >
 
     <!-- STARTUP -->
     <fragment
         android:id="@+id/startUpFragment"
         android:name="com.example.indeedgambling.StartUpFragment"
-        android:label="Start Up">
+        android:label="Start Up" >
+
         <action
             android:id="@+id/action_startUp_to_adminHome"
             app:destination="@id/adminHomeFragment" />
@@ -25,13 +26,15 @@
         <action
             android:id="@+id/action_startUpFragment_to_signupFragment"
             app:destination="@id/signupFragment" />
+
     </fragment>
 
     <!-- LOGIN -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.indeedgambling.LoginFragment"
-        android:label="Login">
+        android:label="Login" >
+
         <action
             android:id="@+id/action_loginFragment_to_adminHomeFragment"
             app:destination="@id/adminHomeFragment" />
@@ -41,96 +44,125 @@
         <action
             android:id="@+id/action_loginFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
+
     </fragment>
 
     <!-- SIGNUP -->
     <fragment
         android:id="@+id/signupFragment"
         android:name="com.example.indeedgambling.SignupFragment"
-        android:label="Signup">
+        android:label="Signup" >
+
         <action
             android:id="@+id/action_signupFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
         <action
             android:id="@+id/action_signupFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
-    </fragment>
 
-    <!-- ENTRANT -->
+    </fragment>
     <fragment
         android:id="@+id/entrantHomeFragment"
         android:name="com.example.indeedgambling.Entrant_HomeFragment"
-        android:label="Entrant Home">
+        android:label="Entrant Home" >
+
         <action
-            android:id="@+id/action_entrantHomeFragment_to_entrant_BrowseFragment"
-            app:destination="@id/entrant_BrowseFragment" />
+            android:id="@+id/action_entrantHomeFragment_to_entrantBrowseFragment"
+            app:destination="@id/entrantBrowseFragment" />
         <action
-            android:id="@+id/action_entrantHomeFragment_to_entrant_HistoryFragment"
-            app:destination="@id/entrant_HistoryFragment" />
+            android:id="@+id/action_entrantHomeFragment_to_entrantHistoryFragment"
+            app:destination="@id/entrantHistoryFragment" />
         <action
-            android:id="@+id/action_entrantHomeFragment_to_entrant_ProfileFragment"
-            app:destination="@id/entrant_ProfileFragment" />
+            android:id="@+id/action_entrantHomeFragment_to_entrantProfileFragment"
+            app:destination="@id/entrantProfileFragment" />
         <action
             android:id="@+id/action_entrantHomeFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
         <action
-            android:id="@+id/action_entrantHomeFragment_to_entrant_GuidelinesFragment"
-            app:destination="@id/entrant_GuidelinesFragment" />
+            android:id="@+id/action_entrantHomeFragment_to_entrantGuidelinesFragment"
+            app:destination="@id/entrantGuidelinesFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_entrantNotificationsFragment"
+            app:destination="@id/entrantNotificationsFragment" />
 
     </fragment>
 
+    <!-- THIS IS THE FRAGMENT I ADDED TO FIX THE ERROR -->
     <fragment
         android:id="@+id/eventDetailsFragment"
         android:name="com.example.indeedgambling.EventDetailsFragment"
         android:label="Event Details"
-        tools:layout="@layout/fragment_event_details">
-
+        tools:layout="@layout/fragment_event_details" >
         <action
-            android:id="@+id/action_eventDetailsFragment_to_entrant_BrowseFragment"
-            app:destination="@id/entrant_BrowseFragment" />
+            android:id="@+id/action_eventDetailsFragment_to_entrantBrowseFragment"
+            app:destination="@id/entrantBrowseFragment" />
     </fragment>
 
-
-
     <fragment
-        android:id="@+id/entrant_BrowseFragment"
+        android:id="@+id/entrantBrowseFragment"
         android:name="com.example.indeedgambling.Entrant_BrowseFragment"
-        android:label="Entrant Browse">
+        android:label="Entrant Browse" >
+
         <action
-            android:id="@+id/action_entrant_BrowseFragment_to_entrantHomeFragment"
+            android:id="@+id/action_entrantBrowseFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
         <action
-            android:id="@+id/action_entrant_BrowseFragment_to_eventDetailsFragment"
+            android:id="@+id/action_entrantBrowseFragment_to_eventDetailsFragment"
             app:destination="@id/eventDetailsFragment" />
 
     </fragment>
-
     <fragment
-        android:id="@+id/entrant_HistoryFragment"
+        android:id="@+id/entrantHistoryFragment"
         android:name="com.example.indeedgambling.Entrant_HistoryFragment"
-        android:label="Entrant History">
+        android:label="Entrant History" >
+
         <action
-            android:id="@+id/action_entrant_HistoryFragment_to_entrantHomeFragment"
+            android:id="@+id/action_entrantHistoryFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/entrantProfileFragment"
+        android:name="com.example.indeedgambling.Entrant_ProfileFragment"
+        android:label="Entrant Profile" >
+
+        <action
+            android:id="@+id/action_entrantProfileFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_entrantProfileFragment_to_startUpFragment"
+            app:destination="@id/startUpFragment" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/entrantGuidelinesFragment"
+        android:name="com.example.indeedgambling.Entrant_GuidelinesFragment"
+        android:label="Entrant Guidelines" >
+
+        <action
+            android:id="@+id/action_entrantGuidelinesFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+
     </fragment>
 
+    <!-- Notifications -->
     <fragment
-        android:id="@+id/entrant_ProfileFragment"
-        android:name="com.example.indeedgambling.Entrant_ProfileFragment"
-        android:label="Entrant Profile">
+        android:id="@+id/entrantNotificationsFragment"
+        android:name="com.example.indeedgambling.EntrantNotificationsFragment"
+        android:label="Entrant Notifications"
+        tools:layout="@layout/fragment_entrant_notifications" >
+
         <action
-            android:id="@+id/action_entrant_ProfileFragment_to_entrantHomeFragment"
+            android:id="@+id/action_entrantNotificationsFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
-        <action
-            android:id="@+id/action_entrant_ProfileFragment_to_startUpFragment"
-            app:destination="@id/startUpFragment" />
+
     </fragment>
 
     <!-- ORGANIZER -->
     <fragment
         android:id="@+id/organizerHomeFragment"
         android:name="com.example.indeedgambling.Organizer_HomeFragment"
-        android:label="Organizer Home">
+        android:label="Organizer Home" >
 
         <action
             android:id="@+id/action_orgHome_to_browse"
@@ -147,61 +179,67 @@
         <action
             android:id="@+id/action_orgHome_to_start"
             app:destination="@id/startUpFragment" />
-    </fragment>
 
+    </fragment>
     <fragment
         android:id="@+id/organizerBrowseFragment"
         android:name="com.example.indeedgambling.Organizer_BrowseFragment"
-        android:label="Organizer Browse">
+        android:label="Organizer Browse" >
+
         <action
             android:id="@+id/action_organizerBrowseFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
-    </fragment>
 
+    </fragment>
     <fragment
         android:id="@+id/organizerUpcomingFragment"
         android:name="com.example.indeedgambling.Organizer_UpcomingFragment"
-        android:label="Organizer Upcoming">
+        android:label="Organizer Upcoming" >
+
         <action
             android:id="@+id/action_organizerUpcomingFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
-    </fragment>
 
+    </fragment>
     <fragment
         android:id="@+id/organizerHistoryFragment"
         android:name="com.example.indeedgambling.Organizer_HistoryFragment"
-        android:label="Organizer History">
+        android:label="Organizer History" >
+
         <action
             android:id="@+id/action_organizerHistoryFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
+
     </fragment>
     <!-- NOTIFICATION SENDER -->
     <fragment
         android:id="@+id/notificationSenderFragment"
         android:name="com.example.indeedgambling.NotificationSenderFragment"
         android:label="Send Notifications"
-        tools:layout="@layout/notification_sender_fragment">
+        tools:layout="@layout/notification_sender_fragment" >
+
         <action
             android:id="@+id/action_notificationSender_to_organizerUpcoming"
             app:destination="@id/organizerUpcomingFragment" />
 
     </fragment>
-
-
     <fragment
         android:id="@+id/organizerProfileFragment"
         android:name="com.example.indeedgambling.Organizer_ProfileFragment"
-        android:label="Organizer Profile">
+        android:label="Organizer Profile" >
+
         <action
             android:id="@+id/action_organizerProfileFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
+
     </fragment>
 
     <!-- ADMIN -->
     <fragment
         android:id="@+id/adminHomeFragment"
         android:name="com.example.indeedgambling.Admin_HomeFragment"
-        android:label="Admin Home">
+        android:label="Admin Home" >
+
         <action
             android:id="@+id/action_adminHomeFragment_to_adminBrowseEventsFragment"
             app:destination="@id/adminBrowseEventsFragment" />
@@ -217,42 +255,44 @@
         <action
             android:id="@+id/action_adminHomeFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
-    </fragment>
 
+    </fragment>
     <fragment
         android:id="@+id/adminBrowseEventsFragment"
         android:name="com.example.indeedgambling.Admin_BrowseEventsFragment"
         android:label="Admin Browse Events" />
-
     <fragment
         android:id="@+id/adminManageProfilesFragment"
         android:name="com.example.indeedgambling.Admin_ManageProfilesFragment"
         android:label="Admin Manage Profiles" />
-
     <fragment
         android:id="@+id/adminReviewImagesFragment"
         android:name="com.example.indeedgambling.Admin_ReviewImagesFragment"
-        android:label="Admin Review Images">
+        android:label="Admin Review Images" >
+
         <action
             android:id="@+id/action_adminReviewImagesFragment_to_adminLogsFragment"
             app:destination="@id/adminLogsFragment" />
-    </fragment>
 
+    </fragment>
     <fragment
         android:id="@+id/adminLogsFragment"
         android:name="com.example.indeedgambling.Admin_SystemLogsFragment"
-        android:label="Admin System Logs">
+        android:label="Admin System Logs" >
+
         <action
             android:id="@+id/action_adminLogsFragment_to_adminManageProfilesFragment"
             app:destination="@id/adminManageProfilesFragment" />
+
     </fragment>
     <fragment
         android:id="@+id/entrant_GuidelinesFragment"
         android:name="com.example.indeedgambling.Entrant_GuidelinesFragment"
         android:label="Entrant_GuidelinesFragment" >
+
         <action
             android:id="@+id/action_entrant_GuidelinesFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
-    </fragment>
 
+    </fragment>
 </navigation>
