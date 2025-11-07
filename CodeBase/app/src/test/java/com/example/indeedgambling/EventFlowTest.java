@@ -18,7 +18,7 @@ class EventFlowTest {
                 new Date(now.getTime() + 5000),
                 now,
                 new Date(now.getTime() + 10000),
-                "ORGX", "desc", "criteria", "Music", "qr.png"
+                "ORGX", "desc", "criteria", "Music", "qr.png", "Location"
         );
 
         assertFalse(e.BeforeRegPeriod());

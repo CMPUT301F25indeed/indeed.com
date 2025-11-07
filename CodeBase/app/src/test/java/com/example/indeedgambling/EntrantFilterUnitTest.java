@@ -27,7 +27,8 @@ class EntrantFilterUnitTest {
                 "Live concert",
                 "Lottery",
                 "Music",
-                "https://example.com/qr1.png"
+                "https://example.com/qr1.png",
+                "Location"
         );
 
         //  Event 2: closed
@@ -41,7 +42,8 @@ class EntrantFilterUnitTest {
                 "Old concert",
                 "Lottery",
                 "Music",
-                "https://example.com/qr2.png"
+                "https://example.com/qr2.png",
+                "Location"
         );
 
         //  Event 3: wrong category
@@ -55,7 +57,8 @@ class EntrantFilterUnitTest {
                 "Sports event",
                 "Lottery",
                 "Sports",
-                "https://example.com/qr3.png"
+                "https://example.com/qr3.png",
+                "Location"
         );
 
         //  Event 4: registration not open yet
@@ -69,7 +72,8 @@ class EntrantFilterUnitTest {
                 "Future event",
                 "Lottery",
                 "Music",
-                "https://example.com/qr4.png"
+                "https://example.com/qr4.png",
+                "Location"
         );
 
         List<Event> allEvents = List.of(e1, e2, e3, e4);

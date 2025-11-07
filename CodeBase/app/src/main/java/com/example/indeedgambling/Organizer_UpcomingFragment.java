@@ -175,7 +175,6 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //This allows not closing the dialog but refusing input
         NewEvent.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String EventName = NameInput.getText().toString().trim();
             //Using GregorianCalander to get date class, since Date from values is depreciated
             Date RegStartDate = new GregorianCalendar(RegStartDateInput.getYear(),RegStartDateInput.getMonth(),RegStartDateInput.getDayOfMonth(),RegStartTimeInput.getHour(),RegStartTimeInput.getMinute()).getTime();
             Date RegEndDate = new GregorianCalendar(RegEndDateInput.getYear(),RegEndDateInput.getMonth(),RegEndDateInput.getDayOfMonth(),RegEndTimeInput.getHour(),RegEndTimeInput.getMinute()).getTime();
@@ -183,46 +182,79 @@ public class Organizer_UpcomingFragment extends Fragment {
             Date EventStartDate = new GregorianCalendar(EventStartDateInput.getYear(),EventStartDateInput.getMonth(), EventStartDateInput.getDayOfMonth(), EventStartTimeInput.getHour(), EventStartTimeInput.getMinute()).getTime();
             Date EventEndDate  = new GregorianCalendar(EventEndDateInput.getYear(),EventEndDateInput.getMonth(), EventEndDateInput.getDayOfMonth(), EventEndTimeInput.getHour(), EventEndTimeInput.getMinute()).getTime();
 
+            //Refuse incorrect start-end date for event
             if (EventStartDate.after(EventEndDate)){
-                Log.d("DEBUG", "Cant start after end");
-                Toast bad_reg_toast = new Toast(requireContext());
-                bad_reg_toast.setText("Event Start cannot be BEFORE Event End!");
-                bad_reg_toast.show();
+                WarningToast("Event Start cannot be BEFORE Event End!");
                 return;
             }
+            //Refuse incorrect start-end date for registration
             if (RegStartDate.after(RegEndDate)){
-                Log.d("DEBUG", "Cant start after end");
-                Toast bad_reg_toast = new Toast(requireContext());
-                bad_reg_toast.setText("Registration start cannot be BEFORE Registration End!");
-                bad_reg_toast.show();
+                WarningToast("Registration start cannot be BEFORE Registration End!");
                 return;
             }
-            Log.d("DEBUG", "No time errors");
 
 
-            String MaxEnt = MaxEntrantsInput.getText().toString().trim();
-            String Location = LocationInput.getText().toString().trim();
+
+
+            //String inputs
+            String EventName = NameInput.getText().toString().trim();
             String Description = DescriptionInput.getText().toString().trim();
+            String Location = LocationInput.getText().toString().trim();
             String Category = CategoryInput.getText().toString().trim();
             String Criteria = CriteriaInput.getText().toString().trim();
+            String MaxEnt = MaxEntrantsInput.getText().toString().trim();
+
+
+            //Refuse empty title
+            if (EventName.isEmpty()){
+                WarningToast("Event Title cannot be empty!");
+                return;
+            }
+            //Require description
+            if (Description.isEmpty()){
+                WarningToast("Description cannot be empty!");
+                return;
+            }
+            //Require Location
+            if (Location.isEmpty()){
+                WarningToast("Must set a Location!");
+                return;
+            }
+            //Require Category
+            if (Category.isEmpty()){
+                WarningToast("Event must have a Category!");
+                return;
+            }
+            //Require Criteria
+            if (Criteria.isEmpty()){
+                WarningToast("Event must have a signup criteria!");
+                return;
+            }
+
+
+            //Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
+            //
 
             //US 02.01.04 : Optional for unlimited
-            Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,orgID,Description,Category,Criteria);
+            Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,orgID,Description,Criteria,Category);
+            CreatedEvent.setLocation(Location);
+
             //Optionals
-            if (!Location.isEmpty()){
-                CreatedEvent.setLocation(Location);
-            }
             if (!MaxEnt.isBlank()){
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
             }
             Data.Add(CreatedEvent);
 
+
+
+
+            //Amrit
             if (selectedImageUri != null) {
                 try {
                     InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-// prevent giant posters
+                    // prevent giant posters
                     if (bitmap.getByteCount() > 2_000_000) { // only compress if very big
                         bitmap = Bitmap.createScaledBitmap(bitmap, 600, 600, true);
                         Toast.makeText(requireContext(), "Poster compressed to fit upload size.", Toast.LENGTH_SHORT).show();
@@ -264,13 +296,12 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
 
 
-
-
-            //Displaying Organizer's events
+            //Update the event list on the Upcoming screen.
             Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
                 Log.d("FIREBASE Error", "onCreateView: Error with Event results".concat(e.toString()));
             });
 
+            //Close the popup
             NewEvent.dismiss();
         });
 
@@ -286,22 +317,20 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Setting References
         TextView Description = popupView.findViewById(R.id.Organizer_EventPopup_Description);
+        TextView Criteria = popupView.findViewById(R.id.Organizer_EventPopup_Criteria);
+        TextView Category = popupView.findViewById(R.id.Organizer_EventPopup_Category);
+        TextView Location = popupView.findViewById(R.id.Organizer_EventPopup_EventLocation);
+
 
         ImageView QRCode = popupView.findViewById(R.id.Organizer_EventPopup_QR_Code);
         TextView RegPeriod = popupView.findViewById(R.id.Organizer_EventPopup_RegistrationPeriod);
         TextView RunTime = popupView.findViewById(R.id.Organizer_EventPopup_EventRuntime);
-        TextView Location = popupView.findViewById(R.id.Organizer_EventPopup_EventLocation);
         TextView Capacity = popupView.findViewById(R.id.Organizer_EventPopup_Capacity);
 
-        //Setting pop-up to event data
 
-        Log.d("DEBUG ERROR", event.getDescription());
-        Description.setText(event.getDescription());
+                                    //Setting pop-up to event data
 
-
-
-        //TODO: EVENTPOSTER
-
+        //Event Poster
         Button updatePosterButton = popupView.findViewById(R.id.btnUpdatePoster);
         if (updatePosterButton != null) {
             updatePosterButton.setOnClickListener(v -> {
@@ -367,13 +396,18 @@ public class Organizer_UpcomingFragment extends Fragment {
         //TODO:QR CODE
 
 
+        //Description
+        Description.setText(event.getDescription());
+
+        Criteria.setText("Event Criteria: ".concat(event.getCriteria()));
+
+        Category.setText("Event Cateogry: ".concat(event.getCategory()));
+
         //Registration Period: Mon Nov 03 11:11:00 MST 2025 - Tues Nov 04 12:00:00 MST 2025
         RegPeriod.setText("Registration Period: ".concat(event.getRegistrationStart().toString().concat(" - ").concat(event.getRegistrationEnd().toString())));
 
-
         //RUNTIME
         RunTime.setText("Event Runtime: ".concat(event.getEventStart().toString()).concat(" - ").concat(event.getEventEnd().toString()));
-
 
         //Location
         if (event.hasLocation()){
@@ -386,9 +420,8 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //WaitList Button
         Button WaitListButton = popupView.findViewById(R.id.Organizer_EventPopup_WaitList);
-        //Log.d("DEBUG","Before Listener");
 
-        //Waitlist Pop-up
+        //Waitlist Button Pop-up
         WaitListButton.setOnClickListener(v -> {
             WaitListPopup(event);
         });
@@ -396,7 +429,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Invited List Button
         Button InviteListButton = popupView.findViewById(R.id.Organizer_EventPopup_InvList);
 
-        //Invited List Pop-up
+        //Invited List Button Pop-up
         InviteListButton.setOnClickListener(v -> {
             Log.d("DEBUG","PRE BUILDPOPUP INVITEDLIST: ".concat(event.getInvitedList().toString()));
             View listView = inflater.inflate(R.layout.listview_popup, null);
@@ -413,13 +446,15 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
         });
 
-
+        //Show the Popup
         AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
                 .setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", null)
                 .show();
 
+
+        //Notification Pop-up, closes event pop-up
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         notificationButton.setOnClickListener(v->{
             Log.d("DEBUG", "Notification button clicked!");
@@ -519,12 +554,18 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
+    /** POPUP that invites the entrants according to the number inputted by the user.
+     * @param event Event whose waitlist and invitelist to affect
+     * @param inflater current screen inflator
+     * @param waitlistView The waitlist view we need to update after inviting entrants
+     */
     private void InviteNumberPopup(Event event, LayoutInflater inflater, ListView waitlistView){
         View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
+
         //Building integer input dialog
         new AlertDialog.Builder(requireContext())
-                .setTitle("Number of entrants to invite (Up to ".concat(event.getMaxWaitingEntrantsString()).concat(")"))
+                .setTitle("Number of entrants to invite (Up to ".concat(Integer.toString(event.getWaitingList().size())).concat(")"))
                 .setView(helperView)
                 .setPositiveButton("Confirm",((dialog, which) -> {
                     //Preventing non-numbers from being used
@@ -581,5 +622,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlist);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingList());
         waitlist.setAdapter(adapter);
+    }
+
+    private void WarningToast(String warning){
+        Toast WarningToast = new Toast(requireContext());
+        WarningToast.setText(warning);
+        WarningToast.show();
     }
 }
