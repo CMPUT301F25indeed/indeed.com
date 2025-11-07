@@ -156,7 +156,7 @@ public class Entrant_ProfileFragment extends Fragment {
         // home
         homeButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_entrant_ProfileFragment_to_entrantHomeFragment)
+                        .navigate(R.id.action_entrantProfileFragment_to_entrantHomeFragment)
         );
 
         // delete
@@ -176,7 +176,7 @@ public class Entrant_ProfileFragment extends Fragment {
                                     entrantVM.setEntrant(null);
                                     Toast.makeText(getContext(), "Profile deleted successfully", Toast.LENGTH_SHORT).show();
                                     NavHostFragment.findNavController(this)
-                                            .navigate(R.id.action_entrant_ProfileFragment_to_startUpFragment);
+                                            .navigate(R.id.action_entrantProfileFragment_to_startUpFragment);
                                 },
                                 err -> Toast.makeText(getContext(),
                                         "Failed to delete: " + err.getMessage(),
