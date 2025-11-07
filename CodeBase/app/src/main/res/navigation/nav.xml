@@ -136,9 +136,6 @@
             android:id="@+id/action_orgHome_to_browse"
             app:destination="@id/organizerBrowseFragment" />
         <action
-            android:id="@+id/action_orgHome_to_notifications"
-            app:destination="@id/notificationSenderFragment" />
-        <action
             android:id="@+id/action_orgHome_to_upcoming"
             app:destination="@id/organizerUpcomingFragment" />
         <action
@@ -184,11 +181,9 @@
         android:name="com.example.indeedgambling.NotificationSenderFragment"
         android:label="Send Notifications"
         tools:layout="@layout/notification_sender_fragment">
-
-        <!-- Action to return to organizer home -->
         <action
-            android:id="@+id/action_notificationSender_to_orgHome"
-            app:destination="@id/organizerHomeFragment" />
+            android:id="@+id/action_notificationSender_to_organizerUpcoming"
+            app:destination="@id/organizerUpcomingFragment" />
 
     </fragment>
 
