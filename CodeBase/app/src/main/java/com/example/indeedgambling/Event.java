@@ -550,10 +550,17 @@ public class Event implements Serializable {
     public boolean atCapacity() {
         // 0 == unlimited, and thus event cannot be at capacity.
         // If limit is met, we cannot fit anybody more, and are at capacity.
-        if (this.maxWaitingEntrants == 0 || (this.maxWaitingEntrants >= this.waitingList.size())){
+
+        //If our max is at or larger than the size of the list.
+        //If our limit is unset
+
+        //No matter what, with 0 being unlimited, we are never at capacity.
+        if (this.maxWaitingEntrants == 0){
             return false;
         }
-        return true;
+
+        //If our waitinglist is as big as our limit, we are at capacity
+        return this.waitingList.size() >= this.maxWaitingEntrants;
     }
 
 
@@ -614,6 +621,18 @@ public class Event implements Serializable {
 
             }
         }
+    }
+
+    /** Attempts to add a ID string to the waitingList. Will not if at capacity
+     * @param entrantID ID to try to add
+     * @return TRUE if added, FALSE if not.
+     */
+    public boolean tryaddtoWaitingList(String entrantID){
+        if (!atCapacity() && this.RegistrationOpen()){
+            this.waitingList.add(entrantID);
+            return true;
+        }
+        return false;
     }
 
 
