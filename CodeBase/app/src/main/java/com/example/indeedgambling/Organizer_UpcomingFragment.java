@@ -8,6 +8,7 @@ import android.net.Uri;
 
 
 import android.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -37,6 +38,20 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+/**
+ * Fragment that displays the organizer's upcoming events.
+ * <p>
+ * Provides functionality for:
+ * <ul>
+ *     <li>Displaying a list of upcoming events</li>
+ *     <li>Creating new events via a popup dialog</li>
+ *     <li>Viewing and updating event details (location, poster, waitlist, invited list)</li>
+ *     <li>Sending notifications to event entrants</li>
+ * </ul>
+ * <p>
+ * Handles interaction with Firebase via {@link FirebaseViewModel} and
+ * state management via {@link OrganizerViewModel}.
+ */
 
 
 public class Organizer_UpcomingFragment extends Fragment {
@@ -78,7 +93,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         // Show popup when clicking an event in the list
         EventList.setOnItemClickListener((parent, itemView, position, id) -> {
             Event clickedEvent = (Event) parent.getItemAtPosition(position);
-            showEventPopup(clickedEvent);
+            showEventPopup(clickedEvent); // Back to original
         });
 
 
@@ -92,6 +107,13 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
     //---------------- POPUPS -------------//
+    /**
+     * Displays a popup dialog to create a new event.
+     * <p>
+     * Handles user input for event name, description, location, category, criteria,
+     * maximum entrants, registration period, event runtime, and optional poster upload.
+     * Ensures dates are valid and compresses large images before uploading.
+     */
 
     private void showNewEventPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -279,6 +301,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
         //TODO: EVENTPOSTER
+
         Button updatePosterButton = popupView.findViewById(R.id.btnUpdatePoster);
         if (updatePosterButton != null) {
             updatePosterButton.setOnClickListener(v -> {
@@ -390,10 +413,25 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
         });
 
-        new AlertDialog.Builder(requireContext()).setTitle(event.getEventName())
+
+        AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
+                .setTitle(event.getEventName())
                 .setView(popupView)
-                .setNegativeButton("Close", ((dialog, which) -> {}))
+                .setNegativeButton("Close", null)
                 .show();
+
+        Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
+        notificationButton.setOnClickListener(v->{
+            Log.d("DEBUG", "Notification button clicked!");
+            //is button click working
+            //Toast.makeText(requireContext(), "Opening notifications...", Toast.LENGTH_SHORT).show();
+            organizerVM.setSelectedEvent(event);
+            //close current dialog/popup
+            eventDialog.dismiss();
+
+            NavHostFragment.findNavController(Organizer_UpcomingFragment.this).navigate(R.id.notificationSenderFragment);
+
+        });
     }
 
     @Override
@@ -533,9 +571,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         EventList.setAdapter(adapter);
     }
 
-    /** TODO: FIX
-     *
-     * @param event
+    /**
+     * Refreshes the waitlist for a given event and updates the ListView.
+     * TODO: Fix
+     * @param event Event whose waitlist will be refreshed.
+     * @param waitlist ListView to update.
      */
     private void RefreshWaitlist(Event event, ListView waitlist){
         Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlist);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});

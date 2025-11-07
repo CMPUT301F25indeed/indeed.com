@@ -23,6 +23,7 @@ public class Event implements Serializable {
     private Date registrationEnd;
     //US: 02.03.01
     private int maxWaitingEntrants;
+    private String maxWaitingEntrantsString;
     private String imageUrl;
     private String qrCodeURL;
     private String status;    // planned/open/closed/completed
@@ -252,6 +253,15 @@ public class Event implements Serializable {
     public void setMaxWaitingEntrants(int max) {
         //No negative max. 0 is unlimited entrants
         maxWaitingEntrants = Math.max(max, 0);
+    }
+    /**
+     * Sets the string representation of maximum waiting entrants
+     * Used by Firebase for serialization/deserialization
+     *
+     * @param maxWaitingEntrantsString String representation of max waiting entrants
+     */
+    public void setMaxWaitingEntrantsString(String maxWaitingEntrantsString) {
+        this.maxWaitingEntrantsString = maxWaitingEntrantsString;
     }
 
     /** Returns the ProfileIDs of all Entrants who have been invited
