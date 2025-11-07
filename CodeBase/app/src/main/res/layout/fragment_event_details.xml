@@ -9,21 +9,78 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:backgroundTint="@color/purple_700"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
+
+
         <TextView
             android:id="@+id/event_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Event Name"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:paddingBottom="4dp" />
+            android:textColor="@color/black"
+            android:layout_marginTop="8dp" />
+
 
         <TextView
             android:id="@+id/event_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Event description goes here"
-            android:layout_marginBottom="24dp" />
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:layout_marginBottom="8dp" />
+
+
+        <TextView
+            android:id="@+id/event_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/event_dates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/event_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/event_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="2dp" />
+
+        <TextView
+            android:id="@+id/event_registration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="16dp" />
+
+
 
         <Button
             android:id="@+id/signup_button"
@@ -45,14 +102,16 @@
             android:text="Leave Waiting List"
             android:layout_marginTop="8dp" />
 
-        <Button
-            android:id="@+id/back_button"
+        <TextView
+            android:id="@+id/waitlist_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="← Back"
-            android:backgroundTint="@color/purple_700"
-            android:textColor="@android:color/white"
-            android:layout_marginBottom="16dp" />
+            android:text="✅ You are on the waiting list!"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="14sp"
+            android:visibility="gone"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp" />
 
 
 
