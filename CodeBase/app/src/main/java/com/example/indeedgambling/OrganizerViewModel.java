@@ -28,7 +28,7 @@ public class OrganizerViewModel extends ViewModel {
     private final MutableLiveData<Profile> organizer = new MutableLiveData<>();
 
     /** Holds the organizer's currently selected event (for editing, viewing entrants, etc.) */
-    private final MutableLiveData selectedEvent = new MutableLiveData<>();
+    private final MutableLiveData<Event> selectedEvent = new MutableLiveData<>();
 
     /**
      * Assign the logged-in organizer profile
