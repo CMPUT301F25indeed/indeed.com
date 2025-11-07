@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 
 import android.app.Application;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -213,6 +214,28 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
+
+    /**
+     * Fetches an event from Firestore by its unique event ID.
+     */
+
+    public void getEventById(String eventId, Consumer<Event> onSuccess, Consumer<Exception> onError) {
+        db.collection("events").document(eventId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        Event event = document.toObject(Event.class);
+                        onSuccess.accept(event);
+                    } else {
+                        onError.accept(new Exception("Event not found"));
+                    }
+                })
+                .addOnFailureListener(onError::accept);
+    }
+
+
+
+
 
     /**
      * Update event details
