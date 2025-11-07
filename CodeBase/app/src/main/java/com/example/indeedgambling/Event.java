@@ -23,7 +23,6 @@ public class Event implements Serializable {
     private Date registrationEnd;
     //US: 02.03.01
     private int maxWaitingEntrants;
-    private String maxWaitingEntrantsString;
     private String imageUrl;
     private String qrCodeURL;
     private String status;    // planned/open/closed/completed
@@ -46,8 +45,9 @@ public class Event implements Serializable {
      * @param Critera           Critera (?)
      * @param Category          Category of Event
      * @param QRCodeURL         URL of the poster image for the event
+     * @param Location          Location of the event
      */
-    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL) {
+    Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, String Location) {
         //Potential profanity filter.
 
         //TODO: Check if an exact match exists already ().
@@ -88,9 +88,27 @@ public class Event implements Serializable {
 
         this.status = getStatus();
 
+        this.location = Location;
+
         //Event ID : Hash of OrgIdEventnameEventstart
         this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
     }
+
+    /** No MaxEntrant, no Location constructor. DO NOT USE, as it does not include mandatory location.
+     *
+     * @param EventName
+     * @param RegistrationOpen
+     * @param RegistrationClose
+     * @param EventStart
+     * @param EventEnd
+     * @param OrgID
+     * @param Description
+     * @param Critera
+     * @param Category
+     * @param QRCodeURL
+     * @param MaxEntrants
+     */
+    @Deprecated
     Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
         //Potential profanity filter.
 
@@ -254,15 +272,6 @@ public class Event implements Serializable {
         //No negative max. 0 is unlimited entrants
         maxWaitingEntrants = Math.max(max, 0);
     }
-    /**
-     * Sets the string representation of maximum waiting entrants
-     * Used by Firebase for serialization/deserialization
-     *
-     * @param maxWaitingEntrantsString String representation of max waiting entrants
-     */
-    public void setMaxWaitingEntrantsString(String maxWaitingEntrantsString) {
-        this.maxWaitingEntrantsString = maxWaitingEntrantsString;
-    }
 
     /** Returns the ProfileIDs of all Entrants who have been invited
      * @return Array of Strings IDs.
@@ -285,7 +294,7 @@ public class Event implements Serializable {
         return eventId;
     }
 
-    /** Sets the EventID
+    /** Sets the EventID. NOT RECOMMENED, as IDs are key to accessing events, and IDs are generated.
      *  Needed by Firebase to create the object
      * @return
      */
@@ -300,46 +309,79 @@ public class Event implements Serializable {
         return description;
     }
 
+    /** Overwrites the Events Description with the arguments'
+     * @param description New description for event.
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /** Returns the current Event's owner's ID.
+     * @return Organizer ID String
+     */
     public String getOrganizerId() {
         return organizerId;
     }
 
+    /** Overwrites the organizer's ID with the arugment's.
+     * @param organizerId New OrgID.
+     */
     public void setOrganizerId(String organizerId) {
         this.organizerId = organizerId;
     }
 
+    /** Provides the event's saved category.
+     * @return Category of event; a string
+     */
     public String getCategory() {
         return category;
     }
 
+    /** Overwrites the event's category with the arguments, no questions asked.
+     * @param category new Category
+     */
     public void setCategory(String category) {
         this.category = category;
     }
 
+    /** Returns the Event's saved location as a string
+     * @return Location of event
+     */
     public String getLocation() {
         return location;
     }
 
+    /** Overwrites the event's location with the arguments.
+     * @param location New location for the event
+     */
     public void setLocation(String location) {
         this.location = location;
     }
 
+    /** Returns the URL where the Image is saved.
+     * @return String for the URL
+     */
     public String getImageUrl() {
         return imageUrl;
     }
 
+    /** Updates the URL for the event. Does not affect server.
+     * @param imageUrl New URL for the event
+     */
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
+    /** Returns the string of the URL for the QR.
+     * @return QR URL string
+     */
     public String getQrCodeURL() {
         return qrCodeURL;
     }
 
+    /** Updates the QRCodeURL
+     * @param qrCodeURL
+     */
     public void setQrCodeURL(String qrCodeURL) {
         this.qrCodeURL = qrCodeURL;
     }
@@ -373,27 +415,44 @@ public class Event implements Serializable {
         return status;
     }
 
-
+    /** Sets the status of the event to the passed argument.
+     * @param status new Status.
+     */
     public void setStatus(String status) {
         this.status = status;
     }
 
+    /** Returns a list of EntrantIDs who signed up to the waitlist
+     * @return List of EntrantID strings
+     */
     public List<String> getWaitingList() {
         return waitingList;
     }
 
+    /** Overwrites the waitinglist of the event with the argument. Does not affect serverside.
+     * @param waitingList What overwrites the event's waiting list
+     */
     public void setWaitingList(ArrayList<String> waitingList) {
         this.waitingList = waitingList;
     }
 
+    /** Returns the saved criteria of the event
+     * @return String of the Criteria
+     */
     public String getCriteria() {
         return criteria;
     }
 
+    /** Change the criteria needed to sign up to the event
+     * @param criteria new critera. Overwrites the old.
+     */
     public void setCriteria(String criteria) {
         this.criteria = criteria;
     }
 
+    /** The open datetime of the event is returned
+     * @return Datetime, start of event
+     */
     public Date getEventStart() {
         return eventStart;
     }
@@ -521,7 +580,7 @@ public class Event implements Serializable {
     }
 
     /** Moves a random selection of entrants from the waitlist to the invited list.
-     * @param number How many entrants to move. Will not throw error if limit exceeded
+     * @param number How many entrants to move. Will not throw error if limit exceeded, just stops.
      */
     public void InviteEntrants(int number){
         //Skip if number passed is 0
@@ -566,7 +625,7 @@ public class Event implements Serializable {
     @NonNull
     @Override
     public String toString() {
-        return eventName;
+        return eventName;//.concat(" : ".concat(Integer.toString(waitingList.size()).concat(" / ").concat(getMaxWaitingEntrantsString())));
     }
 
 

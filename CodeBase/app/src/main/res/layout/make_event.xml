@@ -12,8 +12,7 @@
             android:id="@+id/NewEventPopup_NameDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Title"
-            />
+            android:hint="Event Title" />
 
         <EditText
             android:id="@+id/NewEventPopup_Description"

@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="Event QR Code"/>
 
+        <!-- Formatting Description label and text -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,6 +42,21 @@
                     android:layout_height="wrap_content"/>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Criteria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_EventLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
 
         <TextView
             android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
@@ -53,19 +69,15 @@
             android:layout_height="wrap_content"/>
 
         <TextView
-            android:id="@+id/Organizer_EventPopup_EventLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <TextView
             android:id="@+id/Organizer_EventPopup_Capacity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <!-- Button grid at bottom of screen -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="top"
             android:orientation="horizontal"
             android:columnCount="2">
                 <Button
@@ -103,9 +115,7 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:text="Update Event Poster"
-                    android:textAllCaps="false"
-                    android:layout_marginTop="8dp"
-                    android:padding="10dp" />
+                    android:textAllCaps="false" />
 
                 <Button
                     android:id="@+id/btnViewPoster"
@@ -113,23 +123,18 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:text="View Event Poster"
-                    android:textAllCaps="false"
-                    android:layout_marginTop="8dp"
-                    android:padding="10dp" />
+                    android:textAllCaps="false" />
 
+                <Button
+                    android:id="@+id/btnSendNotifications"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="Send Notifications"
+                    android:textColor="@android:color/white" />
 
         </GridLayout>
 
-        <Button
-            android:id="@+id/btnSendNotifications"
-            android:layout_width="173dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="84dp"
-            android:padding="16dp"
-            android:text="Send Notifications"
-            android:textColor="@android:color/white" />
 
         <!--        &lt;!&ndash; NEW: Button to update event poster &ndash;&gt;-->
 <!--        <Button-->
