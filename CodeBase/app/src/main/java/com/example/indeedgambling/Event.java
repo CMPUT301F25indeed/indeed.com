@@ -512,6 +512,14 @@ public class Event implements Serializable {
         this.acceptedEntrants = acceptedEntrants;
     }
 
+
+
+
+
+
+
+
+
     //---------------------------------------------------- Helpers ---------------------------//
     /** Helper function that checks if RIGHT NOW is before reg period opens
      * @return True if before Reg Open, false otherwise
@@ -623,7 +631,7 @@ public class Event implements Serializable {
         }
     }
 
-    /** Attempts to add a ID string to the waitingList. Will not if at capacity
+    /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER
      * @param entrantID ID to try to add
      * @return TRUE if added, FALSE if not.
      */
@@ -635,12 +643,24 @@ public class Event implements Serializable {
         return false;
     }
 
+    /** Ends registration now. Does not do any checks for goodness or graciousness.
+     *
+     */
+    public void endRegistration(){
+        //Checks if registration ends in the past. Only updates if it would end in the future.
+
+        if (registrationEnd.after(new Date())){
+            this.registrationEnd = new Date();
+        }
+
+    }
 
 
 
 
 
-                                            //-----------------------------Overrides--------------------//
+
+    //-----------------------------Overrides--------------------//
 
     /**
      * Overriding toString's function on Events to return the name of the event instead.
@@ -649,6 +669,10 @@ public class Event implements Serializable {
     @NonNull
     @Override
     public String toString() {
+        //If registration is over, display so
+        if (this.registrationEnd.before(new Date())){
+            return "®".concat(" | ").concat(eventName);
+        }
         return eventName;//.concat(" : ".concat(Integer.toString(waitingList.size()).concat(" / ").concat(getMaxWaitingEntrantsString())));
     }
 

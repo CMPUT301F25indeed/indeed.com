@@ -108,6 +108,14 @@
                     android:layout_columnWeight="1"
                     android:text="View Accepted List"/>
 
+                <Button
+                    android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:text="End Registration"
+                    />
+
                 <!-- New: Update poster button inside grid -->
                 <Button
                     android:id="@+id/btnUpdatePoster"
@@ -132,6 +140,7 @@
                     android:layout_columnWeight="1"
                     android:text="Send Notifications"
                     android:textColor="@android:color/white" />
+
 
         </GridLayout>
 
