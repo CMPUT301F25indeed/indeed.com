@@ -86,9 +86,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Displaying Organizer's events
         EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-        Data.fetchOrgsUpcomingEvents(orgID,events -> {UpdateEventList(events);}, e -> {
-            Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
-        });
+        RefreshUpcomingEventList();
 
         // Show popup when clicking an event in the list
         EventList.setOnItemClickListener((parent, itemView, position, id) -> {
@@ -297,9 +295,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
             //Update the event list on the Upcoming screen.
-            Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
-                Log.d("FIREBASE Error", "onCreateView: Error with Event results".concat(e.toString()));
-            });
+            RefreshUpcomingEventList();
 
             //Close the popup
             NewEvent.dismiss();
@@ -425,9 +421,9 @@ public class Organizer_UpcomingFragment extends Fragment {
                         //Close popup of event on success and update events
                         Data.updateEvent(event.getEventId(), update, ()->{
                             WarningToast("Registration for ".concat(event.getEventName()).concat(" ended"));
-                            //Refresh page
-                            Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));});;
-                            //close pop-up
+
+                            //Refresh page on success
+                            RefreshUpcomingEventList();
                             },
                                 e -> Log.d("Firebase Error", "Error pushing registration changes to server:".concat(e.toString())));
 
@@ -658,16 +654,29 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     /**
      * Refreshes the waitlist for a given event and updates the ListView.
-     * TODO: Fix
+     * Runs on a separate thread than the GUI
      * @param event Event whose waitlist will be refreshed.
      * @param waitlist ListView to update.
      */
     private void RefreshWaitlist(Event event, ListView waitlist){
-        Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlist);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingList());
-        waitlist.setAdapter(adapter);
+        new Thread(()->{Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlist);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingList());
+            waitlist.setAdapter(adapter);}).start();
+
     }
 
+    /** Refreshes the Upcoming Event list using a separate Thread
+     * Uses the Current Org ID for the Upcoming Events
+     */
+    private void RefreshUpcomingEventList(){
+        new Thread(()->{Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
+            Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
+        });}).start();
+    }
+
+    /** EoA function that makes Toasts easier. Standard Toast popup helper
+     * @param warning Message for Toast to display
+     */
     private void WarningToast(String warning){
         Toast WarningToast = new Toast(requireContext());
         WarningToast.setText(warning);
