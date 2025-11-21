@@ -385,7 +385,10 @@ public class Organizer_UpcomingFragment extends Fragment {
             Log.d("DEBUG","PRE BUILDPOPUP INVITEDLIST: ".concat(event.getInvitedList().toString()));
             View listView = inflater.inflate(R.layout.listview_popup, null);
             ListView InvitedList = listView.findViewById(R.id.popUp_Listview);
-            Data.getEventInvitedList(event.getEventId(),p->{UpdateProfileList(p,InvitedList);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+            //Putting on seperate Thread
+            //Data.getEventInvitedList(event.getEventId(),p->{UpdateProfileList(p,InvitedList);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+            RefreshProfileList(InvitedList,event);
+
             //Actual popup
             Log.d("DEBUG","Building POPUP");
             new AlertDialog.Builder(requireContext())
@@ -578,7 +581,9 @@ public class Organizer_UpcomingFragment extends Fragment {
         View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
         ListView List = waitlistView.findViewById(R.id.waitlistpopup_listview);
 
-        Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,List);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+        //Putting on seperate Thread
+        //Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,List);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+        RefreshProfileList(List,event);
 
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
@@ -650,6 +655,13 @@ public class Organizer_UpcomingFragment extends Fragment {
     private void UpdateProfileList(List<Profile> itemsToShow, ListView EventList){
         ArrayAdapter<Profile> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, itemsToShow);
         EventList.setAdapter(adapter);
+    }
+
+
+    private void RefreshProfileList(ListView ProfileList, Event event){
+        new Thread(()->{
+            Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,ProfileList);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+        }).start();
     }
 
     /**
