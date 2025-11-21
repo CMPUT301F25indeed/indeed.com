@@ -671,9 +671,12 @@ public class Event implements Serializable {
     public String toString() {
         //If registration is over, display so
         if (this.registrationEnd.before(new Date())){
-            return "®".concat(" | ").concat(eventName);
+            return "\uD83D\uDCDD❌".concat(" | ").concat(eventName);
         }
-        return eventName;//.concat(" : ".concat(Integer.toString(waitingList.size()).concat(" / ").concat(getMaxWaitingEntrantsString())));
+        else{
+            return "\uD83D\uDCDD✅".concat(" | ").concat(eventName);
+        }
+        //return eventName;//.concat(" : ".concat(Integer.toString(waitingList.size()).concat(" / ").concat(getMaxWaitingEntrantsString())));
     }
 
 
