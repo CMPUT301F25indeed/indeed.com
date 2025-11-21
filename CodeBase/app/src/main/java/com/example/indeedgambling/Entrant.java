@@ -16,12 +16,14 @@ import java.util.List;
  */
 public class Entrant extends Profile {
     private List<String> waitlistedEvents;
+    private List<String> allEvents;
 
     /**
      * Empty constructor required for Firestore data mapping.
      */
     public Entrant() { super();
         this.waitlistedEvents = new ArrayList<>();
+        this.allEvents = new ArrayList<>();
         setRoleVerified(true);
         setRole("entrant");}
 
@@ -32,9 +34,30 @@ public class Entrant extends Profile {
         return waitlistedEvents;
     }
 
-    public void setWaitlistedEvents(List<String> waitlistedEvents) {
-        this.waitlistedEvents = waitlistedEvents;
+    public void setWaitlistedEvents(List<String> waitlistedEvents) {this.waitlistedEvents = waitlistedEvents;}
+
+    public List<String> getAllEvents() {
+        return allEvents;
     }
+
+    public void setAllEvents(List<String> allEvents) {
+        this.allEvents = allEvents;
+    }
+
+    public void add2Entrant(String val){
+        waitlistedEvents.add(val);
+        allEvents.add(val);
+    }
+
+    public void remove2Entrant(String val){
+        waitlistedEvents.remove(val);
+        allEvents.remove(val);
+    }
+
+    public void removeWaitlistedEvent(String val){
+        waitlistedEvents.remove(val);
+    }
+
 
     /**
      * Creates a new Entrant profile.
@@ -49,6 +72,7 @@ public class Entrant extends Profile {
         super(profileId, name, email, phone, "entrant", passwordHash);
         setRoleVerified(true);
         this.waitlistedEvents = new ArrayList<>();
+        this.allEvents = new ArrayList<>();
     }
 
 

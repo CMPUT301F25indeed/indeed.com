@@ -672,5 +672,25 @@ public class Event implements Serializable {
 
     }
 
+    public String whichList(String profileID) {
+
+        if (invitedList.contains(profileID)) {
+            return "invited";
+        }
+
+        if (acceptedEntrants.contains(profileID)) {
+            return "accepted";
+        }
+
+        if (cancelledEntrants.contains(profileID)) {
+            return "cancelled";
+        }
+
+        if (waitingList.contains(profileID)) {
+            return "waitlist";
+        }
+        return "none";
+    }
+
 
 }

@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -54,10 +55,10 @@ public class EventDetailsFragment extends Fragment {
     private FirebaseViewModel firebaseVM;
     private EntrantViewModel entrantVM;
     private Event event;
-    private String entrantId;
+    private String entrantId,entrantRelation;
 
-    private TextView name, desc, waitlistStatus;
-    private Button joinBtn, leaveBtn, signUpBtn, backBtn;
+    private TextView name, desc, waitlistStatus, total;
+    private Button yesBtn, noBtn, backBtn,tryAgainBtn;
 
     /**
      * Initializes and displays the event details screen.
@@ -75,21 +76,19 @@ public class EventDetailsFragment extends Fragment {
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
 
-        Entrant currentEntrant = entrantVM.getCurrentEntrant();
-        if (currentEntrant != null) {
-            entrantId = currentEntrant.getProfileId();
-        } else {
-            entrantId = "TEST_USER";
-            Toast.makeText(getContext(), "No entrant loaded — using TEST_USER.", Toast.LENGTH_SHORT).show();
-        }
+
+        entrantId = entrantVM.returnID();
 
         name = v.findViewById(R.id.event_name);
         desc = v.findViewById(R.id.event_description);
         waitlistStatus = v.findViewById(R.id.waitlist_status);
-        joinBtn = v.findViewById(R.id.join_waitlist_button);
-        leaveBtn = v.findViewById(R.id.leave_waitlist_button);
-        signUpBtn = v.findViewById(R.id.signup_button);
         backBtn = v.findViewById(R.id.back_button);
+
+        total = v.findViewById(R.id.event_total_entrant);
+        yesBtn = v.findViewById(R.id.yes_button);
+        noBtn = v.findViewById(R.id.no_button);
+        tryAgainBtn =  v.findViewById(R.id.try_again_button);
+
 
         if (getArguments() != null) {
             event = (Event) getArguments().getSerializable("event");
@@ -99,32 +98,128 @@ public class EventDetailsFragment extends Fragment {
         if (event != null) {
             name.setText(event.getEventName());
             desc.setText(event.getDescription());
-            updateWaitlistStatus();
+            entrantRelation = event.whichList(entrantId);
+
         }
 
         backBtn.setOnClickListener(v1 -> requireActivity().onBackPressed());
 
-        joinBtn.setOnClickListener(v1 -> {
-            if (entrantId == null) {
-                Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // Cases:
+        //      waitlist
+        //      none
+        //      accepted --> Entrant accepted their invite
+        //      cancelled --> Entrant rejects invite/Gets to try again
+        //      invited --> Entrant get to accept to rejects their invite
 
-            if (event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
-                Toast.makeText(getContext(), "You already joined this waitlist!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // on waitlist and not on waitlist case
 
-            firebaseVM.joinWaitingList(event.getEventId(), entrantId,
-                    () -> {
-                        event.getWaitingList().add(entrantId);
-                        updateWaitlistStatus();
-                        Toast.makeText(getContext(), "Joined waitlist!", Toast.LENGTH_SHORT).show();
-                    },
-                    e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-        });
+        if (entrantRelation.equals("none")||entrantRelation.equals("waitlist")){
 
-        leaveBtn.setOnClickListener(v1 -> {
+
+            yesBtn.setText("Join\n Waitlist");
+            noBtn.setText("Leave\n Waitlist");
+            yesBtn.setVisibility(View.VISIBLE);
+            noBtn.setVisibility(View.VISIBLE);
+            tryAgainBtn.setVisibility(View.GONE);
+
+            yesBtn.setOnClickListener(v1 -> {
+                clickedJoinWaitlist(v);
+                updateWaitlistStatus();
+            });
+
+            noBtn.setOnClickListener(v1 -> {
+                clickedLeaveWaitlist(v);
+                updateWaitlistStatus();
+            });
+
+
+        }
+
+
+        if (entrantRelation.equals("invited")){
+            // Backup. If it is somehow still in the waitlist list remove it for an entrant
+            // NOTE: if lottery process/selection works it needs to do this to avoid errors
+            // contact Tj for more info
+            // Back Up - Start
+            entrantVM.inviteEntrantRemoveWaitlist(event.getEventId());
+            firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(),() -> {},
+                    err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
+            );
+            // Back Up - END
+
+
+            yesBtn.setText("Accept\n Invite");
+            noBtn.setText("Reject\n Invite");
+            yesBtn.setVisibility(View.VISIBLE);
+            noBtn.setVisibility(View.VISIBLE);
+            tryAgainBtn.setVisibility(View.GONE);
+
+            yesBtn.setOnClickListener(v1 -> {
+                clickedAcceptInvite(v);
+                // create the updatewaitliststatus function for update invite status
+            });
+
+            noBtn.setOnClickListener(v1 -> {
+                clickedRejectInvite(v);
+                // create the updatewaitliststatus function for update invite status
+            });
+
+
+
+        }
+
+        if (entrantRelation.equals("cancelled")){
+
+
+            tryAgainBtn.setText("Try Again?");
+            yesBtn.setVisibility(View.GONE);
+            noBtn.setVisibility(View.GONE);
+            tryAgainBtn.setVisibility(View.VISIBLE);
+
+            tryAgainBtn.setOnClickListener(v1 -> {
+                clickedTryAgain(v);
+            });
+
+
+
+        }
+
+        return v;
+    }
+
+
+    private void clickedJoinWaitlist(View v){
+        if (entrantId == null) {
+            Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
+            Toast.makeText(getContext(), "You already joined this waitlist!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (event.tryaddtoWaitingList(entrantId)){
+            Toast.makeText(getContext(), "Waitlist is FULL!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        entrantVM.addEventToEntrant(event.getEventId());
+        event.getWaitingList().add(entrantId);
+
+
+        firebaseVM.joinWaitingList(event.getEventId(), entrantId, () -> {},
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+        firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(),() -> {},
+                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
+        );
+
+        Toast.makeText(getContext(), "Joined waitlist!", Toast.LENGTH_SHORT).show();
+        updateTotal(v);
+    }
+
+    private void clickedLeaveWaitlist(View v){
             if (entrantId == null) {
                 Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
                 return;
@@ -135,28 +230,42 @@ public class EventDetailsFragment extends Fragment {
                 return;
             }
 
-            firebaseVM.leaveWaitingList(event.getEventId(), entrantId,
-                    () -> {
-                        event.getWaitingList().remove(entrantId);
-                        updateWaitlistStatus();
-                        Toast.makeText(getContext(), "Removed from waitlist.", Toast.LENGTH_SHORT).show();
-                    },
+
+        event.getWaitingList().remove(entrantId);
+        entrantVM.removeEventFromEntrant(event.getEventId()); // needs to update database as well
+
+        firebaseVM.leaveWaitingList(event.getEventId(), entrantId, () -> {},
                     e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-        });
 
-        signUpBtn.setOnClickListener(v1 -> {
-            if (entrantId == null) {
-                Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
-                return;
-            }
 
-            firebaseVM.signUpForEvent(event.getEventId(), entrantId,
-                    () -> Toast.makeText(getContext(), "Signed up successfully!", Toast.LENGTH_SHORT).show(),
-                    e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-        });
+        firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(),() -> {},
+                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show());
 
-        return v;
+        Toast.makeText(getContext(), "Removed from waitlist.", Toast.LENGTH_SHORT).show();
+        updateTotal(v);
     }
+
+    private void clickedAcceptInvite(View v){
+        if (entrantId == null) {
+            Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        firebaseVM.signUpForEvent(event.getEventId(), entrantId,
+                () -> Toast.makeText(getContext(), "Signed up successfully!", Toast.LENGTH_SHORT).show(),
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+}
+    private void clickedRejectInvite(View v){
+        String tj = "tj";
+
+    }
+
+    private void clickedTryAgain(View v){
+        String tj = "tj";
+
+    }
+
 
     /**
      * Loads and formats all event details for display.
@@ -174,6 +283,7 @@ public class EventDetailsFragment extends Fragment {
         TextView status = v.findViewById(R.id.event_status);
         TextView category = v.findViewById(R.id.event_category);
 
+
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
         if (event.getLocation() != null)
@@ -190,9 +300,19 @@ public class EventDetailsFragment extends Fragment {
 
         status.setText("Status: " + event.getStatus());
 
-        updateWaitlistStatus();
+        updateTotal(v);
+
+
+        //updateWaitlistStatus();
     }
 
+    private void updateTotal(View v){
+        if (event.getWaitingList() != null){
+            int totalEntrant = event.getWaitingList().size();
+            total.setText("Total: " + totalEntrant);
+
+        }
+    }
     /**
      * Updates the visual state of the waiting list section and buttons
      * depending on whether the current entrant is already listed.
@@ -203,12 +323,14 @@ public class EventDetailsFragment extends Fragment {
         if (entrantId != null && event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
             waitlistStatus.setVisibility(View.VISIBLE);
             waitlistStatus.setText("✅ You are on the waiting list!");
-            joinBtn.setEnabled(false);
-            joinBtn.setText("Already Joined");
+            yesBtn.setEnabled(false);
+            yesBtn.setText("Joined\nWaitlist");
+
         } else {
             waitlistStatus.setVisibility(View.GONE);
-            joinBtn.setEnabled(true);
-            joinBtn.setText("Join Waiting List");
+            yesBtn.setEnabled(true);
+            yesBtn.setText("Join Waitlist");
         }
     }
+
 }
