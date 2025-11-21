@@ -2,126 +2,54 @@ package com.example.indeedgambling;
 
 import java.util.Date;
 
+/**
+ * Represents an in-app notification between users in the system.
+ *
+ * Notifications are stored in Firestore under the "notifications" collection.
+ * These help the system inform entrants, organizers, or admins about important updates.
+ *
+ * Common notification examples:
+ * - Organizer invites entrant to an event
+ * - Entrant receives acceptance or rejection
+ * - System reminders about deadlines or actions
+ *
+ * Fields:
+ * - senderId: ID of the user sending the notification (could be system or organizer)
+ * - receiverId: ID of the user receiving the notification
+ * - eventId: ID of the related event (if applicable)
+ * - type: category of the notification (ex: "INVITE", "ACCEPTED", "REMINDER")
+ * - message: human-readable message text
+ * - timestamp: when the notification was created
+ *
+ * Firestore requires a no-argument constructor which is included below.
+ */
 public class Notification {
-    private String title;
-    private String message;
 
-    private String id;
-    private String recipientId;
-    private String eventId;
-    private String type;  // "invitation", "result", etc.
     private String senderId;
     private String receiverId;
+    private String eventId;
+    private String type;
+    private String message;
     private Date timestamp;
 
-    private String profileId;
+    /** Required empty constructor for Firestore serialization */
+    public Notification() {}
 
+    public String getSenderId() { return senderId; }
+    public void setSenderId(String senderId) { this.senderId = senderId; }
 
-    public Notification() {
-        // empty constructor for Firestore
-    }
+    public String getReceiverId() { return receiverId; }
+    public void setReceiverId(String receiverId) { this.receiverId = receiverId; }
 
-    public Notification(String title, String message, String recipientId, String eventId, String type) {
-        this.title = title;
-        this.message = message;
-        this.recipientId = recipientId;
-        this.eventId = eventId;
-        this.type = type;
-        this.profileId = profileId;
-    }
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
 
-    // ----- Getters -----
-    public String getTitle() {
-        return title;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public String getMessage() {
-        return message;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-
-    /**
-     * Returns the document ID of the notification.
-     * @return The notification ID.
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Sets the document ID for the notification.
-     * This is typically used after fetching the document from Firestore.
-     * @param id The document ID from Firestore.
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-
-    public String getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(String profileId) {
-        this.profileId = profileId;
-    }
-
-
-
-    public String getRecipientId() {
-        return recipientId;
-    }
-
-    public String getEventId() {
-        return eventId;
-    }
-
-    public String getSenderId() {
-        return senderId;
-    }
-
-    public String getReceiverId() {
-        return receiverId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    // ----- Setters -----
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setRecipientId(String recipientId) {
-        this.recipientId = recipientId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
-
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
+    public Date getTimestamp() { return timestamp; }
+    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
 }

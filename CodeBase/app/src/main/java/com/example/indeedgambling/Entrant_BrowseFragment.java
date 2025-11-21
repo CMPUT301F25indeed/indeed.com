@@ -56,8 +56,7 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
         homeBtn.setOnClickListener(view ->
                 NavHostFragment.findNavController(Entrant_BrowseFragment.this)
-                        .navigate(R.id.action_entrantBrowseFragment_to_entrantHomeFragment));
-
+                        .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment));
 
         // 🔹 Added: Filter button click opens dialog
         Button filterBtn = v.findViewById(R.id.entrant_filter_button_browse);
@@ -71,7 +70,7 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         Bundle bundle = new Bundle();
         bundle.putSerializable("event", e);
         NavHostFragment.findNavController(this)
-                .navigate(R.id.action_entrantBrowseFragment_to_eventDetailsFragment, bundle);
+                .navigate(R.id.action_entrant_BrowseFragment_to_eventDetailsFragment, bundle);
     }
 
     // ----------------------------------------------------

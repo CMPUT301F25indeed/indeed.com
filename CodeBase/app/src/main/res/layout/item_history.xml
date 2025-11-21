@@ -1,42 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:padding="12dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/list_item_background">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/history_event_title"
-        android:textSize="18sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Event Title"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/history_event_desc"
-        android:textSize="14sp"
-        android:textColor="@color/black"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp" />
-
-    <TextView
-        android:id="@+id/history_event_date"
-        android:textSize="13sp"
-        android:textColor="@color/darker_gray"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp" />
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/history_event_status"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        android:textColor="@color/teal_700"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp" />
+        android:text="Joined / Invited / Attended"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp"/>
 
 </LinearLayout>

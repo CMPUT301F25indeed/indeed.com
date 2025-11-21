@@ -2,8 +2,6 @@ package com.example.indeedgambling;
 
 import android.util.Log;
 
-
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -44,11 +42,6 @@ import com.google.firebase.firestore.*;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import java.util.function.Consumer;
-
-
 
 /**
  * Firebase ViewModel responsible for handling all Firestore operations
@@ -786,63 +779,5 @@ public class FirebaseViewModel extends ViewModel {
                     .addOnFailureListener(onErr::accept);
 
         }).addOnFailureListener(onErr::accept);
-
-
     }
-
-    // *** Fetch notifications for a specific entrant
-    public void fetchUserNotifications(String userId,
-                                       Consumer<List<Notification>> onResult,
-                                       Consumer<Exception> onError) {
-        FirebaseFirestore.getInstance()
-                .collection("notifications")
-                .whereEqualTo("receiverId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(q -> onResult.accept(q.toObjects(Notification.class)))
-                .addOnFailureListener(onError::accept);
-    }
-
-
-
-    public void fetchUserNotifications(String profileId,
-                                       OnNotificationsFetched callback,
-                                       OnError errorCallback) {
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("Notifications")
-                .whereEqualTo("profileId", profileId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (querySnapshot.isEmpty()) {
-                        callback.onFetched(new ArrayList<>());
-                        return;
-                    }
-                    List<Notification> notifications = new ArrayList<>();
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
-                        Notification notif = doc.toObject(Notification.class);
-                        notif.setId(doc.getId()); // store document id for updates
-                        notifications.add(notif);
-                    }
-                    callback.onFetched(notifications);
-                })
-                .addOnFailureListener(error -> {
-                    errorCallback.onError(error);
-                });
-    }
-
-    // Interfaces for callbacks
-    public interface OnNotificationsFetched {
-        void onFetched(List<Notification> notifications);
-    }
-
-    public interface OnError {
-        void onError(Exception e);
-    }
-
-
-
-
 }
