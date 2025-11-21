@@ -26,6 +26,7 @@ public class Entrant_HomeFragment extends Fragment {
      * ViewModel holding the current Entrant data.
      */
     private EntrantViewModel entrantVM;
+    private FirebaseViewModel fvm;
 
     /**
      * Default constructor.
@@ -57,8 +58,7 @@ public class Entrant_HomeFragment extends Fragment {
         options.setAdapter(adapter);
 
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
-        // Firebase so below line irrelevant for now
-        //FirebaseViewModel fwm = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
+        fvm = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
         Profile e = entrantVM.getCurrentEntrant();
         greeting.setText("Hi " + e.getPersonName());

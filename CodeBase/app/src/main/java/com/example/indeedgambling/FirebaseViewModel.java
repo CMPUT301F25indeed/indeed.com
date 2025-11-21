@@ -649,7 +649,7 @@ public class FirebaseViewModel extends ViewModel {
 
     public void signUpForEvent(String eventId, String entrantId, Runnable onSuccess, Consumer<Exception> onFailure) {
         db.collection("events").document(eventId)
-                .update("participants", FieldValue.arrayUnion(entrantId))
+                .update("acceptedEntrants", FieldValue.arrayUnion(entrantId))
                 .addOnSuccessListener(aVoid -> onSuccess.run())
                 .addOnFailureListener(onFailure::accept);
     }

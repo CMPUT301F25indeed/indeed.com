@@ -17,45 +17,53 @@ public class EntrantViewModel extends ViewModel {
     /** Stores the currently logged-in entrant profile */
     private final MutableLiveData<Entrant> entrant = new MutableLiveData<>();
 
-    /** Stores the event currently selected by entrant (when browsing or joining) */
-    private final MutableLiveData<Event> selectedEvent = new MutableLiveData<>();
 
     /**
      * Sets the logged-in entrant profile
-     *
-     * @param e Entrant object of the logged-in user
-     */
+     * @param e Entrant object of the logged-in user*/
     public void setEntrant(@NonNull Entrant e) {
         entrant.setValue(e);
     }
 
-    /**
-     * @return Entrant object for direct access (not observable)
-     */
+    /** @return Entrant object for direct access*/
     public Entrant getCurrentEntrant() {
         return entrant.getValue();
     }
 
-    /**
-     * @return LiveData for observing entrant profile changes from UI
-     */
+    /**@return LiveData for observing entrant profile changes from UI*/
     public MutableLiveData<Entrant> getEntrant() {
         return entrant;
     }
 
-    /**
-     * Sets the event currently selected by the entrant
-     *
-     * @param e event selected
-     */
-    public void setSelectedEvent(Event e) {
-        selectedEvent.setValue(e);
+    public String returnID() {
+        Entrant e = entrant.getValue();
+        return (e != null) ? e.getProfileId() : null;
     }
 
-    /**
-     * @return LiveData for observing selected event changes
-     */
-    public MutableLiveData<Event> getSelectedEvent() {
-        return selectedEvent;
+
+    public void addEventToEntrant(@NonNull String eventId) {
+        Entrant e = entrant.getValue();
+        if (e != null) {
+            e.add2Entrant(eventId);
+            entrant.setValue(e); // notify observers
+        }
     }
+
+    public void removeEventFromEntrant(@NonNull String eventId) {
+        Entrant e = entrant.getValue();
+        if (e != null) {
+            e.remove2Entrant(eventId);
+            entrant.setValue(e); // notify observers
+        }
+    }
+
+    public void inviteEntrantRemoveWaitlist(@NonNull String eventId) {
+        Entrant e = entrant.getValue();
+        if (e != null) {
+            e.removeWaitlistedEvent(eventId);
+            entrant.setValue(e); // notify observers
+        }
+    }
+
+
 }
