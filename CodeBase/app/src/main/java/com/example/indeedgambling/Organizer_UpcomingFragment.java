@@ -631,7 +631,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                     update.put("waitingList",event.getWaitingList());
                     update.put("invitedList",event.getInvitedList());
 
-                    Data.updateEvent(event.getEventId(), update, ()->{RefreshWaitlist(event,waitlistView);}, e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+                    Data.updateEvent(event.getEventId(),
+                            update,
+                            ()->{RefreshProfileList(waitlistView,event);},
+                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
 
                 }))
                 .setNegativeButton("Cancel",null)
@@ -660,21 +663,10 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     private void RefreshProfileList(ListView ProfileList, Event event){
         new Thread(()->{
-            Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,ProfileList);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
+            Data.getEventWaitlist(event.getEventId(),
+                    p->{requireActivity().runOnUiThread(()->{UpdateProfileList(p,ProfileList);});},
+                    e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
         }).start();
-    }
-
-    /**
-     * Refreshes the waitlist for a given event and updates the ListView.
-     * Runs on a separate thread than the GUI
-     * @param event Event whose waitlist will be refreshed.
-     * @param waitlist ListView to update.
-     */
-    private void RefreshWaitlist(Event event, ListView waitlist){
-        new Thread(()->{Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,waitlist);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, event.getWaitingList());
-            waitlist.setAdapter(adapter);}).start();
-
     }
 
     /** Refreshes the Upcoming Event list using a separate Thread
