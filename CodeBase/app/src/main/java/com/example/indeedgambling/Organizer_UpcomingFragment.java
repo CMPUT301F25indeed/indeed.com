@@ -243,6 +243,11 @@ public class Organizer_UpcomingFragment extends Fragment {
             if (!MaxEnt.isBlank()){
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
             }
+            // Generate QR code for the new event
+            Bitmap qrCodeBitmap = CreatedEvent.generateQRCode();
+            if (qrCodeBitmap != null) {
+                Log.d("QR_CODE", "QR code generated for new event: " + CreatedEvent.getEventName());
+            }
             Data.Add(CreatedEvent);
 
 
@@ -327,8 +332,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         TextView RunTime = popupView.findViewById(R.id.Organizer_EventPopup_EventRuntime);
         TextView Capacity = popupView.findViewById(R.id.Organizer_EventPopup_Capacity);
 
-
-                                    //Setting pop-up to event data
+        //Setting pop-up to event data
 
         //Event Poster
         Button updatePosterButton = popupView.findViewById(R.id.btnUpdatePoster);
@@ -393,7 +397,13 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
 
-        //TODO:QR CODE
+        Bitmap qrBitmap = event.generateQRCode();
+        if (qrBitmap != null) {
+            QRCode.setImageBitmap(qrBitmap);
+        } else {
+            QRCode.setImageResource(android.R.drawable.ic_dialog_alert);
+            Toast.makeText(requireContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+        }
 
 
         //Description
