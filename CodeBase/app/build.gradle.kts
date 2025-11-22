@@ -59,6 +59,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.ext.junit)
+    implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.5.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
 
@@ -73,6 +76,7 @@ dependencies {
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    androidTestImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.0.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.0.1")
 }
