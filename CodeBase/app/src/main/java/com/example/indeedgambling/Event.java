@@ -1,6 +1,12 @@
 package com.example.indeedgambling;
 
+import android.graphics.Bitmap;
 import android.util.Log;
+import com.example.indeedgambling.QRCodeGenerator;
+
+import androidx.annotation.NonNull;
+
+
 
 import androidx.annotation.NonNull;
 
@@ -24,7 +30,7 @@ public class Event implements Serializable {
     //US: 02.03.01
     private int maxWaitingEntrants;
     private String imageUrl;
-    private String qrCodeURL;
+    //private String qrCodeURL;
     private String status;    // planned/open/closed/completed
     private String criteria;  // lottery notes
     private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs
@@ -84,7 +90,7 @@ public class Event implements Serializable {
 
         category = Category;
 
-        qrCodeURL = QRCodeURL;
+        //qrCodeURL = QRCodeURL;
 
         this.status = getStatus();
 
@@ -145,7 +151,7 @@ public class Event implements Serializable {
 
         category = Category;
 
-        qrCodeURL = QRCodeURL;
+        //qrCodeURL = QRCodeURL;
 
         this.status = getStatus();
 
@@ -201,7 +207,7 @@ public class Event implements Serializable {
 
         category = Category;
 
-        qrCodeURL = "";
+        //qrCodeURL = "";
 
         this.status = getStatus();
 
@@ -375,16 +381,20 @@ public class Event implements Serializable {
     /** Returns the string of the URL for the QR.
      * @return QR URL string
      */
-    public String getQrCodeURL() {
-        return qrCodeURL;
+//    public String getQrCodeURL() {
+//        return qrCodeURL;
+//    }
+//
+//    /** Updates the QRCodeURL
+//     * @param qrCodeURL
+//     */
+    public Bitmap generateQRCode() {
+        QRCodeGenerator qrService = new QRCodeGenerator();
+        return qrService.generateEventQRCode(this);
     }
-
-    /** Updates the QRCodeURL
-     * @param qrCodeURL
-     */
-    public void setQrCodeURL(String qrCodeURL) {
-        this.qrCodeURL = qrCodeURL;
-    }
+//    public void setQrCodeURL(String qrCodeURL) {
+//        this.qrCodeURL = qrCodeURL;
+//    }
 
     /** Updates the status of the event to the current moment before returning.
      * Registration not yet open: Planned
