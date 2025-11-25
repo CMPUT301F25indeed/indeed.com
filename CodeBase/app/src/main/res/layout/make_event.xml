@@ -40,7 +40,7 @@
             android:id="@+id/NewEventPopup_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Location"
+            android:hint="Location (Optional)"
             android:layout_marginTop="8dp"/>
 
         <TextView
@@ -72,8 +72,6 @@
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
             android:visibility="gone" />
-
-
 
         <TextView
             android:layout_width="match_parent"

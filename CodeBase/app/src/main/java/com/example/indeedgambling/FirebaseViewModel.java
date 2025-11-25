@@ -317,7 +317,6 @@ public class FirebaseViewModel extends ViewModel {
 
     /**
      * Returns the waitlist for the event matching the eventID
-     * onResult is the
      *
      * @param eventID  EventID to find waitlist of
      * @param onResult code to be run after success with the Profile Data.
@@ -331,17 +330,41 @@ public class FirebaseViewModel extends ViewModel {
         EVENTS.document(eventID).get().addOnSuccessListener(e -> {
             //Getting Profiles saved under event waitlist
             List<String> result = e.toObject(Event.class).getWaitingList();
-            Log.d("FIREBASE TEST", result.toString());
+            Log.d("FIREBASE Pull: getEventWaitList (event)", result.toString());
             if (!result.isEmpty()) {
+                getProfiles(result,onResult,onErr);/*
                 PROFILES.whereIn("profileId", result)
                         .orderBy("personName")
                         .get()
                         .addOnSuccessListener(p -> {
+                            Log.d("FIREBASE Pull: getEventWaitList (profiles)", p.toObjects(Profile.class).toString());
                             onResult.accept(p.toObjects(Profile.class));
                         })
-                        .addOnFailureListener(onErr::accept);
+                        .addOnFailureListener(onErr::accept);*/
             }
         }).addOnFailureListener(onErr::accept);
+    }
+
+    /** Gets the profile objects for all the passed IDs
+     *
+     * @param ProfileIDs IDs of the profiles we want
+     * @param onResult What to do on successful retrieval
+     * @param onErr What to do on a failed query
+     */
+    public void getProfiles(List<String> ProfileIDs, Consumer<List<Profile>> onResult, Consumer<Exception> onErr){
+        if (ProfileIDs.isEmpty()){
+            onResult.accept(new ArrayList<>());
+            return;
+        }
+
+        //Create phoney thing to return.
+        new Thread(()->{PROFILES.whereIn("profileId",ProfileIDs)
+                .orderBy("personName")
+                .get()
+                .addOnSuccessListener(p->{
+                    onResult.accept(p.toObjects(Profile.class));
+                })
+                .addOnFailureListener(onErr::accept);}).start();
     }
 
     /**
@@ -367,6 +390,9 @@ public class FirebaseViewModel extends ViewModel {
                             onResult.accept(p.toObjects(Profile.class));
                         })
                         .addOnFailureListener(onErr::accept);
+            }
+            else{
+                onResult.accept(new ArrayList<>());
             }
         }).addOnFailureListener(onErr::accept);
     }

@@ -8,7 +8,6 @@ import android.net.Uri;
 
 
 import android.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -19,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -31,8 +29,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.firebase.firestore.ListenerRegistration;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -56,26 +57,50 @@ import java.util.Map;
 
 public class Organizer_UpcomingFragment extends Fragment {
 
+    //Server info
     private FirebaseViewModel Data;
     private OrganizerViewModel organizerVM;
     private String orgID;
-    private View view;
-    private ListView EventList;
 
+    //Local storage of server info
+
+    //EventList Array
+    ArrayList<Event> EventArray = new ArrayList<>();
+    ArrayAdapter<Event> UpcomingEventsAdapter;
+
+
+
+
+
+    //Other
     private static final int PICK_IMAGE_REQUEST = 999;
     private Uri selectedImageUri;
     private Event currentEventForUpdate;
-
     private Uri selectedPosterUri;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
+        //Views
+        View view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
         Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
         orgID = organizerVM.getOrganizer().getValue().getProfileId();
+
+        //Displaying Organizer's events
+        //Event adapter setup
+        UpcomingEventsAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_list_item_1,EventArray);
+
+        //Pull data
+        ListView eventList = view.findViewById(R.id.Organizer_UpcomingEventList);
+        eventList.setAdapter(UpcomingEventsAdapter);
+        RefreshUpcomingEventList();
+
+
+
+                    //Button Functionality
+
 
 
         //HomeButton Function
@@ -84,12 +109,9 @@ public class Organizer_UpcomingFragment extends Fragment {
             NavHostFragment.findNavController(this).navigate(R.id.action_organizerUpcomingFragment_to_organizerHomeFragment);
         });
 
-        //Displaying Organizer's events
-        EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-        RefreshUpcomingEventList();
 
         // Show popup when clicking an event in the list
-        EventList.setOnItemClickListener((parent, itemView, position, id) -> {
+        eventList.setOnItemClickListener((parent, itemView, position, id) -> {
             Event clickedEvent = (Event) parent.getItemAtPosition(position);
             showEventPopup(clickedEvent); // Back to original
         });
@@ -97,7 +119,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //+New Event functionality.
         Button NewEvent = view.findViewById(R.id.Organizer_Upcoming_NewEventButton);
-        NewEvent.setOnClickListener(v -> { showNewEventPopup();});
+        NewEvent.setOnClickListener(v -> {showNewEventPopup();});
 
         return view;
 
@@ -213,11 +235,11 @@ public class Organizer_UpcomingFragment extends Fragment {
                 WarningToast("Description cannot be empty!");
                 return;
             }
-            //Require Location
-            if (Location.isEmpty()){
+            //Do not Require Location
+            /*if (Location.isEmpty()){
                 WarningToast("Must set a Location!");
                 return;
-            }
+            }*/
             //Require Category
             if (Category.isEmpty()){
                 WarningToast("Event must have a Category!");
@@ -382,20 +404,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Invited List Button Pop-up
         InviteListButton.setOnClickListener(v -> {
-            Log.d("DEBUG","PRE BUILDPOPUP INVITEDLIST: ".concat(event.getInvitedList().toString()));
-            View listView = inflater.inflate(R.layout.listview_popup, null);
-            ListView InvitedList = listView.findViewById(R.id.popUp_Listview);
-            //Putting on seperate Thread
-            //Data.getEventInvitedList(event.getEventId(),p->{UpdateProfileList(p,InvitedList);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
-            RefreshProfileList(InvitedList,event);
-
-            //Actual popup
-            Log.d("DEBUG","Building POPUP");
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Invited Entrants")
-                    .setView(listView)
-                    .setNegativeButton("Close", null)
-                    .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+            InviteListPopup(event);
         });
 
         //Show the Invite List Popup
@@ -435,9 +444,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .setNegativeButton("Never mind",null)
                     .show();
         });
-
-
-
 
 
         //Event Poster Buttons
@@ -576,19 +582,45 @@ public class Organizer_UpcomingFragment extends Fragment {
     //US 02.02.01 && US 02.06.01
     private void WaitListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View popupView = inflater.inflate(R.layout.organization_event_popup, null);
+
         Log.d("DEBUG","PRE BUILDPOPUP");
         View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
-        ListView List = waitlistView.findViewById(R.id.waitlistpopup_listview);
+        ListView WaitingList = waitlistView.findViewById(R.id.waitlistpopup_listview);
 
-        //Putting on seperate Thread
-        //Data.getEventWaitlist(event.getEventId(),p->{UpdateProfileList(p,List);},e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
-        RefreshProfileList(List,event);
+        //Creating adapter for Listview (and attaching it)
+        ArrayList<Profile> WaitingListArray = new ArrayList<>();
+        ArrayAdapter<Profile> WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
+        WaitingList.setAdapter(WaitingListAdapter);
+
+
+        //Pull data
+        ListenerRegistration waitlistListener =
+                Data.getDb()
+                .collection("events")
+                .document(event.getEventId())
+                .addSnapshotListener((docSnapshot, error) -> {
+                    Event updatedEvent = docSnapshot.toObject(Event.class);
+                    //What happens when the event has an update on the server
+                    Data.getProfiles(updatedEvent.getWaitingList(),
+                            (p)->{
+                            //Update local data
+                                    event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
+                                    event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+
+                                    //Updating array
+                                    WaitingListArray.clear();
+                                    WaitingListArray.addAll(p);
+                                    WaitingListAdapter.notifyDataSetChanged();
+                                },
+                                e->{Log.d("Firestore Error",e.toString());});
+
+                });
+
 
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
         inviteEntrants.setOnClickListener(v1 -> {
-            InviteNumberPopup(event, inflater, List);
+            InviteNumberPopup(event, inflater, WaitingList);
         });
 
         //Waitlist Actual popup
@@ -596,6 +628,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Waitlist")
                 .setView(waitlistView)
                 .setNegativeButton("Close", null)
+                .setOnDismissListener((d)->{waitlistListener.remove();})
                 .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
@@ -633,7 +666,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                     Data.updateEvent(event.getEventId(),
                             update,
-                            ()->{RefreshProfileList(waitlistView,event);},
+                            ()->{},
                             e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
 
                 }))
@@ -642,32 +675,54 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
 
+    private void InviteListPopup(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+
+        View popupView = inflater.inflate(R.layout.listview_popup, null);
+        ListView inviteListView = popupView.findViewById(R.id.popUp_Listview);
+
+        ArrayList<Profile> invitedPeople = new ArrayList<>();
+        ArrayAdapter<Profile> inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
+        inviteListView.setAdapter(inviteListAdapter);
+
+
+        //Get the profiles from the server.
+        Data.getProfiles(event.getInvitedList(),(p)->{
+            invitedPeople.clear();
+            invitedPeople.addAll(p);
+            inviteListAdapter.notifyDataSetChanged();
+        },e -> {
+            Log.d("Firestore Error",e.toString());
+        });
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Invited Entrants")
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .show();
+
+    }
+
+
                 // -------------------- UPDATING LISTVIEWS -------------//
 
+    /** Updates what events are on the array
+     *
+     * @param eventsToShow
+     */
     private void UpdateEventList(List<Event> eventsToShow){
-        ArrayAdapter<Event> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, eventsToShow);
-        EventList.setAdapter(adapter);
+        //Update the array for display without replacing the reference
+        EventArray.clear();
+        EventArray.addAll(eventsToShow);
+        //Notify the adapter
+        UpcomingEventsAdapter.notifyDataSetChanged();
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
     }
 
-    /** Updates the passed ListView with the array passed. Sets the adapter
-     *
-     * @param itemsToShow
-     * @param EventList
-     */
-    private void UpdateProfileList(List<Profile> itemsToShow, ListView EventList){
-        ArrayAdapter<Profile> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, itemsToShow);
-        EventList.setAdapter(adapter);
-    }
 
 
-    private void RefreshProfileList(ListView ProfileList, Event event){
-        new Thread(()->{
-            Data.getEventWaitlist(event.getEventId(),
-                    p->{requireActivity().runOnUiThread(()->{UpdateProfileList(p,ProfileList);});},
-                    e -> {Log.d("DEBUG: Error", "Firebase Error".concat(e.toString()));});
-        }).start();
-    }
+
 
     /** Refreshes the Upcoming Event list using a separate Thread
      * Uses the Current Org ID for the Upcoming Events
