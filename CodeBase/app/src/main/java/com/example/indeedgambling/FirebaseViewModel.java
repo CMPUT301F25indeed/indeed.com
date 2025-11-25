@@ -1,5 +1,6 @@
 package com.example.indeedgambling;
 
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -39,6 +40,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.firestore.*;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -51,6 +53,10 @@ import java.util.Objects;
  * methods for CRUD operations and waiting list functionality.
  */
 public class FirebaseViewModel extends ViewModel {
+
+    private final com.google.firebase.storage.FirebaseStorage storage = com.google.firebase.storage.FirebaseStorage.getInstance();
+    private final com.google.firebase.storage.StorageReference storageRef = storage.getReference();
+
 
     // ---- Firestore ----
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -780,4 +786,60 @@ public class FirebaseViewModel extends ViewModel {
 
         }).addOnFailureListener(onErr::accept);
     }
+
+
+    /**
+     * Retrieves a Profile document from Firestore given its profile ID.
+     * @param profileId  The unique ID of the profile document to fetch.
+     * @param onSuccess  Callback executed when the profile is successfully retrieved.
+     *                   Receives the corresponding Profile object.
+     * @param onError    Callback executed when an error occurs, such as when the
+     *                   document is missing or the Firestore request fails.
+     */
+    public void getProfileById(String profileId,
+                               Consumer<Profile> onSuccess,
+                               Consumer<Exception> onError) {
+
+        PROFILES.document(profileId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        Profile p = document.toObject(Profile.class);
+                        onSuccess.accept(p);
+                    } else {
+                        onError.accept(new Exception("Profile not found"));
+                    }
+                })
+                .addOnFailureListener(onError::accept);
+    }
+
+    public void uploadProfilePicture(String profileId, Uri imageUri,
+                                     Consumer<String> onSuccess,
+                                     Consumer<Exception> onError) {
+
+        String fileName = "profile_pictures/" + profileId + "_" + UUID.randomUUID() + ".jpg";
+        StorageReference ref = storageRef.child(fileName);
+
+        ref.putFile(imageUri)
+                .addOnSuccessListener(task ->
+                        ref.getDownloadUrl().addOnSuccessListener(uri -> {
+                            onSuccess.accept(uri.toString());
+                        }).addOnFailureListener(onError::accept)
+                )
+                .addOnFailureListener(onError::accept);
+    }
+
+    public void updateProfilePicture(String profileId, String downloadUrl,
+                                     Runnable onOk, Consumer<Exception> onErr) {
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("profileImageUrl", downloadUrl);
+
+        PROFILES.document(profileId)
+                .update(updates)
+                .addOnSuccessListener(v -> onOk.run())
+                .addOnFailureListener(onErr::accept);
+    }
+
+
 }
