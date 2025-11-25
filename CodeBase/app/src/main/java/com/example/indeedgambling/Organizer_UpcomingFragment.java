@@ -355,6 +355,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button updatePosterButton = popupView.findViewById(R.id.btnUpdatePoster);
         Button WaitListButton = popupView.findViewById(R.id.Organizer_EventPopup_WaitList);
         Button InviteListButton = popupView.findViewById(R.id.Organizer_EventPopup_InvList);
+        Button CancelledListButton = popupView.findViewById(R.id.Organizer_EventPopup_CancelledList);
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
@@ -411,6 +412,12 @@ public class Organizer_UpcomingFragment extends Fragment {
         InviteListButton.setOnClickListener(v -> {
             InviteListPopup(event);
         });
+
+        //Cancelled List Button Pop-up
+        CancelledListButton.setOnClickListener(v -> {
+            CancelledListPopup(event);
+        });
+
 
         //Show the Invite List Popup
         AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
@@ -506,10 +513,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 viewPosterButton.setVisibility(View.GONE);
             }
         }
-
-
-
-
 
 
         Bitmap qrBitmap = event.generateQRCode();
@@ -659,7 +662,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
         inviteEntrants.setOnClickListener(v1 -> {
-            InviteNumberPopup(event, inflater, WaitingList);
+            InviteNumberPopup(event, inflater);
         });
 
         //Waitlist Actual popup
@@ -674,9 +677,8 @@ public class Organizer_UpcomingFragment extends Fragment {
     /** POPUP that invites the entrants according to the number inputted by the user.
      * @param event Event whose waitlist and invitelist to affect
      * @param inflater current screen inflator
-     * @param waitlistView The waitlist view we need to update after inviting entrants
      */
-    private void InviteNumberPopup(Event event, LayoutInflater inflater, ListView waitlistView){
+    private void InviteNumberPopup(Event event, LayoutInflater inflater){
         View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
 
@@ -713,6 +715,34 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
+    private void CancelledListPopup(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+
+        View popupView = inflater.inflate(R.layout.listview_popup, null);
+        ListView cancelledListView = popupView.findViewById(R.id.popUp_Listview);
+
+        ArrayList<Profile> cancelledPeople = new ArrayList<>();
+        ArrayAdapter<Profile> cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
+        cancelledListView.setAdapter(cancelledListAdapter);
+
+
+        //Get the profiles from the server.
+        Data.getProfiles(event.getCancelledEntrants(),(p)->{
+            cancelledPeople.clear();
+            cancelledPeople.addAll(p);
+            cancelledListAdapter.notifyDataSetChanged();
+        },e -> {
+            Log.d("Firestore Error",e.toString());
+        });
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Cancelled Entrants")
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .show();
+    }
+
 
     private void InviteListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -740,7 +770,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setNegativeButton("Close", null)
                 .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
-
     }
 
 

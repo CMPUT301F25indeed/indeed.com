@@ -98,6 +98,7 @@
                 </Button>
 
                 <Button
+                    android:id="@+id/Organizer_EventPopup_CancelledList"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
