@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/item_history_root"
+    android:id="@+id/item_notification_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="12dp">
 
     <TextView
-        android:id="@+id/history_event_title"
+        android:id="@+id/notification_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Event title"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:text="Notification message"
+        android:textSize="15sp" />
 
     <TextView
-        android:id="@+id/history_event_status"
+        android:id="@+id/notification_meta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Status"
-        android:textSize="14sp"
+        android:text="Type • Time"
+        android:textSize="12sp"
+        android:textColor="@android:color/darker_gray"
         android:layout_marginTop="4dp" />
 
 </LinearLayout>
