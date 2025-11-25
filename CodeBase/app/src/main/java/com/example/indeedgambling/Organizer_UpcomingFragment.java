@@ -356,6 +356,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button WaitListButton = popupView.findViewById(R.id.Organizer_EventPopup_WaitList);
         Button InviteListButton = popupView.findViewById(R.id.Organizer_EventPopup_InvList);
         Button CancelledListButton = popupView.findViewById(R.id.Organizer_EventPopup_CancelledList);
+        Button AcceptedListButton = popupView.findViewById(R.id.Organizer_EventPopup_AcceptedList);
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
@@ -418,13 +419,12 @@ public class Organizer_UpcomingFragment extends Fragment {
             CancelledListPopup(event);
         });
 
+        //Accepted List Pop-up
+        AcceptedListButton.setOnClickListener(v -> {
+            AcceptedListPopup(event);
+        });
 
-        //Show the Invite List Popup
-        AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
-                .setTitle(event.getEventName())
-                .setView(popupView)
-                .setNegativeButton("Close", null)
-                .show();
+
 
 
 
@@ -457,6 +457,12 @@ public class Organizer_UpcomingFragment extends Fragment {
                     .show();
         });
 
+
+        AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
+                .setTitle(event.getEventName())
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .show();
 
         //Event Poster Buttons
 
@@ -674,6 +680,99 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
+    /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
+     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
+     * @param event
+     */
+    private void CancelledListPopup(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+
+        View popupView = inflater.inflate(R.layout.listview_popup, null);
+        ListView cancelledListView = popupView.findViewById(R.id.popUp_Listview);
+
+        ArrayList<Profile> cancelledPeople = new ArrayList<>();
+        ArrayAdapter<Profile> cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
+        cancelledListView.setAdapter(cancelledListAdapter);
+
+
+        //Get the profiles from the server.
+        Data.getProfiles(event.getCancelledEntrants(),(p)->{
+            cancelledPeople.clear();
+            cancelledPeople.addAll(p);
+            cancelledListAdapter.notifyDataSetChanged();
+        },e -> {
+            Log.d("Firestore Error",e.toString());
+        });
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Cancelled Entrants")
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Replace Entrants", (dialog, which) -> {replaceEntrants(event,inflater);
+                //Refresh Data
+                RefreshUpcomingEventList();})
+                .show();
+    }
+
+
+    private void InviteListPopup(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+
+        View popupView = inflater.inflate(R.layout.listview_popup, null);
+        ListView inviteListView = popupView.findViewById(R.id.popUp_Listview);
+
+        ArrayList<Profile> invitedPeople = new ArrayList<>();
+        ArrayAdapter<Profile> inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
+        inviteListView.setAdapter(inviteListAdapter);
+
+
+        //Get the profiles from the server.
+        Data.getProfiles(event.getInvitedList(),(p)->{
+            invitedPeople.clear();
+            invitedPeople.addAll(p);
+            inviteListAdapter.notifyDataSetChanged();
+        },e -> {
+            Log.d("Firestore Error",e.toString());
+        });
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Invited Entrants")
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .show();
+    }
+
+
+    private void AcceptedListPopup(Event event){
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+
+        View popupView = inflater.inflate(R.layout.listview_popup, null);
+        ListView AcceptedListView = popupView.findViewById(R.id.popUp_Listview);
+
+        ArrayList<Profile> acceptedPeople = new ArrayList<>();
+        ArrayAdapter<Profile> acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
+        AcceptedListView.setAdapter(acceptedListAdapter);
+
+
+        //Get the profiles from the server.
+        Data.getProfiles(event.getAcceptedEntrants(),(p)->{
+            acceptedPeople.clear();
+            acceptedPeople.addAll(p);
+            acceptedListAdapter.notifyDataSetChanged();
+        },e -> {
+            Log.d("Firestore Error",e.toString());
+        });
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Accepted Entrants")
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .show();
+    }
+
+
     /** POPUP that invites the entrants according to the number inputted by the user.
      * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
      * @param event Event whose waitlist and invitelist to affect
@@ -716,69 +815,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-    /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
-     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
-     * @param event
-     */
-    private void CancelledListPopup(Event event){
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
 
-        View popupView = inflater.inflate(R.layout.listview_popup, null);
-        ListView cancelledListView = popupView.findViewById(R.id.popUp_Listview);
-
-        ArrayList<Profile> cancelledPeople = new ArrayList<>();
-        ArrayAdapter<Profile> cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
-        cancelledListView.setAdapter(cancelledListAdapter);
-
-
-        //Get the profiles from the server.
-        Data.getProfiles(event.getCancelledEntrants(),(p)->{
-            cancelledPeople.clear();
-            cancelledPeople.addAll(p);
-            cancelledListAdapter.notifyDataSetChanged();
-        },e -> {
-            Log.d("Firestore Error",e.toString());
-        });
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Cancelled Entrants")
-                .setView(popupView)
-                .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
-                .show();
-    }
-
-
-    private void InviteListPopup(Event event){
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-
-        View popupView = inflater.inflate(R.layout.listview_popup, null);
-        ListView inviteListView = popupView.findViewById(R.id.popUp_Listview);
-
-        ArrayList<Profile> invitedPeople = new ArrayList<>();
-        ArrayAdapter<Profile> inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
-        inviteListView.setAdapter(inviteListAdapter);
-
-
-        //Get the profiles from the server.
-        Data.getProfiles(event.getInvitedList(),(p)->{
-            invitedPeople.clear();
-            invitedPeople.addAll(p);
-            inviteListAdapter.notifyDataSetChanged();
-        },e -> {
-            Log.d("Firestore Error",e.toString());
-        });
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Invited Entrants")
-                .setView(popupView)
-                .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
-                .show();
-    }
-
-
-                // -------------------- UPDATING LISTVIEWS -------------//
+            // -------------------- UPDATING LISTVIEWS -------------//
 
     /** Updates what events are on the array
      *
@@ -794,8 +832,6 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
 
-
-
     /** Refreshes the Upcoming Event list using a separate Thread
      * Uses the Current Org ID for the Upcoming Events
      */
@@ -804,6 +840,60 @@ public class Organizer_UpcomingFragment extends Fragment {
             Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
         });}).start();
     }
+
+                // ------------- Helpers --------- //
+
+    /** Replaces the cancelled entrants with a number upto the cancelled number
+     * US 02.05.03
+     * @param event Event to shuffle entrants around in
+     * @param inflater Display
+     */
+    private void replaceEntrants(Event event, LayoutInflater inflater){
+        View helperView = inflater.inflate(R.layout.text_input_helper,null);
+        EditText numberInp = helperView.findViewById(R.id.EditText_helper);
+        int NumCancelled = event.getCancelledEntrants().size();
+        int numWaiting = event.getWaitingList().size();
+        if (numWaiting == 0){
+            WarningToast("No waiting entrants to invite!");
+            return;
+        }
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Number of entrants to replace (Up to ".concat(Integer.toString(Math.min(NumCancelled,numWaiting))).concat(")"))
+                .setView(helperView)
+                .setPositiveButton("Confirm",((dialog, which) -> {
+                    //Preventing non-numbers from being used
+                    int number;
+                    try {
+                        number = Integer.parseInt(numberInp.getText().toString().trim());
+                        //If a non-int was passed, do nothing
+                    } catch (Exception e) {
+                        number = 0;
+                        //throw new RuntimeException(e);
+                    }
+
+                    //limit to cancelled entrant count
+                    if (number > event.getCancelledEntrants().size()){
+                        number = event.getCancelledEntrants().size();
+                    }
+                    //Send out invites
+                    event.InviteEntrants(number);
+
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("waitingList",event.getWaitingList());
+                    update.put("invitedList",event.getInvitedList());
+
+                    Data.updateEvent(event.getEventId(),
+                            update,
+                            ()->{},
+                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+
+                }))
+                .setNegativeButton("Cancel",null)
+                .show();
+    }
+
+
+
 
     /** EoA function that makes Toasts easier. Standard Toast popup helper
      * @param warning Message for Toast to display

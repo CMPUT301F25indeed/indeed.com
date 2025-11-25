@@ -609,7 +609,7 @@ public class Event implements Serializable {
         return !(location == null);
     }
 
-    /** Moves a random selection of entrants from the waitlist to the invited list.
+    /** Moves a random selection of entrants from the waitlist to the invited list. DOES NOT TALK TO SERVER
      * @param number How many entrants to move. Will not throw error if limit exceeded, just stops.
      */
     public void InviteEntrants(int number){
@@ -640,6 +640,8 @@ public class Event implements Serializable {
             }
         }
     }
+
+
 
     /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER
      * @param entrantID ID to try to add
