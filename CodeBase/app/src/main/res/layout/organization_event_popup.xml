@@ -17,10 +17,11 @@
             android:text="View Event Poster"
             android:contentDescription="Event Poster"/>
 
+        <!-- to display qr code!-->
         <ImageView
             android:id="@+id/Organizer_EventPopup_QR_Code"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:contentDescription="Event QR Code"/>
 
         <!-- Formatting Description label and text -->

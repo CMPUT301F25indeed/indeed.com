@@ -263,6 +263,11 @@ public class Organizer_UpcomingFragment extends Fragment {
             if (!MaxEnt.isBlank()){
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
             }
+            // Generate QR code for the new event
+            Bitmap qrCodeBitmap = CreatedEvent.generateQRCode();
+            if (qrCodeBitmap != null) {
+                Log.d("QR_CODE", "QR code generated for new event: " + CreatedEvent.getEventName());
+            }
             Data.Add(CreatedEvent);
 
 
@@ -502,6 +507,40 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
         }
 
+
+
+
+
+
+        Bitmap qrBitmap = event.generateQRCode();
+        if (qrBitmap != null) {
+            QRCode.setImageBitmap(qrBitmap);
+        } else {
+            QRCode.setImageResource(android.R.drawable.ic_dialog_alert);
+            Toast.makeText(requireContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+        }
+
+
+        //Description
+        Description.setText(event.getDescription());
+
+        Criteria.setText("Event Criteria: ".concat(event.getCriteria()));
+
+        Category.setText("Event Cateogry: ".concat(event.getCategory()));
+
+        //Registration Period: Mon Nov 03 11:11:00 MST 2025 - Tues Nov 04 12:00:00 MST 2025
+        RegPeriod.setText("Registration Period: ".concat(event.getRegistrationStart().toString().concat(" - ").concat(event.getRegistrationEnd().toString())));
+
+        //RUNTIME
+        RunTime.setText("Event Runtime: ".concat(event.getEventStart().toString()).concat(" - ").concat(event.getEventEnd().toString()));
+
+        //Location
+        if (event.hasLocation()){
+            Location.setText("Location: ".concat(event.getLocation()));
+        }
+
+        //Event Capacity: 12/40, 3/Unlimited, 0/30
+        Capacity.setText("Waitlist Capacity: ".concat(Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
 
 
         //Notification Pop-up, closes event pop-up
