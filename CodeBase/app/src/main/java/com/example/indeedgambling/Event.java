@@ -674,10 +674,6 @@ public class Event implements Serializable {
 
     public String whichList(String profileID) {
 
-        if (invitedList.contains(profileID)) {
-            return "invited";
-        }
-
         if (acceptedEntrants.contains(profileID)) {
             return "accepted";
         }
@@ -686,11 +682,17 @@ public class Event implements Serializable {
             return "cancelled";
         }
 
+        if (invitedList.contains(profileID)) {
+            return "invited";
+        }
+
         if (waitingList.contains(profileID)) {
             return "waitlist";
         }
         return "none";
     }
+
+
 
 
 }

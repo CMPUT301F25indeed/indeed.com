@@ -77,7 +77,18 @@
             android:id="@+id/action_entrantHomeFragment_to_entrant_GuidelinesFragment"
             app:destination="@id/entrant_GuidelinesFragment" />
 
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_entrant_NotificationsFragment"
+            app:destination="@id/entrant_NotificationsFragment" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/entrant_NotificationsFragment"
+        android:name="com.example.indeedgambling.Entrant_NotificationsFragment"
+        android:label="Notifications" />
+
+
 
     <fragment
         android:id="@+id/eventDetailsFragment"
