@@ -235,11 +235,11 @@ public class Organizer_UpcomingFragment extends Fragment {
                 WarningToast("Description cannot be empty!");
                 return;
             }
-            //Do not Require Location
-            /*if (Location.isEmpty()){
+            //Require Location
+            if (Location.isEmpty()){
                 WarningToast("Must set a Location!");
                 return;
-            }*/
+            }
             //Require Category
             if (Category.isEmpty()){
                 WarningToast("Event must have a Category!");
@@ -675,6 +675,7 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
     /** POPUP that invites the entrants according to the number inputted by the user.
+     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
      * @param event Event whose waitlist and invitelist to affect
      * @param inflater current screen inflator
      */
@@ -715,6 +716,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
+    /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
+     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
+     * @param event
+     */
     private void CancelledListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
@@ -787,7 +792,6 @@ public class Organizer_UpcomingFragment extends Fragment {
         UpcomingEventsAdapter.notifyDataSetChanged();
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
     }
-
 
 
 
