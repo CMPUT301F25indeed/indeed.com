@@ -18,10 +18,21 @@ import androidx.navigation.fragment.NavHostFragment;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.TextUtils;
+import android.widget.ImageView;
+import android.util.Base64;
+
+import com.google.firebase.firestore.DocumentSnapshot;
+
+
 public class Admin_EventDetailsFragment extends Fragment {
 
     private FirebaseViewModel firebaseVM;
     private Event event;
+
+    private ImageView posterView;
 
     private TextView name, desc, loc, dates, reg, status, category, total;
     private Button backBtn, removeBtn;
@@ -33,6 +44,8 @@ public class Admin_EventDetailsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.admin_event_details_fragment, container, false);
+
+
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
@@ -46,6 +59,7 @@ public class Admin_EventDetailsFragment extends Fragment {
         total    = v.findViewById(R.id.event_total_entrant);
         backBtn  = v.findViewById(R.id.admin_event_back);
         removeBtn= v.findViewById(R.id.admin_event_remove);
+        posterView = v.findViewById(R.id.event_poster);
 
         if (getArguments() != null) {
             event = (Event) getArguments().getSerializable("event");
@@ -71,6 +85,36 @@ public class Admin_EventDetailsFragment extends Fragment {
 
     private void bindEvent() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
+
+        // reset poster to grey placeholder
+        if (posterView != null) {
+            posterView.setImageBitmap(null);
+            posterView.setBackgroundColor(0xFFEEEEEE);
+        }
+
+        // load poster if this event has one
+        String imageId = event.getImageUrl();
+        if (!TextUtils.isEmpty(imageId) && posterView != null) {
+            firebaseVM.getDb().collection("images")
+                    .document(imageId)
+                    .get()
+                    .addOnSuccessListener((DocumentSnapshot doc) -> {
+                        if (doc != null && doc.exists()) {
+                            String base64 = doc.getString("url");
+                            if (!TextUtils.isEmpty(base64)) {
+                                try {
+                                    byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+                                    Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                                    posterView.setBackgroundColor(0x00000000);
+                                    posterView.setImageBitmap(bmp);
+                                } catch (Exception ignored) {
+                                    // keep grey placeholder if decode fails
+                                }
+                            }
+                        }
+                    });
+        }
+
 
         name.setText(event.getEventName());
         desc.setText(event.getDescription());
