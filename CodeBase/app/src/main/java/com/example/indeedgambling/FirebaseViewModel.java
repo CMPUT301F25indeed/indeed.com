@@ -1163,6 +1163,11 @@ public class FirebaseViewModel extends ViewModel {
         }
 
 
+    public void deleteProfile(String profileID) {
+        PROFILES.document(profileID).delete();
     }
+
+
+}
 
 

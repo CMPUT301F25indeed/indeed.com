@@ -91,7 +91,7 @@ public class EntrantViewModel extends ViewModel {
                 e.setNotificationsEnabled((Boolean) updates.get(key));
             }
 
-            if (key.equals("lightModeEnabled")) {
+            if (key.equals("lightMode")) {
                 e.setLightMode((Boolean) updates.get(key));
             }
         }
