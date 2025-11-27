@@ -507,7 +507,9 @@ public class Organizer_UpcomingFragment extends Fragment {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
-                    // Upload updated image to /images collection
+
+                    String oldDocId = currentEventForUpdate.getImageUrl();
+
                     Map<String, Object> imageData = new HashMap<>();
                     imageData.put("eventId", currentEventForUpdate.getEventId());
                     imageData.put("uploaderId", orgID);
@@ -515,20 +517,40 @@ public class Organizer_UpcomingFragment extends Fragment {
                     imageData.put("uploadedAt", new Date());
                     imageData.put("approved", true);
 
-                    Data.getDb().collection("images")
-                            .add(imageData)
-                            .addOnSuccessListener(docRef -> {
-                                String imageDocId = docRef.getId();
+                    // Upload new poster after deleting old one
+                    Runnable uploadNewPoster = () -> {
+                        Data.getDb().collection("images")
+                                .add(imageData)
+                                .addOnSuccessListener(docRef -> {
+                                    String newDocId = docRef.getId();
+                                    Data.updateEvent(
+                                            currentEventForUpdate.getEventId(),
+                                            Map.of("imageUrl", newDocId),
+                                            () -> {
+                                                currentEventForUpdate.setImageUrl(newDocId);
+                                                Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
+                                            },
+                                            e -> Toast.makeText(requireContext(), "Failed to link new poster!", Toast.LENGTH_SHORT).show()
+                                    );
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show()
+                                );
+                    };
 
-                                Data.updateEvent(currentEventForUpdate.getEventId(),
-                                        Map.of("imageUrl", imageDocId),
-                                        () -> {
-                                            currentEventForUpdate.setImageUrl(imageDocId);
-                                            Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
-                                        },
-                                        e -> Toast.makeText(requireContext(), "Failed to link new poster!", Toast.LENGTH_SHORT).show());
-                            })
-                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show());
+                    // If old poster exists → delete it first
+                    if (oldDocId != null && !oldDocId.isEmpty()) {
+                        Data.getDb().collection("images").document(oldDocId)
+                                .delete()
+                                .addOnSuccessListener(unused -> uploadNewPoster.run())
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(requireContext(), "Old poster delete failed!", Toast.LENGTH_SHORT).show();
+                                    uploadNewPoster.run(); // still upload new one
+                                });
+                    } else {
+                        uploadNewPoster.run();
+                    }
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
