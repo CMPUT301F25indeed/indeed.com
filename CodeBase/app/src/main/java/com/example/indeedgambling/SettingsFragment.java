@@ -44,7 +44,7 @@ import android.util.Patterns;
 
 public class SettingsFragment extends Fragment {
     private FirebaseViewModel fvm;
-    public String profileID,role,name,email,phone;
+    public String profileID,role,name,email,phone,imageUrl;
 
     private EntrantViewModel entrantVM;
     private OrganizerViewModel organizerVM;
@@ -56,35 +56,15 @@ public class SettingsFragment extends Fragment {
 
     private boolean initialNotifications, initialLightMode;
     private Switch lightModeSwitch,notificationsSwitch;
+    private ImageView profileImage;
 
-    private ActivityResultLauncher<String> imagePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
-                if (uri != null) {
-                    selectedPfpUri = uri;
-                    uploadProfileImage(uri);
-                }
-            });
+
+    private ActivityResultLauncher<String> imagePickerLauncher;
+
 
     public SettingsFragment() {}
 
-    private void uploadProfileImage(Uri uri) {
-        fvm.uploadProfilePicture(profileID, uri,
-                downloadUrl -> {
-                    ImageView profileImage = requireView().findViewById(R.id.pfp_image);
 
-                    Glide.with(requireContext())
-                            .load(downloadUrl)
-                            //.placeholder(R.drawable.default_pfp)
-                            .into(profileImage);
-
-                    // also update Firestore profile
-                    fvm.updateProfilePicture(profileID, downloadUrl,
-                            () -> {}, err -> err.printStackTrace());
-                },
-                exception -> {
-                    exception.printStackTrace();
-                });
-    }
 
 
     @Override
@@ -94,6 +74,18 @@ public class SettingsFragment extends Fragment {
         if (getArguments() != null) {
             profileID = getArguments().getString("profileID");
         }
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null) {
+                        selectedPfpUri = uri; // store for later
+                        if (profileImage != null) {
+                            profileImage.setImageURI(uri); // show preview
+                        }
+                    }
+                }
+        );
+
     }
 
 
@@ -113,7 +105,7 @@ public class SettingsFragment extends Fragment {
 
         TextView roleText = view.findViewById(R.id.role_text_profile);
 
-        ImageView profileImage = view.findViewById(R.id.pfp_image);
+        profileImage = view.findViewById(R.id.pfp_image);
         Button editPfpButton = view.findViewById(R.id.pfp_edit_button);
 
         nameEdit = view.findViewById(R.id.settings_name);
@@ -125,6 +117,9 @@ public class SettingsFragment extends Fragment {
 
         Button deleteProfileButton = view.findViewById(R.id.delete_profile_button);
         Button saveButton = view.findViewById(R.id.save_settings_button);
+
+
+
 
         // load profile data
         fvm.getProfileById(profileID, profile -> {
@@ -138,6 +133,15 @@ public class SettingsFragment extends Fragment {
             phoneEdit.setText(phone);
 
             roleText.setText(role);
+
+            // Load the profile image
+            imageUrl = profile.getProfileImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                Glide.with(requireContext())
+                        .load(imageUrl)
+                        //.placeholder(R.drawable.default_pfp) // optional placeholder
+                        .into(profileImage);
+            }
 
             if (!role.equals("entrant")) {
                 deleteProfileButton.setVisibility(View.GONE);
@@ -171,8 +175,6 @@ public class SettingsFragment extends Fragment {
         editPfpButton.setOnClickListener(v -> {
             imagePickerLauncher.launch("image/*");
         });
-
-
 
 
 
@@ -276,25 +278,38 @@ public class SettingsFragment extends Fragment {
         if (!email.equals(emailEdit.getText().toString())) updates.put("email", newEmail);
         if (!phone.equals(phoneEdit.getText().toString())) updates.put("phone", newPhone);
         if (newNotifications != initialNotifications) updates.put("notificationsEnabled", newNotifications);
-        if (newLightMode != initialLightMode) updates.put("lightModeEnabled", newLightMode);
+        if (newLightMode != initialLightMode) updates.put("lightMode", newLightMode);
 
-        if (updates.isEmpty()) {
-            Toast.makeText(requireContext(), "No changes to save", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        if (!newEmail.equals(emailEdit.getText().toString())) {
-            fvm.checkEmailExists(newEmail, exists -> {
-                if (exists) {
-                    emailEdit.setError("Email already in use");
-                    emailEdit.requestFocus();
-                } else {
-                    commitSave(updates);
+        // Check email first
+        fvm.checkEmailExists(newEmail, exists -> {
+            if (exists && !newEmail.equals(email)) {
+                emailEdit.setError("Email already in use");
+                emailEdit.requestFocus();
+                return;
+            }
+
+
+            // If user picked a new profile picture, upload it first
+            if (selectedPfpUri != null) {
+                fvm.uploadProfilePicture(profileID, selectedPfpUri, downloadUrl -> {
+                    updates.put("profileImageUrl", downloadUrl);
+                    commitSave(updates); // commit after successful upload
+                }, exception -> {
+                    exception.printStackTrace();
+                    Toast.makeText(requireContext(), "Failed to upload image", Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                // No new image, just commit other updates
+                if (updates.isEmpty()) {
+                    Toast.makeText(requireContext(), "No changes to save", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-            }, err -> Toast.makeText(getContext(), "Error checking email: " + err.getMessage(), Toast.LENGTH_SHORT).show());
-        } else {
-            commitSave(updates);
-        }
+                commitSave(updates);
+            }
+
+        }, err -> Toast.makeText(getContext(), "Error checking email: " + err.getMessage(), Toast.LENGTH_SHORT).show());
+
     }
 
 
@@ -319,4 +334,23 @@ public class SettingsFragment extends Fragment {
     }
 
 
+    private void useProfileImage(Uri uri) {
+        fvm.uploadProfilePicture(profileID, uri,
+                downloadUrl -> {
+
+                    profileImage = requireView().findViewById(R.id.pfp_image);
+
+                    Glide.with(requireContext())
+                            .load(downloadUrl)
+                            //.placeholder(R.drawable.default_pfp)
+                            .into(profileImage);
+
+                    // also update Firestore profile
+                    fvm.updateProfilePicture(profileID, downloadUrl,
+                            () -> {}, err -> err.printStackTrace());
+                },
+                exception -> {
+                    exception.printStackTrace();
+                });
+    }
 }
