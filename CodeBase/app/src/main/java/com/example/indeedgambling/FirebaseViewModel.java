@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.Set;
 
 
 import androidx.annotation.Nullable;
@@ -932,68 +934,114 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     *
-     */
     public void deleteProfileAndCleanOpenEvents(Profile profile, Runnable onOk, Consumer<Exception> onErr) {
         String profileId = profile.getProfileId();
-        if (profileId == null) {
+        if (profileId == null || profileId.isEmpty()) {
             onErr.accept(new Exception("Profile ID missing"));
             return;
         }
 
-        PROFILES.document(profileId).get().addOnSuccessListener(snapshot -> {
-            Profile latest = snapshot.toObject(Profile.class);
-            List<String> joinedEvents = (latest != null && latest.getEventsJoined() != null)
-                    ? latest.getEventsJoined() : new ArrayList<>();
+        // Get latest profile from Firestore (to read waitlistedEvents field)
+        PROFILES.document(profileId).get()
+                .addOnSuccessListener(snapshot -> {
 
-            if (joinedEvents.isEmpty()) {
-                PROFILES.document(profileId).delete()
-                        .addOnSuccessListener(v -> onOk.run())
-                        .addOnFailureListener(onErr::accept);
-                return;
-            }
-
-            List<Task<DocumentSnapshot>> eventFetchTasks = new ArrayList<>();
-            for (String eventId : joinedEvents) {
-                eventFetchTasks.add(EVENTS.document(eventId).get());
-            }
-
-            Tasks.whenAllComplete(eventFetchTasks)
-                    .addOnSuccessListener(tasks -> {
-                        WriteBatch batch = db.batch();
-
-                        for (Task<DocumentSnapshot> t : eventFetchTasks) {
-                            if (!t.isSuccessful()) {
-                                continue;
+                    // read waitlistedEvents from profile doc (may be null)
+                    List<String> waitlistedEvents = new ArrayList<>();
+                    if (snapshot.exists()) {
+                        Object raw = snapshot.get("waitlistedEvents");
+                        if (raw instanceof List<?>) {
+                            for (Object o : (List<?>) raw) {
+                                if (o instanceof String) {
+                                    waitlistedEvents.add((String) o);
+                                }
                             }
-
-                            DocumentSnapshot doc = t.getResult();
-                            if (doc == null || !doc.exists()) {
-                                continue;
-                            }
-
-                            Event event = doc.toObject(Event.class);
-                            if (event == null) {
-                                continue;
-                            }
-
-                            DocumentReference eventRef = EVENTS.document(event.getEventId());
-                            batch.update(eventRef, "waitingList", FieldValue.arrayRemove(profileId));
-                            batch.update(eventRef, "invitedList", FieldValue.arrayRemove(profileId));
                         }
+                    }
 
-                        batch.commit()
-                                .addOnSuccessListener(a ->
-                                        PROFILES.document(profileId).delete()
-                                                .addOnSuccessListener(x -> onOk.run())
-                                                .addOnFailureListener(onErr::accept)
-                                )
-                                .addOnFailureListener(onErr::accept);
-                    })
-                    .addOnFailureListener(onErr::accept);
+                    // Query events where this profile is invited / accepted / cancelled
+                    Task<QuerySnapshot> invitedTask =
+                            EVENTS.whereArrayContains("invitedList", profileId).get();
+                    Task<QuerySnapshot> acceptedTask =
+                            EVENTS.whereArrayContains("acceptedEntrants", profileId).get();
+                    Task<QuerySnapshot> cancelledTask =
+                            EVENTS.whereArrayContains("cancelledEntrants", profileId).get();
 
-        }).addOnFailureListener(onErr::accept);
+                    Tasks.whenAllComplete(invitedTask, acceptedTask, cancelledTask)
+                            .addOnSuccessListener(tasks -> {
+
+                                // collect eventIds for each list type (to avoid duplicates)
+                                Set<String> waitlistEventIds = new HashSet<>();
+                                Set<String> invitedEventIds = new HashSet<>();
+                                Set<String> acceptedEventIds = new HashSet<>();
+                                Set<String> cancelledEventIds = new HashSet<>();
+
+                                // from profile.waitlistedEvents
+                                for (String evId : waitlistedEvents) {
+                                    if (evId != null && !evId.isEmpty()) {
+                                        waitlistEventIds.add(evId);
+                                    }
+                                }
+
+                                // from query: invitedList contains profileId
+                                if (invitedTask.isSuccessful() && invitedTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : invitedTask.getResult().getDocuments()) {
+                                        invitedEventIds.add(doc.getId());
+                                    }
+                                }
+
+                                // from query: acceptedEntrants contains profileId
+                                if (acceptedTask.isSuccessful() && acceptedTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : acceptedTask.getResult().getDocuments()) {
+                                        acceptedEventIds.add(doc.getId());
+                                    }
+                                }
+
+                                // from query: cancelledEntrants contains profileId
+                                if (cancelledTask.isSuccessful() && cancelledTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : cancelledTask.getResult().getDocuments()) {
+                                        cancelledEventIds.add(doc.getId());
+                                    }
+                                }
+
+                                WriteBatch batch = db.batch();
+
+                                // clean waitlist
+                                for (String eventId : waitlistEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "waitingList", FieldValue.arrayRemove(profileId));
+                                }
+
+                                // clean invited
+                                for (String eventId : invitedEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "invitedList", FieldValue.arrayRemove(profileId));
+                                }
+
+                                // clean accepted
+                                for (String eventId : acceptedEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "acceptedEntrants", FieldValue.arrayRemove(profileId));
+                                }
+
+                                // clean cancelled
+                                for (String eventId : cancelledEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "cancelledEntrants", FieldValue.arrayRemove(profileId));
+                                }
+
+                                // After cleaning events, delete the profile itself
+                                batch.commit()
+                                        .addOnSuccessListener(v ->
+                                                PROFILES.document(profileId).delete()
+                                                        .addOnSuccessListener(x -> onOk.run())
+                                                        .addOnFailureListener(onErr::accept)
+                                        )
+                                        .addOnFailureListener(onErr::accept);
+                            })
+                            .addOnFailureListener(onErr::accept);
+
+                })
+                .addOnFailureListener(onErr::accept);
     }
 
 
