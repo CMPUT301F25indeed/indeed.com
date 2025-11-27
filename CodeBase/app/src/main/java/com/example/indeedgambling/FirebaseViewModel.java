@@ -711,6 +711,76 @@ public class FirebaseViewModel extends ViewModel {
     }
 
     // -------------------------
+// Images (admin helpers)
+// -------------------------
+
+    /**
+     * Small wrapper that keeps both the Firestore doc id and the ImageUpload data.
+     * Used by the admin "review images" screen.
+     */
+    public static class ImageDoc {
+        private final String docId;
+        private final ImageUpload data;
+
+        public ImageDoc(String docId, ImageUpload data) {
+            this.docId = docId;
+            this.data = data;
+        }
+
+        public String getDocId() { return docId; }
+        public ImageUpload getData() { return data; }
+    }
+
+    /**
+     * Fetch all image metadata documents.
+     */
+    public void fetchAllImages(Consumer<List<ImageDoc>> onResult,
+                               Consumer<Exception> onErr) {
+        IMAGES.get()
+                .addOnSuccessListener(snap -> {
+                    List<ImageDoc> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
+                        ImageUpload img = doc.toObject(ImageUpload.class);
+                        if (img != null) {
+                            list.add(new ImageDoc(doc.getId(), img));
+                        }
+                    }
+                    onResult.accept(list);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * Delete an image metadata doc and also clear the poster URL
+     * on the related event (if eventId is not null).
+     */
+    public void deleteImageAndClearEventPoster(String imageDocId,
+                                               @Nullable String eventId,
+                                               Runnable onOk,
+                                               Consumer<Exception> onErr) {
+
+        WriteBatch batch = db.batch();
+
+        // delete image metadata
+        batch.delete(IMAGES.document(imageDocId));
+
+        // optionally clear event imageUrl
+        if (eventId != null && !eventId.isEmpty()) {
+            DocumentReference eventRef = EVENTS.document(eventId);
+            Map<String, Object> u = new HashMap<>();
+            u.put("imageUrl", null);
+            batch.update(eventRef, u);
+        }
+
+        batch.commit()
+                .addOnSuccessListener(v -> onOk.run())
+                .addOnFailureListener(onErr::accept);
+    }
+
+
+
+
+    // -------------------------
     // Logs
     // -------------------------
 
@@ -824,6 +894,9 @@ public class FirebaseViewModel extends ViewModel {
         return list;
     }
 
+    /**
+     *
+     */
     public void signUpForEvent(String eventId, String entrantId, Runnable onSuccess, Consumer<Exception> onFailure) {
         db.collection("events").document(eventId)
                 .update("acceptedEntrants", FieldValue.arrayUnion(entrantId))
@@ -966,4 +1039,128 @@ public class FirebaseViewModel extends ViewModel {
 
         }).addOnFailureListener(onErr::accept);
     }
+
+
+
+    // -------------------------
+// Admin - delete event + cleanup
+// -------------------------
+
+    /**
+     * Admin-only: deletes an event and cleans related data:
+     * - removes eventId from entrants' arrays (waitlistedEvents, allEvents, eventsJoined)
+     * - deletes invitations for this event
+     * - deletes notifications for this event
+     * - deletes image metadata for this event
+     * - deletes the event document itself
+     */
+    public void adminDeleteEventAndCleanup(
+            String eventId,
+            Runnable onOk,
+            Consumer<Exception> onErr
+    ) {
+        if (eventId == null || eventId.isEmpty()) {
+            onErr.accept(new IllegalArgumentException("eventId is required"));
+            return;
+        }
+
+        EVENTS.document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Event event = doc.toObject(Event.class);
+                    if (event == null) {
+                        onErr.accept(new Exception("Event not found"));
+                        return;
+                    }
+
+                    // collect all entrant/profile IDs involved
+                    List<String> allIds = new ArrayList<>();
+
+                    if (event.getWaitingList() != null) {
+                        allIds.addAll(event.getWaitingList());
+                    }
+                    if (event.getInvitedList() != null) {
+                        allIds.addAll(event.getInvitedList());
+                    }
+                    if (event.getAcceptedEntrants() != null) {
+                        allIds.addAll(event.getAcceptedEntrants());
+                    }
+                    if (event.getCancelledEntrants() != null) {
+                        allIds.addAll(event.getCancelledEntrants());
+                    }
+
+                    // remove duplicates
+                    List<String> uniqueIds = new ArrayList<>();
+                    for (String id : allIds) {
+                        if (id != null && !uniqueIds.contains(id)) {
+                            uniqueIds.add(id);
+                        }
+                    }
+
+                    // load notifications + images for this event
+                    Task<QuerySnapshot> notifTask =
+                            NOTIFS.whereEqualTo("eventId", eventId).get();
+                    Task<QuerySnapshot> imageTask =
+                            IMAGES.whereEqualTo("eventId", eventId).get();
+
+                    Tasks.whenAllComplete(notifTask, imageTask)
+                            .addOnSuccessListener(tasks -> {
+
+                                WriteBatch batch = db.batch();
+
+                                // delete event doc
+                                DocumentReference eventRef = EVENTS.document(eventId);
+                                batch.delete(eventRef);
+
+                                // clean entrant profile arrays
+                                for (String profileId : uniqueIds) {
+                                    DocumentReference profRef = PROFILES.document(profileId);
+                                    batch.update(profRef, "waitlistedEvents",
+                                            FieldValue.arrayRemove(eventId));
+                                    batch.update(profRef, "allEvents",
+                                            FieldValue.arrayRemove(eventId));
+                                    batch.update(profRef, "eventsJoined",
+                                            FieldValue.arrayRemove(eventId));
+                                }
+
+                                // delete invitations (eventId_entrantId)
+                                for (String profileId : uniqueIds) {
+                                    if (profileId == null) continue;
+                                    String invId = eventId + "_" + profileId;
+                                    DocumentReference invRef = INVITES.document(invId);
+                                    batch.delete(invRef);
+                                }
+
+                                // delete notifications for this event
+                                if (notifTask.isSuccessful() && notifTask.getResult() != null) {
+                                    for (DocumentSnapshot nDoc : notifTask.getResult().getDocuments()) {
+                                        batch.delete(nDoc.getReference());
+                                    }
+                                }
+
+                                // delete image metadata for this event
+                                if (imageTask.isSuccessful() && imageTask.getResult() != null) {
+                                    for (DocumentSnapshot iDoc : imageTask.getResult().getDocuments()) {
+                                        batch.delete(iDoc.getReference());
+                                    }
+                                }
+
+                                batch.commit()
+                                        .addOnSuccessListener(v -> onOk.run())
+                                        .addOnFailureListener(onErr::accept);
+
+                            })
+                            .addOnFailureListener(onErr::accept);
+
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+
+
+
+
+
 }
+
+
