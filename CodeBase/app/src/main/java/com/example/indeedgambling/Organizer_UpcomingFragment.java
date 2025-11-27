@@ -857,6 +857,9 @@ public class Organizer_UpcomingFragment extends Fragment {
             WarningToast("No waiting entrants to invite!");
             return;
         }
+        if (NumCancelled == 0){
+            WarningToast("There are no Cancelled Entrants to replace!");
+        }
         new AlertDialog.Builder(requireContext())
                 .setTitle("Number of entrants to replace (Up to ".concat(Integer.toString(Math.min(NumCancelled,numWaiting))).concat(")"))
                 .setView(helperView)
