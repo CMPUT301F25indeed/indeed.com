@@ -38,6 +38,7 @@ public class OrganizerViewModel extends ViewModel {
     public void setOrganizer(Profile p) {
         organizer.setValue(p);
     }
+    public Profile getCurrentOrganizer(){return organizer.getValue();}
 
     /**
      * @return LiveData for organizer profile (UI can observe)
@@ -145,4 +146,35 @@ public class OrganizerViewModel extends ViewModel {
         // For now, return empty LiveData
         return eventLiveData;
     }
+
+    public void updateSettings(Map<String, Object> updates) {
+        Profile p = organizer.getValue();
+        if (p == null) return;
+
+        for (String key : updates.keySet()) {
+
+            if (key.equals("personName")) {
+                p.setPersonName((String) updates.get(key));
+            }
+
+            if (key.equals("email")) {
+                p.setEmail((String) updates.get(key));
+            }
+
+            if (key.equals("phone")) {
+                p.setPhone((String) updates.get(key));
+            }
+
+            if (key.equals("notificationsEnabled")) {
+                p.setNotificationsEnabled((Boolean) updates.get(key));
+            }
+
+            if (key.equals("lightModeEnabled")) {
+                p.setLightMode((Boolean) updates.get(key));
+            }
+        }
+
+        organizer.setValue(p);
+    }
+
 }

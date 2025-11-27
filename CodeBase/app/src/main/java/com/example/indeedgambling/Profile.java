@@ -95,7 +95,7 @@ public class Profile {
     public String getDeviceId() { return deviceId; }
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
-    public Boolean getLightMode() {
+    public Boolean isLightModeEnabled() {
         return lightMode;
     }
 

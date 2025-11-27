@@ -90,8 +90,13 @@ public class Entrant_HomeFragment extends Fragment {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.entrant_HistoryFragment);
             } else if (position == 2) {
+                Bundle args = new Bundle();
+                args.putString("profileID", e.getProfileId());
+
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.entrant_ProfileFragment);
+                        .navigate(R.id.settingsFragment, args);
+
+
             } else if (position == 3) {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.entrant_GuidelinesFragment);
