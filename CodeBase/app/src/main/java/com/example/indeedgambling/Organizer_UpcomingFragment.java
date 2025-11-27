@@ -374,40 +374,38 @@ public class Organizer_UpcomingFragment extends Fragment {
                                             //--    Setting Display Texts -- //
 
 
+
+
         //Description
         Description.setText(event.getDescription());
 
-        Criteria.setText("Event Criteria: ".concat(event.getCriteria()));
+        Criteria.setText(event.getCriteria());
 
-        Category.setText("Event Cateogry: ".concat(event.getCategory()));
+        Category.setText(event.getCategory());
 
         //Registration Period: Mon Nov 03 11:11:00 MST 2025 - Tues Nov 04 12:00:00 MST 2025
-        RegPeriod.setText("Registration Period: ".concat(event.getRegistrationStart().toString().concat(" - ").concat(event.getRegistrationEnd().toString())));
+        RegPeriod.setText(event.getRegistrationStart().toString().concat(" - ").concat(event.getRegistrationEnd().toString()));
 
         //RUNTIME
-        RunTime.setText("Event Runtime: ".concat(event.getEventStart().toString()).concat(" - ").concat(event.getEventEnd().toString()));
+        RunTime.setText(event.getEventStart().toString().concat(" - ").concat(event.getEventEnd().toString()));
 
         //Location
-        if (event.hasLocation()){
-            Location.setText("Location: ".concat(event.getLocation()));
-        }
+        Location.setText(event.getLocation());
 
         //Event Capacity: 12/40, 3/Unlimited, 0/30
-        Capacity.setText("Waitlist Capacity: ".concat(Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+        Capacity.setText((Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
 
 
 
 
 
-                                                    //-- Button Interactions -- //
+        //-- Button Interactions -- //
 
 
         //Waitlist Button Pop-up
         WaitListButton.setOnClickListener(v -> {
             WaitListPopup(event);
         });
-
-
 
         //Invited List Button Pop-up
         InviteListButton.setOnClickListener(v -> {
@@ -424,37 +422,10 @@ public class Organizer_UpcomingFragment extends Fragment {
             AcceptedListPopup(event);
         });
 
-
-
-
-
         //End Registration Now pop-up
         endRegButton.setOnClickListener(v -> {
             //Are you sure? popup
-
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Are you sure you want to end the registration period?")
-                    .setMessage("Doing so will close the event")
-                    .setPositiveButton("Yes", ((dialog, which) -> {
-                        event.endRegistration(); //Update local
-
-                        //Update Server
-                        Map<String, Object> update = new HashMap<>();
-                        update.put("registrationEnd",event.getRegistrationEnd());
-
-                        //Close popup of event on success and update events
-                        Data.updateEvent(event.getEventId(), update, ()->{
-                            WarningToast("Registration for ".concat(event.getEventName()).concat(" ended"));
-
-                            //Refresh page on success
-                            RefreshUpcomingEventList();
-                            },
-                                e -> Log.d("Firebase Error", "Error pushing registration changes to server:".concat(e.toString())));
-
-                        //Close event screen
-                    }))
-                    .setNegativeButton("Never mind",null)
-                    .show();
+            EndRegPopup(event);
         });
 
 
@@ -528,29 +499,6 @@ public class Organizer_UpcomingFragment extends Fragment {
             QRCode.setImageResource(android.R.drawable.ic_dialog_alert);
             Toast.makeText(requireContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
         }
-
-
-        //Description
-        Description.setText(event.getDescription());
-
-        Criteria.setText("Event Criteria: ".concat(event.getCriteria()));
-
-        Category.setText("Event Cateogry: ".concat(event.getCategory()));
-
-        //Registration Period: Mon Nov 03 11:11:00 MST 2025 - Tues Nov 04 12:00:00 MST 2025
-        RegPeriod.setText("Registration Period: ".concat(event.getRegistrationStart().toString().concat(" - ").concat(event.getRegistrationEnd().toString())));
-
-        //RUNTIME
-        RunTime.setText("Event Runtime: ".concat(event.getEventStart().toString()).concat(" - ").concat(event.getEventEnd().toString()));
-
-        //Location
-        if (event.hasLocation()){
-            Location.setText("Location: ".concat(event.getLocation()));
-        }
-
-        //Event Capacity: 12/40, 3/Unlimited, 0/30
-        Capacity.setText("Waitlist Capacity: ".concat(Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
-
 
         //Notification Pop-up, closes event pop-up
         notificationButton.setOnClickListener(v->{
@@ -834,6 +782,37 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                 }))
                 .setNegativeButton("Cancel",null)
+                .show();
+    }
+
+
+    /** Registration for ending the pop-up
+     *
+     * @param event
+     */
+    private void EndRegPopup(Event event){
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Are you sure you want to end the registration period?")
+                .setMessage("Doing so will close the event")
+                .setPositiveButton("Yes", ((dialog, which) -> {
+                    event.endRegistration(); //Update local
+
+                    //Update Server
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("registrationEnd",event.getRegistrationEnd());
+
+                    //Close popup of event on success and update events
+                    Data.updateEvent(event.getEventId(), update, ()->{
+                                WarningToast("Registration for ".concat(event.getEventName()).concat(" ended"));
+
+                                //Refresh page on success
+                                RefreshUpcomingEventList();
+                            },
+                            e -> Log.d("Firebase Error", "Error pushing registration changes to server:".concat(e.toString())));
+
+                    //Close event screen
+                }))
+                .setNegativeButton("Never mind",null)
                 .show();
     }
 
