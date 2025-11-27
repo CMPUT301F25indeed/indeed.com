@@ -373,9 +373,6 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                                             //--    Setting Display Texts -- //
 
-
-
-
         //Description
         Description.setText(event.getDescription());
 
@@ -397,29 +394,27 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
 
-
-
         //-- Button Interactions -- //
 
 
         //Waitlist Button Pop-up
         WaitListButton.setOnClickListener(v -> {
-            WaitListPopup(event);
+            WaitListPopup(event,Capacity);
         });
 
         //Invited List Button Pop-up
         InviteListButton.setOnClickListener(v -> {
-            InviteListPopup(event);
+            InviteListPopup(event,Capacity);
         });
 
         //Cancelled List Button Pop-up
         CancelledListButton.setOnClickListener(v -> {
-            CancelledListPopup(event);
+            CancelledListPopup(event,Capacity);
         });
 
         //Accepted List Pop-up
         AcceptedListButton.setOnClickListener(v -> {
-            AcceptedListPopup(event);
+            AcceptedListPopup(event,Capacity);
         });
 
         //End Registration Now pop-up
@@ -598,7 +593,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
     //US 02.02.01 && US 02.06.01
-    private void WaitListPopup(Event event){
+    private void WaitListPopup(Event event, TextView Capacity){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         Log.d("DEBUG","PRE BUILDPOPUP");
@@ -623,11 +618,18 @@ public class Organizer_UpcomingFragment extends Fragment {
                             (p)->{
                             //Update local data
                                     event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
+                                    event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+                                    event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
+                                    event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
+
 
                                     //Updating array
                                     WaitingListArray.clear();
                                     WaitingListArray.addAll(p);
                                     WaitingListAdapter.notifyDataSetChanged();
+
+                                    updateCapacityDisplay(Capacity,event);
+
                                 },
                                 e->{Log.d("Firestore Error",e.toString());});
 
@@ -637,6 +639,12 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
         inviteEntrants.setOnClickListener(v1 -> {
+            //Skip popup if there is nobody to invite
+            if (event.getWaitingList().isEmpty()){
+                WarningToast("Nobody to invite!");
+                return;
+            }
+
             InviteNumberPopup(event, inflater);
         });
 
@@ -653,7 +661,7 @@ public class Organizer_UpcomingFragment extends Fragment {
      * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
      * @param event
      */
-    private void CancelledListPopup(Event event){
+    private void CancelledListPopup(Event event, TextView Capacity){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -675,12 +683,17 @@ public class Organizer_UpcomingFragment extends Fragment {
                             Data.getProfiles(updatedEvent.getCancelledEntrants(),
                                     (p)->{
                                         //Update local data
+                                        event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
                                         event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+                                        event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
+                                        event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
 
                                         //Updating array
                                         cancelledPeople.clear();
                                         cancelledPeople.addAll(p);
                                         cancelledListAdapter.notifyDataSetChanged();
+
+                                        updateCapacityDisplay(Capacity,event);
                                     },
                                     e->{Log.d("Firestore Error",e.toString());});
 
@@ -699,7 +712,7 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
 
-    private void InviteListPopup(Event event){
+    private void InviteListPopup(Event event, TextView Capacity){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -721,12 +734,17 @@ public class Organizer_UpcomingFragment extends Fragment {
                             Data.getProfiles(updatedEvent.getInvitedList(),
                                     (p)->{
                                         //Update local data
+                                        event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
                                         event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+                                        event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
+                                        event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
 
                                         //Updating array
                                         invitedPeople.clear();
                                         invitedPeople.addAll(p);
                                         inviteListAdapter.notifyDataSetChanged();
+
+                                        updateCapacityDisplay(Capacity,event);
                                     },
                                     e->{Log.d("Firestore Error",e.toString());});
 
@@ -743,7 +761,7 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
 
-    private void AcceptedListPopup(Event event){
+    private void AcceptedListPopup(Event event, TextView Capacity){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -766,11 +784,16 @@ public class Organizer_UpcomingFragment extends Fragment {
                                     (p)->{
                                         //Update local data
                                         event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
+                                        event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+                                        event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
+                                        event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
 
                                         //Updating array
                                         acceptedPeople.clear();
                                         acceptedPeople.addAll(p);
                                         acceptedListAdapter.notifyDataSetChanged();
+
+                                        updateCapacityDisplay(Capacity,event);
                                     },
                                     e->{Log.d("Firestore Error",e.toString());});
 
@@ -940,8 +963,6 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
 
-
-
     /** EoA function that makes Toasts easier. Standard Toast popup helper
      * @param warning Message for Toast to display
      */
@@ -949,5 +970,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         Toast WarningToast = new Toast(requireContext());
         WarningToast.setText(warning);
         WarningToast.show();
+    }
+
+    private void updateCapacityDisplay(TextView Capacity, Event event){
+        Capacity.setText((Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+
+
     }
 }
