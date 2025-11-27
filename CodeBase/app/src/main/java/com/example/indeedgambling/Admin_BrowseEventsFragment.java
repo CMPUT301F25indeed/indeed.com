@@ -27,7 +27,7 @@ public class Admin_BrowseEventsFragment extends Fragment {
     private Button backBtn;
 
     private FirebaseViewModel firebaseVM;
-    private ArrayAdapter<Event> adapter;
+    private AdminEventCardAdapter adapter;
     private final List<Event> allEvents = new ArrayList<>();
 
     @Override
@@ -42,12 +42,13 @@ public class Admin_BrowseEventsFragment extends Fragment {
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
-        adapter = new ArrayAdapter<>(
+        adapter = new AdminEventCardAdapter(
                 requireContext(),
-                android.R.layout.simple_list_item_1,
-                new ArrayList<>()
+                new ArrayList<>(),
+                firebaseVM
         );
         listView.setAdapter(adapter);
+
 
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {
             allEvents.clear();
