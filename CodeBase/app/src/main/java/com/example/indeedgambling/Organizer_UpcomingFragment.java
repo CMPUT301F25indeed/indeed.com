@@ -623,7 +623,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                             (p)->{
                             //Update local data
                                     event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
-                                    event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
 
                                     //Updating array
                                     WaitingListArray.clear();
@@ -665,14 +664,28 @@ public class Organizer_UpcomingFragment extends Fragment {
         cancelledListView.setAdapter(cancelledListAdapter);
 
 
-        //Get the profiles from the server.
-        Data.getProfiles(event.getCancelledEntrants(),(p)->{
-            cancelledPeople.clear();
-            cancelledPeople.addAll(p);
-            cancelledListAdapter.notifyDataSetChanged();
-        },e -> {
-            Log.d("Firestore Error",e.toString());
-        });
+        //Pull data
+        ListenerRegistration cancelledListListener =
+                Data.getDb()
+                        .collection("events")
+                        .document(event.getEventId())
+                        .addSnapshotListener((docSnapshot, error) -> {
+                            Event updatedEvent = docSnapshot.toObject(Event.class);
+                            //What happens when the event has an update on the server
+                            Data.getProfiles(updatedEvent.getCancelledEntrants(),
+                                    (p)->{
+                                        //Update local data
+                                        event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+
+                                        //Updating array
+                                        cancelledPeople.clear();
+                                        cancelledPeople.addAll(p);
+                                        cancelledListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                        });
+
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Cancelled Entrants")
@@ -681,6 +694,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Replace Entrants", (dialog, which) -> {replaceEntrants(event,inflater);
                 //Refresh Data
                 RefreshUpcomingEventList();})
+                .setOnDismissListener((d)->{cancelledListListener.remove();})
                 .show();
     }
 
@@ -696,20 +710,35 @@ public class Organizer_UpcomingFragment extends Fragment {
         inviteListView.setAdapter(inviteListAdapter);
 
 
-        //Get the profiles from the server.
-        Data.getProfiles(event.getInvitedList(),(p)->{
-            invitedPeople.clear();
-            invitedPeople.addAll(p);
-            inviteListAdapter.notifyDataSetChanged();
-        },e -> {
-            Log.d("Firestore Error",e.toString());
-        });
+        //Listen to data
+        ListenerRegistration inviteListListener =
+                Data.getDb()
+                        .collection("events")
+                        .document(event.getEventId())
+                        .addSnapshotListener((docSnapshot, error) -> {
+                            Event updatedEvent = docSnapshot.toObject(Event.class);
+                            //What happens when the event has an update on the server
+                            Data.getProfiles(updatedEvent.getInvitedList(),
+                                    (p)->{
+                                        //Update local data
+                                        event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+
+                                        //Updating array
+                                        invitedPeople.clear();
+                                        invitedPeople.addAll(p);
+                                        inviteListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                        });
+
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Invited Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
                 .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .setOnDismissListener((D)->{inviteListListener.remove();})
                 .show();
     }
 
@@ -725,20 +754,34 @@ public class Organizer_UpcomingFragment extends Fragment {
         AcceptedListView.setAdapter(acceptedListAdapter);
 
 
-        //Get the profiles from the server.
-        Data.getProfiles(event.getAcceptedEntrants(),(p)->{
-            acceptedPeople.clear();
-            acceptedPeople.addAll(p);
-            acceptedListAdapter.notifyDataSetChanged();
-        },e -> {
-            Log.d("Firestore Error",e.toString());
-        });
+        //Pull data
+        ListenerRegistration acceptedlistListener =
+                Data.getDb()
+                        .collection("events")
+                        .document(event.getEventId())
+                        .addSnapshotListener((docSnapshot, error) -> {
+                            Event updatedEvent = docSnapshot.toObject(Event.class);
+                            //What happens when the event has an update on the server
+                            Data.getProfiles(updatedEvent.getAcceptedEntrants(),
+                                    (p)->{
+                                        //Update local data
+                                        event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
+
+                                        //Updating array
+                                        acceptedPeople.clear();
+                                        acceptedPeople.addAll(p);
+                                        acceptedListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                        });
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
                 .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .setOnDismissListener(dialog -> {acceptedlistListener.remove();})
                 .show();
     }
 
