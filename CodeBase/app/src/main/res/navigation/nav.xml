@@ -245,6 +245,16 @@
         android:label="Admin Browse Events" />
 
     <fragment
+        android:id="@+id/adminEventDetailsFragment"
+        android:name="com.example.indeedgambling.Admin_EventDetailsFragment"
+        android:label="Admin Event Details">
+
+        <action
+            android:id="@+id/action_adminEventDetailsFragment_to_adminBrowseEventsFragment"
+            app:destination="@id/adminBrowseEventsFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/adminManageProfilesFragment"
         android:name="com.example.indeedgambling.Admin_ManageProfilesFragment"
         android:label="Admin Manage Profiles" />
@@ -252,11 +262,26 @@
     <fragment
         android:id="@+id/adminReviewImagesFragment"
         android:name="com.example.indeedgambling.Admin_ReviewImagesFragment"
-        android:label="Admin Review Images">
+        android:label="Admin Review Images"
+        tools:layout="@layout/admin_browse_images_fragment">
+
         <action
-            android:id="@+id/action_adminReviewImagesFragment_to_adminLogsFragment"
-            app:destination="@id/adminLogsFragment" />
+            android:id="@+id/action_adminReviewImagesFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/adminImageDetailsFragment"
+        android:name="com.example.indeedgambling.Admin_ImageDetailsFragment"
+        android:label="Admin Image Details"
+        tools:layout="@layout/admin_image_details_fragment">
+
+        <action
+            android:id="@+id/action_adminImageDetailsFragment_to_adminReviewImagesFragment"
+            app:destination="@id/adminReviewImagesFragment" />
+    </fragment>
+
+
 
     <fragment
         android:id="@+id/adminLogsFragment"

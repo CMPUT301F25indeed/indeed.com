@@ -1,0 +1,130 @@
+package com.example.indeedgambling;
+
+import android.app.AlertDialog;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
+
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+public class Admin_EventDetailsFragment extends Fragment {
+
+    private FirebaseViewModel firebaseVM;
+    private Event event;
+
+    private TextView name, desc, loc, dates, reg, status, category, total;
+    private Button backBtn, removeBtn;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
+        View v = inflater.inflate(R.layout.admin_event_details_fragment, container, false);
+
+        firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
+
+        name     = v.findViewById(R.id.event_name);
+        desc     = v.findViewById(R.id.event_description);
+        loc      = v.findViewById(R.id.event_location);
+        dates    = v.findViewById(R.id.event_dates);
+        reg      = v.findViewById(R.id.event_registration);
+        status   = v.findViewById(R.id.event_status);
+        category = v.findViewById(R.id.event_category);
+        total    = v.findViewById(R.id.event_total_entrant);
+        backBtn  = v.findViewById(R.id.admin_event_back);
+        removeBtn= v.findViewById(R.id.admin_event_remove);
+
+        if (getArguments() != null) {
+            event = (Event) getArguments().getSerializable("event");
+        }
+
+        if (event != null) {
+            bindEvent();
+        } else {
+            Toast.makeText(getContext(), "Event not found.", Toast.LENGTH_SHORT).show();
+        }
+
+        backBtn.setOnClickListener(view1 ->
+                NavHostFragment.findNavController(this).navigateUp()
+        );
+
+        removeBtn.setOnClickListener(view12 -> {
+            if (event == null) return;
+            confirmDelete();
+        });
+
+        return v;
+    }
+
+    private void bindEvent() {
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
+
+        name.setText(event.getEventName());
+        desc.setText(event.getDescription());
+
+        if (event.getLocation() != null) {
+            loc.setText("Location: " + event.getLocation());
+        }
+
+        if (event.getCategory() != null) {
+            category.setText("Category: " + event.getCategory());
+        }
+
+        if (event.getEventStart() != null && event.getEventEnd() != null) {
+            dates.setText("Event Dates: " +
+                    sdf.format(event.getEventStart()) + " – " +
+                    sdf.format(event.getEventEnd()));
+        }
+
+        if (event.getRegistrationStart() != null && event.getRegistrationEnd() != null) {
+            reg.setText("Registration: " +
+                    sdf.format(event.getRegistrationStart()) + " – " +
+                    sdf.format(event.getRegistrationEnd()));
+        }
+
+        status.setText("Status: " + event.getStatus());
+
+        if (event.getWaitingList() != null) {
+            total.setText("Total: " + event.getWaitingList().size());
+        } else {
+            total.setText("Total: 0");
+        }
+    }
+
+    private void confirmDelete() {
+        if (getContext() == null || event == null) return;
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Remove event")
+                .setMessage("This will delete the event and related data.\nAre you sure?")
+                .setPositiveButton("Remove", (dialog, which) -> {
+                    firebaseVM.adminDeleteEventAndCleanup(
+                            event.getEventId(),
+                            () -> {
+                                Toast.makeText(getContext(), "Event removed.", Toast.LENGTH_SHORT).show();
+                                NavHostFragment.findNavController(this).navigateUp();
+                            },
+                            err -> Toast.makeText(
+                                    getContext(),
+                                    "Error removing event: " + (err != null ? err.getMessage() : "unknown"),
+                                    Toast.LENGTH_LONG
+                            ).show()
+                    );
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+}
