@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#FFFFFF" />
 
-    <corners android:radius="16dp" />
+    <!-- Black card background -->
+    <solid android:color="#111111" />
 
+    <!-- Blue border -->
     <stroke
-        android:width="1dp"
-        android:color="#CCCCCC" />
+        android:width="2dp"
+        android:color="#0A66C2" />
 
+    <!-- Rounded corners -->
+    <corners android:radius="18dp" />
+
+    <!-- Padding inside card -->
     <padding
-        android:left="6dp"
-        android:top="6dp"
-        android:right="6dp"
-        android:bottom="6dp"/>
+        android:left="12dp"
+        android:top="12dp"
+        android:right="12dp"
+        android:bottom="12dp"/>
 </shape>

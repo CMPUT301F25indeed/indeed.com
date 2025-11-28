@@ -2,6 +2,7 @@ package com.example.indeedgambling;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -32,6 +33,8 @@ public class Admin_ReviewImagesFragment extends Fragment {
     private Button backBtn, removeBtn;
     private SearchView searchView;
 
+
+
     private FirebaseViewModel firebaseVM;
 
     private final List<ImageRow> allRows = new ArrayList<>();
@@ -58,6 +61,14 @@ public class Admin_ReviewImagesFragment extends Fragment {
         backBtn    = view.findViewById(R.id.admin_images_back);
         removeBtn  = view.findViewById(R.id.admin_images_remove);
         searchView = view.findViewById(R.id.admin_images_search);
+
+        // Make search text white
+        int searchTextId = searchView.getContext().getResources()
+                .getIdentifier("android:id/search_src_text", null, null);
+
+        TextView searchText = searchView.findViewById(searchTextId);
+        searchText.setTextColor(Color.WHITE);
+        searchText.setHintTextColor(Color.GRAY);
 
         // we delete inside details fragment, so hide this button here
         removeBtn.setVisibility(View.GONE);

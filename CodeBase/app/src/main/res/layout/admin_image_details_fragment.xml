@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:padding="16dp">
 
     <LinearLayout
@@ -9,65 +11,145 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Full Image -->
         <ImageView
             android:id="@+id/admin_image_full"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
+            android:layout_height="240dp"
             android:scaleType="centerCrop"
-            android:background="#DDDDDD" />
+            android:background="#222222"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="18dp" />
 
+        <!-- Event Name -->
         <TextView
             android:id="@+id/admin_image_event_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
             android:textStyle="bold"
-            android:textSize="20sp" />
+            android:textSize="22sp"
+            android:textColor="#FFFFFF"
+            android:paddingBottom="4dp" />
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/admin_image_sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uploaded image details"
+            android:textColor="#BBBBBB"
+            android:textSize="14sp"
+            android:paddingBottom="12dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#333333" />
+
+        <!-- EVENT ID (bold heading) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event ID:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="18dp"/>
 
         <TextView
             android:id="@+id/admin_image_event_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:textColor="#DDDDDD"
+            android:textSize="16sp" />
+
+        <!-- ORGANIZER -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Organizer:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="18dp"/>
 
         <TextView
             android:id="@+id/admin_image_organizer_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:textColor="#DDDDDD"
+            android:textSize="16sp" />
+
+        <!-- UPLOADER -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uploader ID:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="18dp"/>
 
         <TextView
             android:id="@+id/admin_image_uploader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:textColor="#DDDDDD"
+            android:textSize="16sp" />
+
+        <!-- UPLOADED AT -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Uploaded:"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="18dp"/>
 
         <TextView
             android:id="@+id/admin_image_uploaded_at"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:textColor="#DDDDDD"
+            android:textSize="16sp" />
 
+        <!-- BUTTON ROW -->
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="28dp">
 
+            <!-- BACK (PRIMARY solid blue) -->
             <Button
                 android:id="@+id/admin_image_back"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Back" />
+                android:background="@drawable/bg_button_primary"
+                android:backgroundTint="@null"
+                app:backgroundTint="@null"
+                android:text="Back"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textAllCaps="false"/>
 
+            <!-- REMOVE IMAGE (RED BORDER) -->
             <Button
                 android:id="@+id/admin_image_remove"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_button_danger_border"
+                android:backgroundTint="@null"
+                app:backgroundTint="@null"
                 android:text="Remove Image"
-                android:layout_marginStart="8dp" />
+                android:textColor="#D32F2F"
+                android:textAllCaps="false"
+                android:textSize="16sp"/>
         </LinearLayout>
 
     </LinearLayout>
