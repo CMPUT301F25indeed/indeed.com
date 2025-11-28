@@ -390,7 +390,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         Location.setText(event.getLocation());
 
         //Event Capacity: 12/40, 3/Unlimited, 0/30
-        Capacity.setText((Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+        Capacity.setText((Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
 
 
 
@@ -614,11 +614,15 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .addSnapshotListener((docSnapshot, error) -> {
                     Event updatedEvent = docSnapshot.toObject(Event.class);
                     //What happens when the event has an update on the server
-                    Data.getProfiles(updatedEvent.getWaitingList(),
+                    ArrayList<String> queryList = new ArrayList<>();
+                    queryList.addAll(updatedEvent.getWaitingList());
+                    queryList.addAll(updatedEvent.getLostList());
+                    Data.getProfiles(queryList,
                             (p)->{
                             //Update local data
                                     event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
                                     event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+                                    event.setLostList(updatedEvent.getLostList());
                                     event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
                                     event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
 
@@ -839,6 +843,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                     Map<String, Object> update = new HashMap<>();
                     update.put("waitingList",event.getWaitingList());
+                    update.put("lostList",event.getLostList());
                     update.put("invitedList",event.getInvitedList());
 
                     Data.updateEvent(event.getEventId(),
@@ -919,13 +924,14 @@ public class Organizer_UpcomingFragment extends Fragment {
         View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
         int NumCancelled = event.getCancelledEntrants().size();
-        int numWaiting = event.getWaitingList().size();
+        int numWaiting = event.getLostList().size();
         if (numWaiting == 0){
             WarningToast("No waiting entrants to invite!");
             return;
         }
         if (NumCancelled == 0){
             WarningToast("There are no Cancelled Entrants to replace!");
+            return;
         }
         new AlertDialog.Builder(requireContext())
                 .setTitle("Number of entrants to replace (Up to ".concat(Integer.toString(Math.min(NumCancelled,numWaiting))).concat(")"))
@@ -946,10 +952,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                         number = event.getCancelledEntrants().size();
                     }
                     //Send out invites
-                    event.InviteEntrants(number);
+                    event.ReplaceEntrants(number);
 
                     Map<String, Object> update = new HashMap<>();
-                    update.put("waitingList",event.getWaitingList());
+                    update.put("lostList",event.getLostList());
                     update.put("invitedList",event.getInvitedList());
 
                     Data.updateEvent(event.getEventId(),
@@ -973,7 +979,7 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
     private void updateCapacityDisplay(TextView Capacity, Event event){
-        Capacity.setText((Integer.toString(event.getWaitingList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+        Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
 
 
     }

@@ -33,10 +33,11 @@ public class Event implements Serializable {
     //private String qrCodeURL;
     private String status;    // planned/open/closed/completed
     private String criteria;  // lottery notes
-    private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs
-    private ArrayList<String> invitedList = new ArrayList<String>(); // Entrant IDs
+    private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs who signed up
+    private ArrayList<String> invitedList = new ArrayList<String>(); // Entrant IDs who were randomly selected
+    private ArrayList<String> lostList = new ArrayList<>(); //Entrant Ids who were not randomly selected
     private ArrayList<String> cancelledEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
-    private ArrayList<String> acceptedEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
+    private ArrayList<String> acceptedEntrants = new ArrayList<String>(); //invited entrants who accepted
 
     /**
      * Creates an event. Enforces Open is before Closed with an IllegalArgumentException
@@ -522,15 +523,15 @@ public class Event implements Serializable {
         this.acceptedEntrants = acceptedEntrants;
     }
 
+    public ArrayList<String> getLostList() {
+        return lostList;
+    }
 
+    public void setLostList(ArrayList<String> lostList) {
+        this.lostList = lostList;
+    }
 
-
-
-
-
-
-
-    //---------------------------------------------------- Helpers ---------------------------//
+//---------------------------------------------------- Helpers ---------------------------//
     /** Helper function that checks if RIGHT NOW is before reg period opens
      * @return True if before Reg Open, false otherwise
      */
@@ -639,9 +640,46 @@ public class Event implements Serializable {
 
             }
         }
+
+
+        //Moving the unchosen to the lostList
+        //lostList.clear();
+        lostList.addAll(waitingList);
+        waitingList.clear();
     }
 
 
+    /** Invite Entrants from the LostList.
+     *
+     * @param number how many random entrants you want.
+     */
+    public void ReplaceEntrants(int number){
+        //Skip if number passed is 0
+        if (number == 0){
+            return;
+        }
+
+        //Will stop moving entrants if there are no more to invite
+        for (int i = 0; i < number && !lostList.isEmpty(); i++){
+
+            //Random is not allowed on a range of 1 int
+            if (lostList.size() == 1){
+                invitedList.add(lostList.remove(0));
+            }
+            else{
+                //Randomly choose an entrant
+                int random_index = new Random().nextInt(0,lostList.size() - 1);
+
+                //Check if entrant not already invited. if so, remove from waitlist only.
+                /*if (invitedList.contains(waitingList.get(random_index))){
+                    waitingList.remove(random_index);
+                }*/
+                //else{
+                invitedList.add(lostList.remove(random_index));
+                //}
+            }
+        }
+    }
 
     /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER
      * @param entrantID ID to try to add
