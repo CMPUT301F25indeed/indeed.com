@@ -24,6 +24,13 @@ public class LoginFragment extends Fragment {
         EditText password = view.findViewById(R.id.login_password);
         Button loginBtn = view.findViewById(R.id.btn_login);
 
+        Button backBtn = view.findViewById(R.id.btn_back);
+
+        backBtn.setOnClickListener(v ->
+                Navigation.findNavController(v).popBackStack()
+        );
+
+
         vm = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
