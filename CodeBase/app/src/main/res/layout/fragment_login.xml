@@ -1,29 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    The 'xmlns:app' attribute has been added to the LinearLayout.
+    This is the fix for the build error.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#000000"
     android:padding="24dp">
 
+    <!-- Little quote / note at top -->
+    <TextView
+        android:id="@+id/login_quote_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Welcome back to IndeedGambling"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/ibmplexserif_semibold"
+        android:layout_marginTop="32dp" />
+
+    <TextView
+        android:id="@+id/login_quote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Secure login. Fair draws. Real chances."
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        android:fontFamily="@font/opensans"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Email -->
     <EditText
         android:id="@+id/login_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"
-        android:inputType="textEmailAddress" />
+        android:inputType="textEmailAddress"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#777777"
+        android:fontFamily="@font/opensans"
+        android:background="@android:color/transparent"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333" />
+
+    <!-- Password -->
     <EditText
         android:id="@+id/login_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="16dp"
         android:hint="Password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#777777"
+        android:fontFamily="@font/opensans"
+        android:background="@android:color/transparent"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Login button (primary blue) -->
     <Button
         android:id="@+id/btn_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:layout_marginTop="20dp"/>
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null" /> <!-- This will now work -->
+
+    <!-- Back button (secondary blue border) -->
+    <Button
+        android:id="@+id/btn_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back to start"
+        android:textAllCaps="false"
+        android:textColor="#0A66C2"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_button_secondary"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null" /> <!-- This will now work -->
+
 </LinearLayout>
