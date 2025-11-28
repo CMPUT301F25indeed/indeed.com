@@ -610,7 +610,8 @@ public class Event implements Serializable {
         return !(location == null);
     }
 
-    /** Moves a random selection of entrants from the waitlist to the invited list. DOES NOT TALK TO SERVER
+    /** Moves a random selection of entrants from the waitlist/lostlist to the invited list. DOES NOT TALK TO SERVER DIRECTLY
+     * Entrants who were not selected get moved to the lostlist, or remain there.
      * @param number How many entrants to move. Will not throw error if limit exceeded, just stops.
      */
     public void InviteEntrants(int number){
@@ -619,66 +620,33 @@ public class Event implements Serializable {
             return;
         }
 
-        //Will stop moving entrants if there are no more to invite
-        for (int i = 0; i < number && !waitingList.isEmpty(); i++){
 
-            //Random is not allowed on a range of 1 int
-            if (waitingList.size() == 1){
-                invitedList.add(waitingList.remove(0));
-            }
-            else{
-                //Randomly choose an entrant
-                int random_index = new Random().nextInt(0,waitingList.size() - 1);
+        //Viable-to-invite
+        ArrayList<String> viabletoInvite = new ArrayList<String>();
+        //Need duplicate checks
+        viabletoInvite.addAll(waitingList);
+        viabletoInvite.addAll(lostList);
 
-                //Check if entrant not already invited. if so, remove from waitlist only.
-                /*if (invitedList.contains(waitingList.get(random_index))){
-                    waitingList.remove(random_index);
-                }*/
-                //else{
-                    invitedList.add(waitingList.remove(random_index));
-                //}
-
-            }
-        }
-
-
-        //Moving the unchosen to the lostList
-        //lostList.clear();
-        lostList.addAll(waitingList);
+        //Remove all from both, and all to lostList after
         waitingList.clear();
-    }
-
-
-    /** Invite Entrants from the LostList.
-     *
-     * @param number how many random entrants you want.
-     */
-    public void ReplaceEntrants(int number){
-        //Skip if number passed is 0
-        if (number == 0){
-            return;
-        }
+        lostList.clear();
 
         //Will stop moving entrants if there are no more to invite
-        for (int i = 0; i < number && !lostList.isEmpty(); i++){
+        for (int i = 0; i < number && !viabletoInvite.isEmpty(); i++){
 
             //Random is not allowed on a range of 1 int
-            if (lostList.size() == 1){
-                invitedList.add(lostList.remove(0));
+            if (viabletoInvite.size() == 1){
+                invitedList.add(viabletoInvite.remove(0));
             }
             else{
                 //Randomly choose an entrant
-                int random_index = new Random().nextInt(0,lostList.size() - 1);
-
-                //Check if entrant not already invited. if so, remove from waitlist only.
-                /*if (invitedList.contains(waitingList.get(random_index))){
-                    waitingList.remove(random_index);
-                }*/
-                //else{
-                invitedList.add(lostList.remove(random_index));
-                //}
+                int random_index = new Random().nextInt(0,viabletoInvite.size() - 1);
+                invitedList.add(viabletoInvite.remove(random_index));
             }
         }
+
+        //Putting all remaining people to the lostlist.
+        lostList.addAll(viabletoInvite);
     }
 
     /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER

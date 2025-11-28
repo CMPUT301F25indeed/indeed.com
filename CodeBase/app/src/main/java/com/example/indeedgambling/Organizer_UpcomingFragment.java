@@ -715,7 +715,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-
     private void InviteListPopup(Event event, TextView Capacity){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
@@ -764,7 +763,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-
     private void AcceptedListPopup(Event event, TextView Capacity){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
@@ -811,51 +809,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setOnDismissListener(dialog -> {acceptedlistListener.remove();})
                 .show();
     }
-
-
-    /** POPUP that invites the entrants according to the number inputted by the user.
-     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
-     * @param event Event whose waitlist and invitelist to affect
-     * @param inflater current screen inflator
-     */
-    private void InviteNumberPopup(Event event, LayoutInflater inflater){
-        View helperView = inflater.inflate(R.layout.text_input_helper,null);
-        EditText numberInp = helperView.findViewById(R.id.EditText_helper);
-
-        //Building integer input dialog
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Number of entrants to invite (Up to ".concat(Integer.toString(event.getWaitingList().size())).concat(")"))
-                .setView(helperView)
-                .setPositiveButton("Confirm",((dialog, which) -> {
-                    //Preventing non-numbers from being used
-                    int number;
-                    try {
-                        number = Integer.parseInt(numberInp.getText().toString().trim());
-                        //If a non-int was passed, do nothing
-                    } catch (Exception e) {
-                        number = 0;
-                        //throw new RuntimeException(e);
-                    }
-
-
-                    //Send out invites
-                    event.InviteEntrants(number);
-
-                    Map<String, Object> update = new HashMap<>();
-                    update.put("waitingList",event.getWaitingList());
-                    update.put("lostList",event.getLostList());
-                    update.put("invitedList",event.getInvitedList());
-
-                    Data.updateEvent(event.getEventId(),
-                            update,
-                            ()->{},
-                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
-
-                }))
-                .setNegativeButton("Cancel",null)
-                .show();
-    }
-
 
     /** Registration for ending the pop-up
      *
@@ -915,6 +868,51 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                 // ------------- Helpers --------- //
 
+    /** POPUP that invites the entrants according to the number inputted by the user.
+     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
+     * @param event Event whose waitlist and invitelist to affect
+     * @param inflater current screen inflator
+     */
+    private void InviteNumberPopup(Event event, LayoutInflater inflater){
+        View helperView = inflater.inflate(R.layout.text_input_helper,null);
+        EditText numberInp = helperView.findViewById(R.id.EditText_helper);
+
+        //Building integer input dialog
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Number of entrants to invite (Up to ".concat(Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat(")"))
+                .setView(helperView)
+                .setPositiveButton("Confirm",((dialog, which) -> {
+                    //Preventing non-numbers from being used
+                    int number;
+                    try {
+                        number = Integer.parseInt(numberInp.getText().toString().trim());
+                        //If a non-int was passed, do nothing
+                    } catch (Exception e) {
+                        number = 0;
+                        //throw new RuntimeException(e);
+                    }
+
+
+                    //Send out invites
+                    event.InviteEntrants(number);
+
+                    Map<String, Object> update = new HashMap<>();
+                    update.put("waitingList",event.getWaitingList());
+                    update.put("lostList",event.getLostList());
+                    update.put("invitedList",event.getInvitedList());
+
+                    Data.updateEvent(event.getEventId(),
+                            update,
+                            ()->{},
+                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+
+                }))
+                .setNegativeButton("Cancel",null)
+                .show();
+    }
+
+
+
     /** Replaces the cancelled entrants with a number upto the cancelled number
      * US 02.05.03
      * @param event Event to shuffle entrants around in
@@ -924,7 +922,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
         int NumCancelled = event.getCancelledEntrants().size();
-        int numWaiting = event.getLostList().size();
+        int numWaiting = event.getLostList().size() + event.getWaitingList().size();
         if (numWaiting == 0){
             WarningToast("No waiting entrants to invite!");
             return;
@@ -939,12 +937,12 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Confirm",((dialog, which) -> {
                     //Preventing non-numbers from being used
                     int number;
+                    //If a non-int was passed, do nothing
                     try {
                         number = Integer.parseInt(numberInp.getText().toString().trim());
-                        //If a non-int was passed, do nothing
+                        WarningToast("Please enter only digits!");
                     } catch (Exception e) {
                         number = 0;
-                        //throw new RuntimeException(e);
                     }
 
                     //limit to cancelled entrant count
@@ -952,9 +950,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                         number = event.getCancelledEntrants().size();
                     }
                     //Send out invites
-                    event.ReplaceEntrants(number);
+                    event.InviteEntrants(number);
 
                     Map<String, Object> update = new HashMap<>();
+                    update.put("waitingList",event.getWaitingList());
                     update.put("lostList",event.getLostList());
                     update.put("invitedList",event.getInvitedList());
 
