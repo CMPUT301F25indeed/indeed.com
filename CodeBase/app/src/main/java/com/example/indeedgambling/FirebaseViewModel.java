@@ -1,5 +1,6 @@
 package com.example.indeedgambling;
 
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -30,12 +31,36 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.Set;
+
+
+import androidx.annotation.Nullable;
+
+import android.app.Application;
+import android.util.Log;
+import android.widget.TextView;
+
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import com.google.firebase.firestore.*;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  *
  */
 public class FirebaseViewModel extends ViewModel {
 
+    private final com.google.firebase.storage.FirebaseStorage storage = com.google.firebase.storage.FirebaseStorage.getInstance();
+    private final com.google.firebase.storage.StorageReference storageRef = storage.getReference();
+
+
+    // ---- Firestore ----
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final CollectionReference PROFILES = db.collection("profiles");
     private final CollectionReference EVENTS = db.collection("events");
@@ -498,6 +523,44 @@ public class FirebaseViewModel extends ViewModel {
 
         }).addOnFailureListener(onErr::accept);
     }
+
+    public void declineInvitation(String eventId,
+                                  String entrantId,
+                                  Runnable onOk,
+                                  Consumer<Exception> onErr) {
+
+        EVENTS.document(eventId).get().addOnSuccessListener(doc -> {
+            Event event = doc.toObject(Event.class);
+            if (event == null) {
+                onErr.accept(new Exception("Event not found"));
+                return;
+            }
+
+            WriteBatch batch = db.batch();
+
+            DocumentReference eventRef = EVENTS.document(eventId);
+            DocumentReference inviteRef = INVITES.document(eventId + "_" + entrantId);
+
+            // Remove from invited list
+            batch.update(eventRef, "invitedList", FieldValue.arrayRemove(entrantId));
+
+            // Add to cancelled list
+            batch.update(eventRef, "cancelledEntrants", FieldValue.arrayUnion(entrantId));
+
+            // Update the invitation document
+            Map<String, Object> inviteUpdates = new HashMap<>();
+            inviteUpdates.put("status", "declined");
+            inviteUpdates.put("responded", true);
+            inviteUpdates.put("updatedAt", new Date());
+            batch.set(inviteRef, inviteUpdates, SetOptions.merge());
+
+            batch.commit()
+                    .addOnSuccessListener(v -> onOk.run())
+                    .addOnFailureListener(onErr::accept);
+
+        }).addOnFailureListener(onErr::accept);
+    }
+
 
     // -------------------------
     // Notifications
@@ -972,183 +1035,107 @@ public class FirebaseViewModel extends ViewModel {
      */
     public void deleteProfileAndCleanOpenEvents(Profile profile, Runnable onOk, Consumer<Exception> onErr) {
         String profileId = profile.getProfileId();
-        if (profileId == null) {
+        if (profileId == null || profileId.isEmpty()) {
             onErr.accept(new Exception("Profile ID missing"));
             return;
         }
 
-        //  Step 1: Always fetch latest version of profile from Firestore first
-        PROFILES.document(profileId).get().addOnSuccessListener(snapshot -> {
-            Profile latest = snapshot.toObject(Profile.class);
-            List<String> joinedEvents = (latest != null && latest.getEventsJoined() != null)
-                    ? latest.getEventsJoined() : new ArrayList<>();
+        // Get latest profile from Firestore (to read waitlistedEvents field)
+        PROFILES.document(profileId).get()
+                .addOnSuccessListener(snapshot -> {
 
-            // Case: no joined events, just delete profile directly
-            if (joinedEvents.isEmpty()) {
-                PROFILES.document(profileId).delete()
-                        .addOnSuccessListener(v -> onOk.run())
-                        .addOnFailureListener(onErr::accept);
-                return;
-            }
-
-            //  Step 2: fetch all joined event docs
-            List<Task<DocumentSnapshot>> eventFetchTasks = new ArrayList<>();
-            for (String eventId : joinedEvents) {
-                eventFetchTasks.add(EVENTS.document(eventId).get());
-            }
-
-            Tasks.whenAllComplete(eventFetchTasks)
-                    .addOnSuccessListener(tasks -> {
-                        WriteBatch batch = db.batch();
-
-                        for (Task<DocumentSnapshot> t : eventFetchTasks) {
-                            if (!t.isSuccessful()) {
-                                continue;
+                    // read waitlistedEvents from profile doc (may be null)
+                    List<String> waitlistedEvents = new ArrayList<>();
+                    if (snapshot.exists()) {
+                        Object raw = snapshot.get("waitlistedEvents");
+                        if (raw instanceof List<?>) {
+                            for (Object o : (List<?>) raw) {
+                                if (o instanceof String) {
+                                    waitlistedEvents.add((String) o);
+                                }
                             }
-
-                            DocumentSnapshot doc = t.getResult();
-                            if (doc == null || !doc.exists()) {
-                                continue;
-                            }
-
-                            Event event = doc.toObject(Event.class);
-                            if (event == null) {
-                                continue;
-                            }
-
-                            //  Always remove profile from all lists (no status check)
-                            DocumentReference eventRef = EVENTS.document(event.getEventId());
-                            batch.update(eventRef, "waitingList", FieldValue.arrayRemove(profileId));
-                            batch.update(eventRef, "invitedList", FieldValue.arrayRemove(profileId));
-
-                            // Optional (for future-proofing)
-//                            batch.update(eventRef, "participants", FieldValue.arrayRemove(profileId));
-//                            batch.update(eventRef, "cancelledEntrants", FieldValue.arrayRemove(profileId));
-                        }
-
-                        //  Step 3: commit batch, then delete the profile
-                        batch.commit()
-                                .addOnSuccessListener(a ->
-                                        PROFILES.document(profileId).delete()
-                                                .addOnSuccessListener(x -> onOk.run())
-                                                .addOnFailureListener(onErr::accept)
-                                )
-                                .addOnFailureListener(onErr::accept);
-                    })
-                    .addOnFailureListener(onErr::accept);
-
-        }).addOnFailureListener(onErr::accept);
-    }
-
-
-
-    // -------------------------
-// Admin - delete event + cleanup
-// -------------------------
-
-    /**
-     * Admin-only: deletes an event and cleans related data:
-     * - removes eventId from entrants' arrays (waitlistedEvents, allEvents, eventsJoined)
-     * - deletes invitations for this event
-     * - deletes notifications for this event
-     * - deletes image metadata for this event
-     * - deletes the event document itself
-     */
-    public void adminDeleteEventAndCleanup(
-            String eventId,
-            Runnable onOk,
-            Consumer<Exception> onErr
-    ) {
-        if (eventId == null || eventId.isEmpty()) {
-            onErr.accept(new IllegalArgumentException("eventId is required"));
-            return;
-        }
-
-        EVENTS.document(eventId)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    Event event = doc.toObject(Event.class);
-                    if (event == null) {
-                        onErr.accept(new Exception("Event not found"));
-                        return;
-                    }
-
-                    // collect all entrant/profile IDs involved
-                    List<String> allIds = new ArrayList<>();
-
-                    if (event.getWaitingList() != null) {
-                        allIds.addAll(event.getWaitingList());
-                    }
-                    if (event.getInvitedList() != null) {
-                        allIds.addAll(event.getInvitedList());
-                    }
-                    if (event.getAcceptedEntrants() != null) {
-                        allIds.addAll(event.getAcceptedEntrants());
-                    }
-                    if (event.getCancelledEntrants() != null) {
-                        allIds.addAll(event.getCancelledEntrants());
-                    }
-
-                    // remove duplicates
-                    List<String> uniqueIds = new ArrayList<>();
-                    for (String id : allIds) {
-                        if (id != null && !uniqueIds.contains(id)) {
-                            uniqueIds.add(id);
                         }
                     }
 
-                    // load notifications + images for this event
-                    Task<QuerySnapshot> notifTask =
-                            NOTIFS.whereEqualTo("eventId", eventId).get();
-                    Task<QuerySnapshot> imageTask =
-                            IMAGES.whereEqualTo("eventId", eventId).get();
+                    // Query events where this profile is invited / accepted / cancelled
+                    Task<QuerySnapshot> invitedTask =
+                            EVENTS.whereArrayContains("invitedList", profileId).get();
+                    Task<QuerySnapshot> acceptedTask =
+                            EVENTS.whereArrayContains("acceptedEntrants", profileId).get();
+                    Task<QuerySnapshot> cancelledTask =
+                            EVENTS.whereArrayContains("cancelledEntrants", profileId).get();
 
-                    Tasks.whenAllComplete(notifTask, imageTask)
+                    Tasks.whenAllComplete(invitedTask, acceptedTask, cancelledTask)
                             .addOnSuccessListener(tasks -> {
+
+                                // collect eventIds for each list type (to avoid duplicates)
+                                Set<String> waitlistEventIds = new HashSet<>();
+                                Set<String> invitedEventIds = new HashSet<>();
+                                Set<String> acceptedEventIds = new HashSet<>();
+                                Set<String> cancelledEventIds = new HashSet<>();
+
+                                // from profile.waitlistedEvents
+                                for (String evId : waitlistedEvents) {
+                                    if (evId != null && !evId.isEmpty()) {
+                                        waitlistEventIds.add(evId);
+                                    }
+                                }
+
+                                // from query: invitedList contains profileId
+                                if (invitedTask.isSuccessful() && invitedTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : invitedTask.getResult().getDocuments()) {
+                                        invitedEventIds.add(doc.getId());
+                                    }
+                                }
+
+                                // from query: acceptedEntrants contains profileId
+                                if (acceptedTask.isSuccessful() && acceptedTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : acceptedTask.getResult().getDocuments()) {
+                                        acceptedEventIds.add(doc.getId());
+                                    }
+                                }
+
+                                // from query: cancelledEntrants contains profileId
+                                if (cancelledTask.isSuccessful() && cancelledTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : cancelledTask.getResult().getDocuments()) {
+                                        cancelledEventIds.add(doc.getId());
+                                    }
+                                }
 
                                 WriteBatch batch = db.batch();
 
-                                // delete event doc
-                                DocumentReference eventRef = EVENTS.document(eventId);
-                                batch.delete(eventRef);
-
-                                // clean entrant profile arrays
-                                for (String profileId : uniqueIds) {
-                                    DocumentReference profRef = PROFILES.document(profileId);
-                                    batch.update(profRef, "waitlistedEvents",
-                                            FieldValue.arrayRemove(eventId));
-                                    batch.update(profRef, "allEvents",
-                                            FieldValue.arrayRemove(eventId));
-                                    batch.update(profRef, "eventsJoined",
-                                            FieldValue.arrayRemove(eventId));
+                                // clean waitlist
+                                for (String eventId : waitlistEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "waitingList", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // delete invitations (eventId_entrantId)
-                                for (String profileId : uniqueIds) {
-                                    if (profileId == null) continue;
-                                    String invId = eventId + "_" + profileId;
-                                    DocumentReference invRef = INVITES.document(invId);
-                                    batch.delete(invRef);
+                                // clean invited
+                                for (String eventId : invitedEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "invitedList", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // delete notifications for this event
-                                if (notifTask.isSuccessful() && notifTask.getResult() != null) {
-                                    for (DocumentSnapshot nDoc : notifTask.getResult().getDocuments()) {
-                                        batch.delete(nDoc.getReference());
-                                    }
+                                // clean accepted
+                                for (String eventId : acceptedEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "acceptedEntrants", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // delete image metadata for this event
-                                if (imageTask.isSuccessful() && imageTask.getResult() != null) {
-                                    for (DocumentSnapshot iDoc : imageTask.getResult().getDocuments()) {
-                                        batch.delete(iDoc.getReference());
-                                    }
+                                // clean cancelled
+                                for (String eventId : cancelledEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "cancelledEntrants", FieldValue.arrayRemove(profileId));
                                 }
 
+                                // After cleaning events, delete the profile itself
                                 batch.commit()
-                                        .addOnSuccessListener(v -> onOk.run())
+                                        .addOnSuccessListener(v ->
+                                                PROFILES.document(profileId).delete()
+                                                        .addOnSuccessListener(x -> onOk.run())
+                                                        .addOnFailureListener(onErr::accept)
+                                        )
                                         .addOnFailureListener(onErr::accept);
-
                             })
                             .addOnFailureListener(onErr::accept);
 
@@ -1157,8 +1144,175 @@ public class FirebaseViewModel extends ViewModel {
     }
 
 
+    /**
+     * Retrieves a Profile document from Firestore given its profile ID.
+     * @param profileId  The unique ID of the profile document to fetch.
+     * @param onSuccess  Callback executed when the profile is successfully retrieved.
+     *                   Receives the corresponding Profile object.
+     * @param onError    Callback executed when an error occurs, such as when the
+     *                   document is missing or the Firestore request fails.
+     */
+    public void getProfileById(String profileId,
+                               Consumer<Profile> onSuccess,
+                               Consumer<Exception> onError) {
+
+        PROFILES.document(profileId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        Profile p = document.toObject(Profile.class);
+                        onSuccess.accept(p);
+                    } else {
+                        onError.accept(new Exception("Profile not found"));
+                    }
+                })
+                .addOnFailureListener(onError::accept);
+    }
+
+    public void uploadProfilePicture(String profileId, Uri imageUri,
+                                     Consumer<String> onSuccess,
+                                     Consumer<Exception> onError) {
+
+        String fileName = "profile_pictures/" + profileId + "_" + UUID.randomUUID() + ".jpg";
+        StorageReference ref = storageRef.child(fileName);
+
+        ref.putFile(imageUri)
+                .addOnSuccessListener(task ->
+                        ref.getDownloadUrl().addOnSuccessListener(uri -> {
+                            onSuccess.accept(uri.toString());
+                        }).addOnFailureListener(onError::accept)
+                )
+                .addOnFailureListener(onError::accept);
+    }
+
+    public void updateProfilePicture(String profileId, String downloadUrl,
+                                     Runnable onOk, Consumer<Exception> onErr) {
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("profileImageUrl", downloadUrl);
+
+        PROFILES.document(profileId)
+                .update(updates)
+                .addOnSuccessListener(v -> onOk.run());
+    }
+
+        // -------------------------
+// Admin - delete event + cleanup
+// -------------------------
+
+        /**
+         * Admin-only: deletes an event and cleans related data:
+         * - removes eventId from entrants' arrays (waitlistedEvents, allEvents, eventsJoined)
+         * - deletes invitations for this event
+         * - deletes notifications for this event
+         * - deletes image metadata for this event
+         * - deletes the event document itself
+         */
+        public void adminDeleteEventAndCleanup(
+                String eventId,
+                Runnable onOk,
+                Consumer < Exception > onErr){
+            if (eventId == null || eventId.isEmpty()) {
+                onErr.accept(new IllegalArgumentException("eventId is required"));
+                return;
+            }
+
+            EVENTS.document(eventId)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        Event event = doc.toObject(Event.class);
+                        if (event == null) {
+                            onErr.accept(new Exception("Event not found"));
+                            return;
+                        }
+
+                        // collect all entrant/profile IDs involved
+                        List<String> allIds = new ArrayList<>();
+
+                        if (event.getWaitingList() != null) {
+                            allIds.addAll(event.getWaitingList());
+                        }
+                        if (event.getInvitedList() != null) {
+                            allIds.addAll(event.getInvitedList());
+                        }
+                        if (event.getAcceptedEntrants() != null) {
+                            allIds.addAll(event.getAcceptedEntrants());
+                        }
+                        if (event.getCancelledEntrants() != null) {
+                            allIds.addAll(event.getCancelledEntrants());
+                        }
+
+                        // remove duplicates
+                        List<String> uniqueIds = new ArrayList<>();
+                        for (String id : allIds) {
+                            if (id != null && !uniqueIds.contains(id)) {
+                                uniqueIds.add(id);
+                            }
+                        }
+
+                        // load notifications + images for this event
+                        Task<QuerySnapshot> notifTask =
+                                NOTIFS.whereEqualTo("eventId", eventId).get();
+                        Task<QuerySnapshot> imageTask =
+                                IMAGES.whereEqualTo("eventId", eventId).get();
+
+                        Tasks.whenAllComplete(notifTask, imageTask)
+                                .addOnSuccessListener(tasks -> {
+
+                                    WriteBatch batch = db.batch();
+
+                                    // delete event doc
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.delete(eventRef);
+
+                                    // clean entrant profile arrays
+                                    for (String profileId : uniqueIds) {
+                                        DocumentReference profRef = PROFILES.document(profileId);
+                                        batch.update(profRef, "waitlistedEvents",
+                                                FieldValue.arrayRemove(eventId));
+                                        batch.update(profRef, "allEvents",
+                                                FieldValue.arrayRemove(eventId));
+                                        batch.update(profRef, "eventsJoined",
+                                                FieldValue.arrayRemove(eventId));
+                                    }
+
+                                    // delete invitations (eventId_entrantId)
+                                    for (String profileId : uniqueIds) {
+                                        if (profileId == null) continue;
+                                        String invId = eventId + "_" + profileId;
+                                        DocumentReference invRef = INVITES.document(invId);
+                                        batch.delete(invRef);
+                                    }
+
+                                    // delete notifications for this event
+                                    if (notifTask.isSuccessful() && notifTask.getResult() != null) {
+                                        for (DocumentSnapshot nDoc : notifTask.getResult().getDocuments()) {
+                                            batch.delete(nDoc.getReference());
+                                        }
+                                    }
+
+                                    // delete image metadata for this event
+                                    if (imageTask.isSuccessful() && imageTask.getResult() != null) {
+                                        for (DocumentSnapshot iDoc : imageTask.getResult().getDocuments()) {
+                                            batch.delete(iDoc.getReference());
+                                        }
+                                    }
+
+                                    batch.commit()
+                                            .addOnSuccessListener(v -> onOk.run())
+                                            .addOnFailureListener(onErr::accept);
+
+                                })
+                                .addOnFailureListener(onErr::accept);
+
+                    })
+                    .addOnFailureListener(onErr::accept);
+        }
 
 
+    public void deleteProfile(String profileID) {
+        PROFILES.document(profileID).delete();
+    }
 
 
 }

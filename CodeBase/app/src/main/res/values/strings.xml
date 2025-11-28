@@ -23,6 +23,12 @@
 8. Always verify event details, such as time and location, before attending.\n\n
 9. Participate responsibly and enjoy the community events fairly!
 </string>
+    <string-array name="profile_filters">
+        <item>All</item>
+        <item>Entrant</item>
+        <item>Organizer</item>
+        <item>Admin</item>
+    </string-array>
 
 
 </resources>

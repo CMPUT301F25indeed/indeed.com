@@ -80,8 +80,29 @@
         <action
             android:id="@+id/action_entrantHomeFragment_to_entrant_NotificationsFragment"
             app:destination="@id/entrant_NotificationsFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_scanQRFragment"
+            app:destination="@id/scanQRFragment" />
+
 
     </fragment>
+
+    <fragment
+        android:id="@+id/scanQRFragment"
+        android:name="com.example.indeedgambling.ScanQRFragment"
+        android:label="Scan QR"
+        tools:layout="@layout/fragment_scan_qr">
+
+        <action
+            android:id="@+id/action_scanQRFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
+    </fragment>
+
+
 
     <fragment
         android:id="@+id/entrant_NotificationsFragment"
@@ -96,10 +117,16 @@
         android:label="Event Details"
         tools:layout="@layout/fragment_event_details">
 
+        <!-- REQUIRED ARGUMENT -->
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+
         <action
             android:id="@+id/action_eventDetailsFragment_to_entrant_BrowseFragment"
             app:destination="@id/entrant_BrowseFragment" />
     </fragment>
+
 
 
 
@@ -158,6 +185,9 @@
         <action
             android:id="@+id/action_orgHome_to_start"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_organizerHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -228,6 +258,9 @@
         <action
             android:id="@+id/action_adminHomeFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -289,6 +322,28 @@
         <action
             android:id="@+id/action_entrant_GuidelinesFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.indeedgambling.SettingsFragment"
+        android:label="SettingsFragment">
+
+    <argument
+        android:name="profileID"
+        app:argType="string" />
+
+        <action
+            android:id="@+id/action_settingsFragment_to_organizerHomeFragment"
+            app:destination="@id/organizerHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_startUpFragment"
+            app:destination="@id/startUpFragment" />
     </fragment>
 
 </navigation>

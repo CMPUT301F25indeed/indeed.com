@@ -2,6 +2,8 @@ package com.example.indeedgambling;
 
 import androidx.lifecycle.ViewModel;
 
+import java.util.Map;
+
 /**
  * ViewModel for Admin user.
  *
@@ -31,4 +33,32 @@ public class AdminViewModel extends ViewModel {
      * @return Admin object for the logged-in admin
      */
     public Admin getAdmin() { return admin; }
+
+    public void updateSettings(Map<String, Object> updates) {
+        if (admin == null) return;
+
+        for (String key : updates.keySet()) {
+
+            if (key.equals("personName")) {
+                admin.setPersonName((String) updates.get(key));
+            }
+
+            if (key.equals("email")) {
+                admin.setEmail((String) updates.get(key));
+            }
+
+            if (key.equals("phone")) {
+                admin.setPhone((String) updates.get(key));
+            }
+
+            if (key.equals("notificationsEnabled")) {
+                admin.setNotificationsEnabled((Boolean) updates.get(key));
+            }
+
+            if (key.equals("lightMode")) {
+                admin.setLightMode((Boolean) updates.get(key));
+            }
+        }
+    }
+
 }

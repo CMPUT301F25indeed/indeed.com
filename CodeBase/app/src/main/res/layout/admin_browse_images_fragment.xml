@@ -7,15 +7,6 @@
     android:layout_height="match_parent">
 
     <!-- grey header bar -->
-    <TextView
-        android:id="@+id/admin_images_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="6dp"
-        android:background="#DDDDDD"
-        android:text="IMAGES"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
 
     <SearchView
         android:id="@+id/admin_images_search"
@@ -23,15 +14,15 @@
         android:layout_height="wrap_content"
         android:queryHint="Search images by uploader/event"/>
 
+
     <ListView
         android:id="@+id/admin_images_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="8dp"
+        android:layout_marginTop="8dp"
         android:layout_weight="1"
-        android:layout_marginTop="8dp"/>
-
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp" />
 
     <Button
         android:id="@+id/admin_images_remove"
