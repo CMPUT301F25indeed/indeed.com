@@ -80,6 +80,9 @@
         <action
             android:id="@+id/action_entrantHomeFragment_to_entrant_NotificationsFragment"
             app:destination="@id/entrant_NotificationsFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
 
         <action
             android:id="@+id/action_entrantHomeFragment_to_scanQRFragment"
@@ -182,6 +185,9 @@
         <action
             android:id="@+id/action_orgHome_to_start"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_organizerHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -252,6 +258,9 @@
         <action
             android:id="@+id/action_adminHomeFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -313,6 +322,28 @@
         <action
             android:id="@+id/action_entrant_GuidelinesFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.indeedgambling.SettingsFragment"
+        android:label="SettingsFragment">
+
+    <argument
+        android:name="profileID"
+        app:argType="string" />
+
+        <action
+            android:id="@+id/action_settingsFragment_to_organizerHomeFragment"
+            app:destination="@id/organizerHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_startUpFragment"
+            app:destination="@id/startUpFragment" />
     </fragment>
 
 </navigation>
