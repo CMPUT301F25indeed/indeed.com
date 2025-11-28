@@ -472,6 +472,44 @@ public class FirebaseViewModel extends ViewModel {
         }).addOnFailureListener(onErr::accept);
     }
 
+    public void declineInvitation(String eventId,
+                                  String entrantId,
+                                  Runnable onOk,
+                                  Consumer<Exception> onErr) {
+
+        EVENTS.document(eventId).get().addOnSuccessListener(doc -> {
+            Event event = doc.toObject(Event.class);
+            if (event == null) {
+                onErr.accept(new Exception("Event not found"));
+                return;
+            }
+
+            WriteBatch batch = db.batch();
+
+            DocumentReference eventRef = EVENTS.document(eventId);
+            DocumentReference inviteRef = INVITES.document(eventId + "_" + entrantId);
+
+            // Remove from invited list
+            batch.update(eventRef, "invitedList", FieldValue.arrayRemove(entrantId));
+
+            // Add to cancelled list
+            batch.update(eventRef, "cancelledEntrants", FieldValue.arrayUnion(entrantId));
+
+            // Update the invitation document
+            Map<String, Object> inviteUpdates = new HashMap<>();
+            inviteUpdates.put("status", "declined");
+            inviteUpdates.put("responded", true);
+            inviteUpdates.put("updatedAt", new Date());
+            batch.set(inviteRef, inviteUpdates, SetOptions.merge());
+
+            batch.commit()
+                    .addOnSuccessListener(v -> onOk.run())
+                    .addOnFailureListener(onErr::accept);
+
+        }).addOnFailureListener(onErr::accept);
+    }
+
+
     // -------------------------
     // Notifications
     // -------------------------
