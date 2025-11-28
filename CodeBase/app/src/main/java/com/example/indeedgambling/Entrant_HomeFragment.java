@@ -43,7 +43,8 @@ public class Entrant_HomeFragment extends Fragment {
         Button LogoutButton = view.findViewById(R.id.entrant_logout_button_home);
         TextView greeting = view.findViewById(R.id.entrant_greeting_home);
 
-        String[] optionsString = {"Browse", "History", "Profile", "Guidelines", "Notifications"};
+        String[] optionsString = {"Browse", "History", "Profile", "Guidelines", "Notifications", "Scan QR Code"};
+
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
@@ -90,14 +91,22 @@ public class Entrant_HomeFragment extends Fragment {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.entrant_HistoryFragment);
             } else if (position == 2) {
+                Bundle args = new Bundle();
+                args.putString("profileID", e.getProfileId());
+
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.entrant_ProfileFragment);
+                        .navigate(R.id.settingsFragment, args);
+
+
             } else if (position == 3) {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.entrant_GuidelinesFragment);
             } else if (position == 4) {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.entrant_NotificationsFragment);
+            } else if (position == 5) {
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_entrantHomeFragment_to_scanQRFragment);
             }
         });
 
