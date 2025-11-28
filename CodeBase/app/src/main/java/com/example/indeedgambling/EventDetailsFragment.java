@@ -129,6 +129,17 @@ public class EventDetailsFragment extends Fragment {
             noBtn.setOnClickListener(v1 -> clickedRejectInvite(v));
         }
 
+        if (entrantRelation.equals("accepted")) {
+
+
+            yesBtn.setVisibility(View.GONE);
+            noBtn.setVisibility(View.GONE);
+            tryAgainBtn.setVisibility(View.VISIBLE);
+            tryAgainBtn.setText("Already Accepted");
+
+            tryAgainBtn.setEnabled(false);
+        }
+        
         if (entrantRelation.equals("cancelled")) {
 
             tryAgainBtn.setText("Try Again?");
