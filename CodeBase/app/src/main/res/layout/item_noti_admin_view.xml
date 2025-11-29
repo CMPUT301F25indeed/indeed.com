@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/bg_button_secondary"
+    android:layout_marginBottom="12dp">
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/noti_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2 hours ago"
+        android:textSize="12sp"
+        android:textColor="#7AA9FF"
+        android:paddingBottom="4dp" />
+
+    <!-- Big Message -->
+    <TextView
+        android:id="@+id/noti_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This is the notification message."
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:paddingBottom="6dp" />
+
+    <!-- Sender Name -->
+    <TextView
+        android:id="@+id/noti_sender_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sender Name"
+        android:textSize="14sp"
+        android:textColor="#CCCCCC" />
+
+</LinearLayout>

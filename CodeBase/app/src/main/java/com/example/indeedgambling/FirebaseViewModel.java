@@ -1169,6 +1169,50 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onError::accept);
     }
 
+    public LiveData<Profile> getProfileLive(String profileId) {
+        MutableLiveData<Profile> data = new MutableLiveData<>();
+
+        PROFILES.document(profileId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        data.setValue(doc.toObject(Profile.class));
+                    } else {
+                        data.setValue(null); // no profile found
+                    }
+                })
+                .addOnFailureListener(e -> data.setValue(null));
+
+        return data;
+    }
+
+    private MutableLiveData<List<Notification>> allNotifications = new MutableLiveData<>(new ArrayList<>());
+
+    public LiveData<List<Notification>> getAllNotificationsLive() {
+
+        NOTIFS.orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snap, err) -> {
+
+                    if (err != null || snap == null) {
+                        allNotifications.postValue(new ArrayList<>());
+                        return;
+                    }
+
+                    List<Notification> list = new ArrayList<>();
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        Notification n = d.toObject(Notification.class);
+                        if (n != null) list.add(n);
+                    }
+
+                    allNotifications.postValue(list);
+                });
+
+        return allNotifications;
+    }
+
+
+
+
     public void uploadProfilePicture(String profileId, Uri imageUri,
                                      Consumer<String> onSuccess,
                                      Consumer<Exception> onError) {
@@ -1313,6 +1357,48 @@ public class FirebaseViewModel extends ViewModel {
     public void deleteProfile(String profileID) {
         PROFILES.document(profileID).delete();
     }
+
+    public void deleteAllOrganizerEvents(String organizerId,
+                                         Runnable onOk,
+                                         Consumer<Exception> onErr) {
+
+        if (organizerId == null || organizerId.isEmpty()) {
+            onErr.accept(new IllegalArgumentException("Organizer ID required"));
+            return;
+        }
+
+        EVENTS.whereEqualTo("organizerId", organizerId)
+                .get()
+                .addOnSuccessListener(query -> {
+
+                    // No events to delete
+                    if (query.isEmpty()) {
+                        onOk.run();
+                        return;
+                    }
+
+                    List<DocumentSnapshot> docs = query.getDocuments();
+                    final int total = docs.size();
+                    final int[] completed = {0};
+
+                    for (DocumentSnapshot doc : docs) {
+                        String eventId = doc.getId();
+
+                        adminDeleteEventAndCleanup(
+                                eventId,
+                                () -> {
+                                    completed[0]++;
+                                    if (completed[0] == total) {
+                                        onOk.run();
+                                    }
+                                },
+                                e -> onErr.accept(e)
+                        );
+                    }
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
 
 
 }

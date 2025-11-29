@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:padding="12dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical">
+    android:padding="12dp"
+    android:background="@drawable/bg_button_secondary"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="12dp">
 
     <!-- Profile Image -->
     <ImageView
         android:id="@+id/profile_image"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@drawable/ic_launcher_background"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
         android:scaleType="centerCrop"
-        android:background="#DDDDDD"
-        android:layout_marginEnd="12dp"
-        android:adjustViewBounds="true" />
+        android:src="@drawable/ic_launcher_background"
+        android:background="#222222"
+        android:layout_marginEnd="14dp"
+        android:clipToOutline="true"
+         />
 
     <!-- Column: role, email, name -->
     <LinearLayout
@@ -24,17 +27,17 @@
         android:layout_height="wrap_content"
         android:layout_weight="1">
 
-        <!-- role (small) -->
+        <!-- role (small, muted) -->
         <TextView
             android:id="@+id/profile_role"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Role"
             android:textSize="12sp"
-            android:textColor="#555555"
+            android:textColor="#7AA9FF"
             android:paddingBottom="2dp" />
 
-        <!-- email (big + bold) -->
+        <!-- email (bold, main text) -->
         <TextView
             android:id="@+id/profile_email"
             android:layout_width="wrap_content"
@@ -42,29 +45,29 @@
             android:text="email@example.com"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#000000"
-            android:paddingBottom="2dp" />
+            android:textColor="#FFFFFF"
+            android:paddingBottom="3dp" />
 
-        <!-- name (small) -->
+        <!-- name (small, muted) -->
         <TextView
             android:id="@+id/profile_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="John Doe"
             android:textSize="12sp"
-            android:textColor="#777777" />
+            android:textColor="#CCCCCC" />
 
     </LinearLayout>
 
-    <!-- Delete button on the right -->
+    <!-- Right action button -->
     <Button
         android:id="@+id/profile_delete_btn"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:text="Delet"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:text="✖"
         android:textSize="18sp"
-        android:layout_marginStart="12dp"
+        android:textColor="#FFFFFF"
         android:backgroundTint="#CC3333"
-        android:textColor="#FFFFFF" />
+        android:layout_marginStart="10dp" />
 
 </LinearLayout>

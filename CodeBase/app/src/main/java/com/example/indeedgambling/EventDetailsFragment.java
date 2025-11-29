@@ -229,13 +229,13 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-        if (event.tryaddtoWaitingList(entrantId)) {
+        if (!(event.tryaddtoWaitingList(entrantId))) {
+            event.getWaitingList().remove(entrantId); //lazy coding cuz im not changing methods
             Toast.makeText(getContext(), "Waitlist is FULL!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         entrantVM.addEventToEntrant(event.getEventId());
-        event.getWaitingList().add(entrantId);
 
         firebaseVM.joinWaitingList(event.getEventId(), entrantId, () -> {},
                 e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
