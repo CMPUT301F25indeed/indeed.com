@@ -39,7 +39,7 @@ public class Profile {
     private boolean roleVerified;
     private String passwordHash; // added
     private String deviceId;     // added for device login later
-    private Boolean lightMode;
+    private Boolean lightModeEnabled;
     private String profileImageUrl;
     private double latitude;
     private double longitude;
@@ -68,7 +68,7 @@ public class Profile {
         this.passwordHash = passwordHash;
         this.roleVerified = false;
         this.notificationsEnabled = true;
-        this.lightMode = true;
+        this.lightModeEnabled = true;
     }
 
     // Getters & Setters
@@ -104,11 +104,11 @@ public class Profile {
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
     public Boolean isLightModeEnabled() {
-        return lightMode;
+        return lightModeEnabled;
     }
 
-    public void setLightMode(Boolean lightMode) {
-        this.lightMode = lightMode;
+    public void setLightModeEnabled(Boolean lightModeEnabled) {
+        this.lightModeEnabled = lightModeEnabled;
     }
 
     public String getProfileImageUrl() {

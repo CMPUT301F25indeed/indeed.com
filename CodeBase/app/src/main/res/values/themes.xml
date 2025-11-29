@@ -1,9 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.IndeedGambling" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <!-- App background -->
+        <item name="android:windowBackground">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+
+        <!-- Buttons (blue background + white text) -->
+        <item name="colorPrimary">@color/indeed_color</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Normal text color (black everywhere except on buttons) -->
+        <item name="android:textColor">@color/black</item>
+        <item name="colorOnBackground">@color/black</item>
+        <item name="colorOnSurface">@color/black</item>
+
     </style>
 
     <style name="Theme.IndeedGambling" parent="Base.Theme.IndeedGambling" />
+
 </resources>

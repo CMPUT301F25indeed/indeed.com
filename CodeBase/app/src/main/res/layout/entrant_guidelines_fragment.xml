@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="@android:color/black">
+    >
 
     <ScrollView
         android:id="@+id/guidelines_scroll"
@@ -30,7 +30,7 @@
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"
-                android:textColor="@android:color/white" />
+                 />
 
             <View
                 android:layout_width="match_parent"
@@ -42,7 +42,6 @@
                 android:id="@+id/guidelines_body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:lineSpacingExtra="4dp"
                 android:text="@string/Guidelines_for_Entrant"
