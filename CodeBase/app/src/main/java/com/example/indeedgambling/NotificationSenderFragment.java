@@ -38,6 +38,8 @@ public class NotificationSenderFragment extends Fragment {
     private RadioGroup radioRecipientGroup;
     private Button buttonSend;
 
+    private String eventName;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -72,6 +74,7 @@ public class NotificationSenderFragment extends Fragment {
         if (currentEvent != null && currentEvent.getEventId() != null) {
             editEventId.setText(currentEvent.getEventId());
             editEventId.setEnabled(false);
+            eventName = currentEvent.getEventName();
         }
     }
 
@@ -129,7 +132,7 @@ public class NotificationSenderFragment extends Fragment {
         if (currentEvent != null && currentEvent.getWaitingList() != null
                 && !currentEvent.getWaitingList().isEmpty()){
             //Log.d("DEBUG", "Sending to Firebase - Event ID: " + eventId);
-            viewModel.notifyWaitingList(eventId, message,
+            viewModel.notifyWaitingList(eventName, eventId, message,
                 (Void aVoid) -> {
                     //Log.d("DEBUG", "Firebase SUCCESS - notification sent");
                     Toast.makeText(requireContext(), "Sent to waiting list!", Toast.LENGTH_SHORT).show();
@@ -147,7 +150,7 @@ public class NotificationSenderFragment extends Fragment {
         if (currentEvent != null && currentEvent.getInvitedList() != null
                 && !currentEvent.getInvitedList().isEmpty()) {
 
-            viewModel.notifySelectedEntrants(eventId, message,
+            viewModel.notifySelectedEntrants(eventName, eventId, message,
                 (Void aVoid) -> {
                     Toast.makeText(requireContext(), "Sent to selected entrants!", Toast.LENGTH_SHORT).show();
                     requireActivity().getOnBackPressedDispatcher();
@@ -167,7 +170,7 @@ public class NotificationSenderFragment extends Fragment {
         if (currentEvent != null && currentEvent.getCancelledEntrants() != null
                 && !currentEvent.getCancelledEntrants().isEmpty()) {
 
-            viewModel.notifyCancelledEntrants(eventId, currentEvent.getCancelledEntrants(), message,
+            viewModel.notifyCancelledEntrants(eventName,eventId, currentEvent.getCancelledEntrants(), message,
                     (Void aVoid) -> {
                         Toast.makeText(requireContext(), "Sent to cancelled entrants!", Toast.LENGTH_SHORT).show();
                         requireActivity().onBackPressed();

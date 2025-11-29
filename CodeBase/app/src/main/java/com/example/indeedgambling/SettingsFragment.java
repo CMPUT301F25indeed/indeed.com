@@ -114,8 +114,6 @@ public class SettingsFragment extends Fragment {
 
         Button backButton = view.findViewById(R.id.back_button);
 
-        TextView roleText = view.findViewById(R.id.role_text_profile);
-
         profileImage = view.findViewById(R.id.pfp_image);
         Button editPfpButton = view.findViewById(R.id.pfp_edit_button);
 
@@ -128,6 +126,8 @@ public class SettingsFragment extends Fragment {
 
         Button deleteProfileButton = view.findViewById(R.id.delete_profile_button);
         Button saveButton = view.findViewById(R.id.save_settings_button);
+
+        TextView roleHeaderText = view.findViewById(R.id.role_header_text);
 
 
 
@@ -143,7 +143,9 @@ public class SettingsFragment extends Fragment {
             emailEdit.setText(email);
             phoneEdit.setText(phone);
 
-            roleText.setText(role);
+            roleHeaderText.setText("Modify your " + role.substring(0, 1).toUpperCase() + role.substring(1) +
+                    " related settings. Your role determines your app access and available settings.");
+
 
             // Load the profile image
             imageUrl = profile.getProfileImageUrl();
@@ -154,10 +156,14 @@ public class SettingsFragment extends Fragment {
                         .into(profileImage);
             }
 
-            if (!role.equals("entrant")) {
+            if (role.equals("entrant")) {
+                LinearLayout noti_layer = view.findViewById(R.id.noti_layout);
+                noti_layer.setVisibility(View.VISIBLE);
+                deleteProfileButton.setVisibility(View.VISIBLE);
+                notificationsSwitch.setVisibility(View.VISIBLE);
+            } else {
                 deleteProfileButton.setVisibility(View.GONE);
-                LinearLayout myLayout = view.findViewById(R.id.noti_layout);
-                myLayout.setVisibility(View.GONE);
+                notificationsSwitch.setVisibility(View.GONE);
             }
 
             initialNotifications = Boolean.TRUE.equals(profile.isNotificationsEnabled());
@@ -365,7 +371,7 @@ public class SettingsFragment extends Fragment {
 
             if (key.equals("lightModeEnabled")) {
                 initialLightMode = (Boolean) updates.get(key);
-                saveAndApplyTheme(initialLightMode);
+                //saveAndApplyTheme(initialLightMode);
             }
 
             if (key.equals("profileImageUrl")) {
