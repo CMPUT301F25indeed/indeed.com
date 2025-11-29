@@ -120,32 +120,36 @@ public class Admin_EventDetailsFragment extends Fragment {
         desc.setText(event.getDescription());
 
         if (event.getLocation() != null) {
-            loc.setText("Location: " + event.getLocation());
+            // only value, label is in XML
+            loc.setText(event.getLocation());
         }
 
         if (event.getCategory() != null) {
-            category.setText("Category: " + event.getCategory());
+            category.setText(event.getCategory());
         }
 
         if (event.getEventStart() != null && event.getEventEnd() != null) {
-            dates.setText("Event Dates: " +
+            dates.setText(
                     sdf.format(event.getEventStart()) + " – " +
-                    sdf.format(event.getEventEnd()));
+                            sdf.format(event.getEventEnd())
+            );
         }
 
         if (event.getRegistrationStart() != null && event.getRegistrationEnd() != null) {
-            reg.setText("Registration: " +
+            reg.setText(
                     sdf.format(event.getRegistrationStart()) + " – " +
-                    sdf.format(event.getRegistrationEnd()));
+                            sdf.format(event.getRegistrationEnd())
+            );
         }
 
-        status.setText("Status: " + event.getStatus());
+        status.setText(event.getStatus());
 
         if (event.getWaitingList() != null) {
-            total.setText("Total: " + event.getWaitingList().size());
+            total.setText(String.valueOf(event.getWaitingList().size()));
         } else {
-            total.setText("Total: 0");
+            total.setText("0");
         }
+
     }
 
     private void confirmDelete() {

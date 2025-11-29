@@ -63,17 +63,18 @@ public class Admin_ImageDetailsFragment extends Fragment {
 
         // basic text
         title.setText(eventName != null ? eventName : "(Unknown event)");
-        eventIdTxt.setText("Event ID: " + (eventId != null ? eventId : "unknown"));
+        eventIdTxt.setText(eventId != null ? eventId : "unknown");
 
-        uploaderTxt.setText("Uploader ID: " + (uploaderId != null ? uploaderId : "unknown"));
+        uploaderTxt.setText(uploaderId != null ? uploaderId : "unknown");
 
         if (uploadedAtMillis > 0) {
             Date d = new Date(uploadedAtMillis);
             SimpleDateFormat sdf =
                     new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
-            uploadedTxt.setText("Uploaded: " + sdf.format(d));
+            uploadedTxt.setText(sdf.format(d));
+
         } else {
-            uploadedTxt.setText("Uploaded: unknown");
+            uploadedTxt.setText("unknown");
         }
 
         // organiser name (profile lookup)
@@ -84,16 +85,17 @@ public class Admin_ImageDetailsFragment extends Fragment {
                     .addOnSuccessListener(doc -> {
                         String name = doc.getString("personName");
                         if (name == null || name.isEmpty()) {
-                            organizerNameTx.setText("Organizer: " + uploaderId);
+                            organizerNameTx.setText(uploaderId);
                         } else {
-                            organizerNameTx.setText("Organizer: " + name);
+                            organizerNameTx.setText(name);
+
                         }
                     })
                     .addOnFailureListener(err ->
-                            organizerNameTx.setText("Organizer: " + uploaderId)
+                            organizerNameTx.setText(uploaderId)
                     );
         } else {
-            organizerNameTx.setText("Organizer: unknown");
+            organizerNameTx.setText("unknown");
         }
 
         // decode base64 image

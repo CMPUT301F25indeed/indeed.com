@@ -1,39 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="12dp"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="32dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    android:background="#000000">
 
-    <!-- grey header bar -->
+    <!-- Header -->
+    <TextView
+        android:id="@+id/admin_images_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search, review, or remove uploaded images."
+        android:textSize="16sp"
+        android:textColor="#BBBBBB"
+        android:fontFamily="@font/opensans"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
 
+    <!-- Search bar -->
     <SearchView
         android:id="@+id/admin_images_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:queryHint="Search images by uploader/event"/>
+        android:queryHint="Search images by uploader or event"
+        android:background="#111111"
+        android:layout_marginBottom="16dp" />
 
-
+    <!-- ListView with better spacing -->
     <ListView
         android:id="@+id/admin_images_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         android:layout_weight="1"
         android:divider="@android:color/transparent"
-        android:dividerHeight="8dp" />
+        android:dividerHeight="20dp"
+        android:layout_marginTop="8dp" />
 
+    <!-- Remove Selected -->
     <Button
         android:id="@+id/admin_images_remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Remove Selected"/>
+        android:text="Remove Selected"
+        android:textAllCaps="false"
+        android:textColor="#D32F2F"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:background="@drawable/bg_button_danger_border"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
+        android:layout_marginTop="16dp" />
 
+    <!-- Back button (red border) -->
     <Button
         android:id="@+id/admin_images_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Back"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_button_danger_border"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
+        android:text="Back to Dashboard"
+        android:textAllCaps="false"
+        android:textColor="#D32F2F"
+        android:textSize="16sp"
+        app:backgroundTint="@null" />
+
 </LinearLayout>

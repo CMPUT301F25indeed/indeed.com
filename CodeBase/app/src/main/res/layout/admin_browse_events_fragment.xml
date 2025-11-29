@@ -1,30 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="12dp"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    android:paddingTop="32dp">      <!-- pushes content away from status bar -->
 
+    <!-- Subtitle (spaced properly now) -->
+    <TextView
+        android:id="@+id/admin_events_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search, review, or remove events."
+        android:textColor="#BBBBBB"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Search bar -->
     <SearchView
         android:id="@+id/admin_events_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:queryHint="Search events by title/date"/>
+        android:background="#111111"
+        android:queryHint="Search events by title or date"
+        android:layout_marginBottom="16dp" />    <!-- spacing before first card -->
 
+    <!-- List of event cards -->
     <ListView
         android:id="@+id/admin_events_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="8dp"
         android:divider="@android:color/transparent"
-        android:dividerHeight="8dp" />
+        android:dividerHeight="20dp"
+        android:layout_marginTop="8dp"/>
 
-
+    <!-- Remove Selected (red border button) -->
     <Button
         android:id="@+id/admin_events_remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Remove Selected"/>
+        android:text="Remove Selected"
+        android:textAllCaps="false"
+        android:textColor="#D32F2F"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:background="@drawable/bg_button_danger_border"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>
