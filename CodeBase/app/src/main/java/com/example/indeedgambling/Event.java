@@ -33,10 +33,11 @@ public class Event implements Serializable {
     //private String qrCodeURL;
     private String status;    // planned/open/closed/completed
     private String criteria;  // lottery notes
-    private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs
-    private ArrayList<String> invitedList = new ArrayList<String>(); // Entrant IDs
+    private ArrayList<String> waitingList = new ArrayList<String>(); // entrant IDs who signed up
+    private ArrayList<String> invitedList = new ArrayList<String>(); // Entrant IDs who were randomly selected
+    private ArrayList<String> lostList = new ArrayList<>(); //Entrant Ids who were not randomly selected
     private ArrayList<String> cancelledEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
-    private ArrayList<String> acceptedEntrants = new ArrayList<String>(); //invited entrants who declined or were removed
+    private ArrayList<String> acceptedEntrants = new ArrayList<String>(); //invited entrants who accepted
 
     /**
      * Creates an event. Enforces Open is before Closed with an IllegalArgumentException
@@ -522,7 +523,15 @@ public class Event implements Serializable {
         this.acceptedEntrants = acceptedEntrants;
     }
 
-    //---------------------------------------------------- Helpers ---------------------------//
+    public ArrayList<String> getLostList() {
+        return lostList;
+    }
+
+    public void setLostList(ArrayList<String> lostList) {
+        this.lostList = lostList;
+    }
+
+//---------------------------------------------------- Helpers ---------------------------//
     /** Helper function that checks if RIGHT NOW is before reg period opens
      * @return True if before Reg Open, false otherwise
      */
@@ -601,7 +610,8 @@ public class Event implements Serializable {
         return !(location == null);
     }
 
-    /** Moves a random selection of entrants from the waitlist to the invited list.
+    /** Moves a random selection of entrants from the waitlist/lostlist to the invited list. DOES NOT TALK TO SERVER DIRECTLY
+     * Entrants who were not selected get moved to the lostlist, or remain there.
      * @param number How many entrants to move. Will not throw error if limit exceeded, just stops.
      */
     public void InviteEntrants(int number){
@@ -610,30 +620,36 @@ public class Event implements Serializable {
             return;
         }
 
+
+        //Viable-to-invite
+        ArrayList<String> viabletoInvite = new ArrayList<String>();
+        //Need duplicate checks
+        viabletoInvite.addAll(waitingList);
+        viabletoInvite.addAll(lostList);
+
+        //Remove all from both, and all to lostList after
+        waitingList.clear();
+        lostList.clear();
+
         //Will stop moving entrants if there are no more to invite
-        for (int i = 0; i < number && !waitingList.isEmpty(); i++){
+        for (int i = 0; i < number && !viabletoInvite.isEmpty(); i++){
 
             //Random is not allowed on a range of 1 int
-            if (waitingList.size() == 1){
-                invitedList.add(waitingList.remove(0));
+            if (viabletoInvite.size() == 1){
+                invitedList.add(viabletoInvite.remove(0));
             }
             else{
                 //Randomly choose an entrant
-                int random_index = new Random().nextInt(0,waitingList.size() - 1);
-
-                //Check if entrant not already invited. if so, remove from waitlist only.
-                /*if (invitedList.contains(waitingList.get(random_index))){
-                    waitingList.remove(random_index);
-                }*/
-                //else{
-                    invitedList.add(waitingList.remove(random_index));
-                //}
-
+                int random_index = new Random().nextInt(0,viabletoInvite.size() - 1);
+                invitedList.add(viabletoInvite.remove(random_index));
             }
         }
+
+        //Putting all remaining people to the lostlist.
+        lostList.addAll(viabletoInvite);
     }
 
-    /** Attempts to add a ID string to the waitingList. Will not if at capacity
+    /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER
      * @param entrantID ID to try to add
      * @return TRUE if added, FALSE if not.
      */
@@ -645,12 +661,24 @@ public class Event implements Serializable {
         return false;
     }
 
+    /** Ends registration now. Does not do any checks for goodness or graciousness.
+     *
+     */
+    public void endRegistration(){
+        //Checks if registration ends in the past. Only updates if it would end in the future.
+
+        if (registrationEnd.after(new Date())){
+            this.registrationEnd = new Date();
+        }
+
+    }
 
 
 
 
 
-                                            //-----------------------------Overrides--------------------//
+
+    //-----------------------------Overrides--------------------//
 
     /**
      * Overriding toString's function on Events to return the name of the event instead.
@@ -659,7 +687,14 @@ public class Event implements Serializable {
     @NonNull
     @Override
     public String toString() {
-        return eventName;//.concat(" : ".concat(Integer.toString(waitingList.size()).concat(" / ").concat(getMaxWaitingEntrantsString())));
+        //If registration is over, display so
+        if (this.registrationEnd.before(new Date())){
+            return "\uD83D\uDCDD❌".concat(" | ").concat(eventName);
+        }
+        else{
+            return "\uD83D\uDCDD✅".concat(" | ").concat(eventName);
+        }
+        //return eventName;//.concat(" : ".concat(Integer.toString(waitingList.size()).concat(" / ").concat(getMaxWaitingEntrantsString())));
     }
 
 

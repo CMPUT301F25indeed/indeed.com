@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#000000">
+    android:background="#000000"
+    android:padding="16dp">
 
     <!-- TOP BAR -->
     <RelativeLayout
@@ -41,12 +42,12 @@
             android:layout_centerVertical="true"/>
     </RelativeLayout>
 
-    <!-- ROLE TEXT -->
+    <!-- Role Header Text (dynamic user role) -->
     <TextView
-        android:id="@+id/role_text_profile"
-        android:layout_width="wrap_content"
+        android:id="@+id/role_header_text"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Role: User"
+        android:text="User: Role. Your role determines your app access and available settings."
         android:textColor="#BBBBBB"
         android:textSize="16sp"
         android:fontFamily="@font/opensans"
@@ -107,7 +108,7 @@
 
             <!-- NAME -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Name"
                 android:textColor="#FFFFFF"
@@ -130,7 +131,7 @@
 
             <!-- EMAIL -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Email"
                 android:textColor="#FFFFFF"
@@ -154,7 +155,7 @@
 
             <!-- PHONE -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Phone"
                 android:textColor="#FFFFFF"
@@ -183,7 +184,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingVertical="20dp">
+                android:paddingVertical="20dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
@@ -200,13 +202,15 @@
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
+            <!-- Notifications -->
             <LinearLayout
                 android:id="@+id/noti_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingVertical="20dp">
+                android:paddingVertical="20dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
