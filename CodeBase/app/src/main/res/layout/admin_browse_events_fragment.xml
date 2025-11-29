@@ -48,7 +48,7 @@
         android:layout_height="wrap_content"
         android:text="Remove Selected"
         android:textAllCaps="false"
-        android:textColor="#D32F2F"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:fontFamily="@font/opensans"
         android:background="@drawable/bg_button_danger_border"

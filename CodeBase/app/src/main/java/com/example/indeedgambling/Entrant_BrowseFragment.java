@@ -1,6 +1,7 @@
 package com.example.indeedgambling;
 
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.widget.Spinner;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.SearchView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +36,9 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
     private FirebaseViewModel firebaseVM;
     private EventsAdapter adapter;
 
+    // keep full list here for search
+    private final List<Event> allEvents = new ArrayList<>();
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,11 +52,45 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         RecyclerView recyclerView = v.findViewById(R.id.entrant_events_browse);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new EventsAdapter(this);
+        adapter = new EventsAdapter(this, firebaseVM);
         recyclerView.setAdapter(adapter);
 
+        // SearchView from layout
+        SearchView searchView = v.findViewById(R.id.searchView);
+
+        // make search text white
+        int searchTextId = searchView.getContext()
+                .getResources()
+                .getIdentifier("android:id/search_src_text", null, null);
+        TextView searchText = searchView.findViewById(searchTextId);
+        if (searchText != null) {
+            searchText.setTextColor(Color.WHITE);
+            searchText.setHintTextColor(Color.GRAY);
+        }
+
+        // live events from Firestore
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {
-            if (events != null) adapter.setData(events);
+            allEvents.clear();
+            if (events != null) {
+                allEvents.addAll(events);
+            }
+            String q = searchView.getQuery() != null ? searchView.getQuery().toString() : "";
+            applySearchFilter(q);
+        });
+
+        // search typing logic
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                applySearchFilter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                applySearchFilter(newText);
+                return true;
+            }
         });
 
         Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
@@ -58,7 +98,7 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
                 NavHostFragment.findNavController(Entrant_BrowseFragment.this)
                         .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment));
 
-        // 🔹 Added: Filter button click opens dialog
+        // Filter button click opens dialog
         Button filterBtn = v.findViewById(R.id.entrant_filter_button_browse);
         filterBtn.setOnClickListener(view -> showFilterDialog());
 
@@ -71,6 +111,23 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         bundle.putSerializable("event", e);
         NavHostFragment.findNavController(this)
                 .navigate(R.id.action_entrant_BrowseFragment_to_eventDetailsFragment, bundle);
+    }
+
+    // simple title/description search on allEvents
+    private void applySearchFilter(String query) {
+        String q = (query == null) ? "" : query.trim().toLowerCase();
+
+        List<Event> filtered = new ArrayList<>();
+        for (Event e : allEvents) {
+            String name = e.getEventName() != null ? e.getEventName().toLowerCase() : "";
+            String desc = e.getDescription() != null ? e.getDescription().toLowerCase() : "";
+
+            if (q.isEmpty() || name.contains(q) || desc.contains(q)) {
+                filtered.add(e);
+            }
+        }
+
+        adapter.setData(filtered);
     }
 
     // ----------------------------------------------------
@@ -86,7 +143,7 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
         Button btnApply = dialogView.findViewById(R.id.btn_apply);
 
-        // ✅ Hardcoded categories (no duplicates)
+        // Hardcoded categories (no duplicates)
         List<String> categories = new ArrayList<>();
         categories.add("All");
         categories.add("Sports");
@@ -146,11 +203,14 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
 
             firebaseVM.fetchEventsByCategoryAndDate(selectedCategory, startDate, endDate, events -> {
                 if (events != null && !events.isEmpty()) {
-                    adapter.setData(events);
+                    // update both adapter and allEvents so search works on filtered list
+                    allEvents.clear();
+                    allEvents.addAll(events);
+                    applySearchFilter(""); // no search text → show all filtered
                 } else {
+                    allEvents.clear();
                     adapter.setData(new ArrayList<>());
                 }
-                adapter.notifyDataSetChanged();
                 dialog.dismiss();
             }, err -> {
                 Toast.makeText(getContext(), "Filter failed: " + err.getMessage(), Toast.LENGTH_SHORT).show();
