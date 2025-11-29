@@ -1,17 +1,23 @@
 package com.example.indeedgambling;
 
-import android.Manifest;
 import android.app.Activity;
+import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +26,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class EventDetailsFragment extends Fragment {
 
@@ -32,6 +40,7 @@ public class EventDetailsFragment extends Fragment {
 
     private TextView name, desc, waitlistStatus, total;
     private Button yesBtn, noBtn, backBtn, tryAgainBtn;
+    private ImageView posterView;          // <--- NEW
 
     // set when QR is used
     private String scannedEventId = null;
@@ -45,29 +54,28 @@ public class EventDetailsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_event_details, container, false);
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
-        entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
+        entrantVM  = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
 
         entrantId = entrantVM.returnID();
 
-        // read QR argument
+        // QR argument
         if (getArguments() != null) {
             scannedEventId = getArguments().getString("eventId");
         }
 
-        name = v.findViewById(R.id.event_name);
-        desc = v.findViewById(R.id.event_description);
+        name           = v.findViewById(R.id.event_name);
+        desc           = v.findViewById(R.id.event_description);
         waitlistStatus = v.findViewById(R.id.waitlist_status);
-        backBtn = v.findViewById(R.id.back_button);
-        total = v.findViewById(R.id.event_total_entrant);
-        yesBtn = v.findViewById(R.id.yes_button);
-        noBtn = v.findViewById(R.id.no_button);
-        tryAgainBtn = v.findViewById(R.id.try_again_button);
+        backBtn        = v.findViewById(R.id.back_button);
+        total          = v.findViewById(R.id.event_total_entrant);
+        yesBtn         = v.findViewById(R.id.yes_button);
+        noBtn          = v.findViewById(R.id.no_button);
+        tryAgainBtn    = v.findViewById(R.id.try_again_button);
+        posterView     = v.findViewById(R.id.event_poster);   // <--- NEW
 
         backBtn.setOnClickListener(v1 -> requireActivity().onBackPressed());
 
-        // -----------------------------------
-        // CASE 1 — OPENED FROM QR SCAN
-        // -----------------------------------
+        // CASE 1 — from QR scan
         if (scannedEventId != null && !scannedEventId.isEmpty()) {
 
             firebaseVM.getEventById(
@@ -75,7 +83,7 @@ public class EventDetailsFragment extends Fragment {
                     loadedEvent -> {
                         this.event = loadedEvent;
                         loadEventDetails(v);
-                        disableAllEntrantActions();  // <<--- FIX
+                        disableAllEntrantActions();
                     },
                     error -> Toast.makeText(getContext(), "Failed to load event", Toast.LENGTH_SHORT).show()
             );
@@ -83,9 +91,7 @@ public class EventDetailsFragment extends Fragment {
             return v;
         }
 
-        // -----------------------------------
-        // CASE 2 — Normal navigation
-        // -----------------------------------
+        // CASE 2 — normal navigation
         if (getArguments() != null) {
             event = (Event) getArguments().getSerializable("event");
             loadEventDetails(v);
@@ -95,7 +101,6 @@ public class EventDetailsFragment extends Fragment {
         return v;
     }
 
-    // =====================================================================
     // =====================================================================
     private void applyEntrantButtonLogic(View v) {
 
@@ -136,15 +141,13 @@ public class EventDetailsFragment extends Fragment {
 
         if (entrantRelation.equals("accepted")) {
 
-
             yesBtn.setVisibility(View.GONE);
             noBtn.setVisibility(View.GONE);
             tryAgainBtn.setVisibility(View.VISIBLE);
             tryAgainBtn.setText("Already Accepted");
-
             tryAgainBtn.setEnabled(false);
         }
-        
+
         if (entrantRelation.equals("cancelled")) {
 
             tryAgainBtn.setText("Try Again?");
@@ -156,9 +159,7 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
-    // =====================================================================
-    //   QR MODE — disables everything
-    // =====================================================================
+    // QR MODE — disables everything
     private void disableAllEntrantActions() {
         yesBtn.setVisibility(View.GONE);
         noBtn.setVisibility(View.GONE);
@@ -177,11 +178,44 @@ public class EventDetailsFragment extends Fragment {
         name.setText(event.getEventName());
         desc.setText(event.getDescription());
 
-        TextView loc = v.findViewById(R.id.event_location);
-        TextView dates = v.findViewById(R.id.event_dates);
+        // ---------- NEW: load poster ----------
+        if (posterView != null) {
+            // grey placeholder first
+            posterView.setImageBitmap(null);
+            posterView.setBackgroundColor(0xFFEEEEEE);
+        }
+
+        String imageId = event.getImageUrl();
+        if (!TextUtils.isEmpty(imageId) && posterView != null) {
+            firebaseVM.getDb().collection("images")
+                    .document(imageId)
+                    .get()
+                    .addOnSuccessListener((DocumentSnapshot doc) -> {
+                        if (doc != null && doc.exists()) {
+                            String base64 = doc.getString("url");
+                            if (!TextUtils.isEmpty(base64)) {
+                                try {
+                                    byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+                                    Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                                    posterView.setBackgroundColor(0x00000000);
+                                    posterView.setImageBitmap(bmp);
+                                } catch (Exception e) {
+                                    Log.e("EventDetails", "Poster decode failed", e);
+                                }
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            Log.e("EventDetails", "Poster load failed", e)
+                    );
+        }
+        // ---------- END poster logic ----------
+
+        TextView loc       = v.findViewById(R.id.event_location);
+        TextView dates     = v.findViewById(R.id.event_dates);
         TextView regPeriod = v.findViewById(R.id.event_registration);
-        TextView status = v.findViewById(R.id.event_status);
-        TextView category = v.findViewById(R.id.event_category);
+        TextView status    = v.findViewById(R.id.event_status);
+        TextView category  = v.findViewById(R.id.event_category);
 
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
@@ -192,17 +226,20 @@ public class EventDetailsFragment extends Fragment {
             category.setText("Category: " + event.getCategory());
 
         if (event.getEventStart() != null && event.getEventEnd() != null)
-            dates.setText("Event Dates: " + sdf.format(event.getEventStart()) + " – " + sdf.format(event.getEventEnd()));
+            dates.setText("Event Dates: " +
+                    sdf.format(event.getEventStart()) + " – " +
+                    sdf.format(event.getEventEnd()));
 
         if (event.getRegistrationStart() != null && event.getRegistrationEnd() != null)
-            regPeriod.setText("Registration: " + sdf.format(event.getRegistrationStart()) + " – " + sdf.format(event.getRegistrationEnd()));
+            regPeriod.setText("Registration: " +
+                    sdf.format(event.getRegistrationStart()) + " – " +
+                    sdf.format(event.getRegistrationEnd()));
 
         status.setText("Status: " + event.getStatus());
 
         updateTotal(v);
     }
 
-    // =====================================================================
     // =====================================================================
     private void clickedJoinWaitlist(View v) {
 

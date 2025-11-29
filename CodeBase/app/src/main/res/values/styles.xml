@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="DarkDateTimePickerTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:colorAccent">#FFFFFF</item>
+        <item name="android:windowBackground">#000000</item>
+    </style>
+
+</resources>
