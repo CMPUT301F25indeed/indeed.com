@@ -1,68 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:orientation="vertical"
+    android:background="#000000"
+    android:paddingTop="32dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp">
 
-    <!-- Top bar (same style as Settings) -->
+    <!-- Top: Back button + Title -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:paddingBottom="16dp">
 
         <Button
             android:id="@+id/admin_browse_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="←"
-            android:textSize="28sp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"/>
+            android:text="←"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_button_danger_border" />
 
         <TextView
             android:id="@+id/admin_browse_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Browse Profiles"
-            android:textSize="26sp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:fontFamily="@font/opensans"
+            android:textColor="#FFFFFF"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true" />
-
     </RelativeLayout>
 
-    <!-- Search + Filter row -->
-    <LinearLayout
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/admin_profiles_sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:gravity="center_vertical">
+        android:text="Search, filter, or review user profiles."
+        android:textColor="#BBBBBB"
+        android:textSize="16sp"
+        android:layout_marginBottom="12dp"
+        android:fontFamily="@font/opensans"
+        android:gravity="center" />
 
-        <SearchView
-            android:id="@+id/admin_profiles_search"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:queryHint="Search name/email" />
+    <!-- Search bar -->
+    <SearchView
+        android:id="@+id/admin_profiles_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#111111"
+        android:queryHint="Search name or email"
+        android:layout_marginBottom="12dp" />
 
-        <Spinner
-            android:id="@+id/admin_profiles_filter"
-            android:layout_width="130dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="12dp" />
-    </LinearLayout>
+    <!-- Filter Spinner (Styled) -->
+    <Spinner
+        android:id="@+id/admin_profiles_filter"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#111111"
+        android:padding="10dp"
+        android:layout_marginBottom="16dp"
+        android:spinnerMode="dropdown" />
 
-    <!-- RecyclerView of profiles -->
+    <!-- RecyclerView of profile cards -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/admin_profiles_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="12dp"/>
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
 
 </LinearLayout>

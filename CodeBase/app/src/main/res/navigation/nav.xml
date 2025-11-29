@@ -281,7 +281,14 @@
     <fragment
         android:id="@+id/adminManageProfilesFragment"
         android:name="com.example.indeedgambling.Admin_ManageProfilesFragment"
-        android:label="Admin Manage Profiles" />
+        android:label="Admin Manage Profiles" >
+        <action
+            android:id="@+id/action_adminManageProfilesFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+        <action
+            android:id="@+id/action_adminManageProfilesFragment_to_profileDetailsFragment"
+            app:destination="@id/profileDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminReviewImagesFragment"
@@ -312,8 +319,8 @@
         android:name="com.example.indeedgambling.Admin_SystemLogsFragment"
         android:label="Admin System Logs">
         <action
-            android:id="@+id/action_adminLogsFragment_to_adminManageProfilesFragment"
-            app:destination="@id/adminManageProfilesFragment" />
+            android:id="@+id/action_adminLogsFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
     </fragment>
     <fragment
         android:id="@+id/entrant_GuidelinesFragment"
@@ -344,6 +351,20 @@
         <action
             android:id="@+id/action_settingsFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/profileDetailsFragment"
+        android:name="com.example.indeedgambling.ProfileDetailsFragment"
+        android:label="ProfileDetailsFragment" >
+        <argument
+            android:name="profileID"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_profileDetailsFragment_to_adminManageProfilesFragment"
+            app:destination="@id/adminManageProfilesFragment" />
     </fragment>
 
 </navigation>
