@@ -686,16 +686,13 @@ public class Organizer_UpcomingFragment extends Fragment {
         View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
         ListView WaitingList = waitlistView.findViewById(R.id.waitlistpopup_listview);
 
-        //Creating adapter for Listview (and attaching it)
-        ArrayList<Profile> WaitingListArray = new ArrayList<>();
-        ArrayAdapter<Profile> WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
         WaitingList.setAdapter(WaitingListAdapter);
 
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
         inviteEntrants.setOnClickListener(v1 -> {
             //Skip popup if there is nobody to invite
-            if (event.getWaitingList().isEmpty()){
+            if (event.getWaitingList().size() + event.getLostList().size() == 0){
                 WarningToast("Nobody to invite!");
                 return;
             }
