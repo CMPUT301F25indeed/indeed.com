@@ -1,11 +1,6 @@
 package com.example.indeedgambling;
 
-import android.app.Activity;
 import android.location.Location;
-import android.util.Pair;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.util.List;
 
@@ -115,8 +110,8 @@ public class Profile {
         return profileImageUrl;
     }
 
-    public Boolean getLightMode() {
-        return lightMode;
+    public Boolean isLightMode() {
+        return lightModeEnabled;
     }
 
     public void setProfileImageUrl(String profileImageUrl) {

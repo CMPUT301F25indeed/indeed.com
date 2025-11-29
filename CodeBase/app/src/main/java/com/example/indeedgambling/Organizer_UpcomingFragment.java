@@ -68,8 +68,18 @@ public class Organizer_UpcomingFragment extends Fragment {
     ArrayList<Event> EventArray = new ArrayList<>();
     ArrayAdapter<Event> UpcomingEventsAdapter;
 
+    ArrayList<Profile> WaitingListArray = new ArrayList<>();
+    ArrayAdapter<Profile> WaitingListAdapter;
 
 
+    ArrayList<Profile> invitedPeople = new ArrayList<>();
+    ArrayAdapter<Profile> inviteListAdapter;
+
+    ArrayList<Profile> cancelledPeople = new ArrayList<>();
+    ArrayAdapter<Profile> cancelledListAdapter;
+
+    ArrayList<Profile> acceptedPeople = new ArrayList<>();
+    ArrayAdapter<Profile> acceptedListAdapter;
 
 
     //Other
@@ -91,6 +101,13 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Displaying Organizer's events
         //Event adapter setup
         UpcomingEventsAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_list_item_1,EventArray);
+        WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
+        inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
+        cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
+        acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
+
+
+
 
         //Pull data
         ListView eventList = view.findViewById(R.id.Organizer_UpcomingEventList);
@@ -394,27 +411,96 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
 
+        //Pull data
+        ListenerRegistration EventListener =
+                Data.getDb()
+                        .collection("events")
+                        .document(event.getEventId())
+                        .addSnapshotListener((docSnapshot, error) -> {
+                            Event updatedEvent = docSnapshot.toObject(Event.class);
+
+                            //Update local data
+                            event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
+                            event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
+                            event.setLostList(updatedEvent.getLostList());
+                            event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
+                            event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
+                            updateCapacityDisplay(Capacity,event);
+
+
+                            //Waitlist Data
+                            ArrayList<String> queryList = new ArrayList<>();
+                            queryList.addAll(updatedEvent.getWaitingList());
+                            queryList.addAll(updatedEvent.getLostList());
+                            Data.getProfiles(queryList,
+                                    (QueryResult)->{
+                                        //Updating arrays
+                                        WaitingListArray.clear();
+                                        WaitingListArray.addAll(QueryResult);
+                                        WaitingListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                            //inviteList Data
+                            Data.getProfiles(updatedEvent.getInvitedList(),
+                                    (InvitedList)->{
+                                        //Updating array
+                                        invitedPeople.clear();
+                                        invitedPeople.addAll(InvitedList);
+                                        inviteListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                            //CancelledList Data
+                            Data.getProfiles(updatedEvent.getCancelledEntrants(),
+                                    (cancelledList)->{
+                                        //Updating array
+                                        cancelledPeople.clear();
+                                        cancelledPeople.addAll(cancelledList);
+                                        cancelledListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                            //AcceptedList Data
+                            Data.getProfiles(updatedEvent.getAcceptedEntrants(),
+                                    (acceptedList)->{
+                                        //Updating array
+                                        acceptedPeople.clear();
+                                        acceptedPeople.addAll(acceptedList);
+                                        acceptedListAdapter.notifyDataSetChanged();
+                                    },
+                                    e->{Log.d("Firestore Error",e.toString());});
+
+                        });
+
+
+
+
+
+
+
+
         //-- Button Interactions -- //
 
 
         //Waitlist Button Pop-up
         WaitListButton.setOnClickListener(v -> {
-            WaitListPopup(event,Capacity);
+            WaitListPopup(event);
         });
 
         //Invited List Button Pop-up
         InviteListButton.setOnClickListener(v -> {
-            InviteListPopup(event,Capacity);
+            InviteListPopup();
         });
 
         //Cancelled List Button Pop-up
         CancelledListButton.setOnClickListener(v -> {
-            CancelledListPopup(event,Capacity);
+            CancelledListPopup(event);
         });
 
         //Accepted List Pop-up
         AcceptedListButton.setOnClickListener(v -> {
-            AcceptedListPopup(event,Capacity);
+            AcceptedListPopup();
         });
 
         //End Registration Now pop-up
@@ -428,6 +514,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", null)
+                .setOnDismissListener(dialog -> {EventListener.remove();})
                 .show();
 
         //Event Poster Buttons
@@ -505,7 +592,6 @@ public class Organizer_UpcomingFragment extends Fragment {
             eventDialog.dismiss();
 
             NavHostFragment.findNavController(Organizer_UpcomingFragment.this).navigate(R.id.notificationSenderFragment);
-
         });
     }
 
@@ -593,7 +679,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
     //US 02.02.01 && US 02.06.01
-    private void WaitListPopup(Event event, TextView Capacity){
+    private void WaitListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         Log.d("DEBUG","PRE BUILDPOPUP");
@@ -604,41 +690,6 @@ public class Organizer_UpcomingFragment extends Fragment {
         ArrayList<Profile> WaitingListArray = new ArrayList<>();
         ArrayAdapter<Profile> WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
         WaitingList.setAdapter(WaitingListAdapter);
-
-
-        //Pull data
-        ListenerRegistration waitlistListener =
-                Data.getDb()
-                .collection("events")
-                .document(event.getEventId())
-                .addSnapshotListener((docSnapshot, error) -> {
-                    Event updatedEvent = docSnapshot.toObject(Event.class);
-                    //What happens when the event has an update on the server
-                    ArrayList<String> queryList = new ArrayList<>();
-                    queryList.addAll(updatedEvent.getWaitingList());
-                    queryList.addAll(updatedEvent.getLostList());
-                    Data.getProfiles(queryList,
-                            (p)->{
-                            //Update local data
-                                    event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
-                                    event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
-                                    event.setLostList(updatedEvent.getLostList());
-                                    event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
-                                    event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
-
-
-                                    //Updating array
-                                    WaitingListArray.clear();
-                                    WaitingListArray.addAll(p);
-                                    WaitingListAdapter.notifyDataSetChanged();
-
-                                    updateCapacityDisplay(Capacity,event);
-
-                                },
-                                e->{Log.d("Firestore Error",e.toString());});
-
-                });
-
 
         //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
@@ -657,7 +708,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Waitlist")
                 .setView(waitlistView)
                 .setNegativeButton("Close", null)
-                .setOnDismissListener((d)->{waitlistListener.remove();})
                 .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
@@ -665,44 +715,13 @@ public class Organizer_UpcomingFragment extends Fragment {
      * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
      * @param event
      */
-    private void CancelledListPopup(Event event, TextView Capacity){
+    private void CancelledListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
         ListView cancelledListView = popupView.findViewById(R.id.popUp_Listview);
 
-        ArrayList<Profile> cancelledPeople = new ArrayList<>();
-        ArrayAdapter<Profile> cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
         cancelledListView.setAdapter(cancelledListAdapter);
-
-
-        //Pull data
-        ListenerRegistration cancelledListListener =
-                Data.getDb()
-                        .collection("events")
-                        .document(event.getEventId())
-                        .addSnapshotListener((docSnapshot, error) -> {
-                            Event updatedEvent = docSnapshot.toObject(Event.class);
-                            //What happens when the event has an update on the server
-                            Data.getProfiles(updatedEvent.getCancelledEntrants(),
-                                    (p)->{
-                                        //Update local data
-                                        event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
-                                        event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
-                                        event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
-                                        event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
-
-                                        //Updating array
-                                        cancelledPeople.clear();
-                                        cancelledPeople.addAll(p);
-                                        cancelledListAdapter.notifyDataSetChanged();
-
-                                        updateCapacityDisplay(Capacity,event);
-                                    },
-                                    e->{Log.d("Firestore Error",e.toString());});
-
-                        });
-
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Cancelled Entrants")
@@ -711,102 +730,36 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Replace Entrants", (dialog, which) -> {replaceEntrants(event,inflater);
                 //Refresh Data
                 RefreshUpcomingEventList();})
-                .setOnDismissListener((d)->{cancelledListListener.remove();})
                 .show();
     }
 
-    private void InviteListPopup(Event event, TextView Capacity){
+    private void InviteListPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
         ListView inviteListView = popupView.findViewById(R.id.popUp_Listview);
-
-        ArrayList<Profile> invitedPeople = new ArrayList<>();
-        ArrayAdapter<Profile> inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
         inviteListView.setAdapter(inviteListAdapter);
-
-
-        //Listen to data
-        ListenerRegistration inviteListListener =
-                Data.getDb()
-                        .collection("events")
-                        .document(event.getEventId())
-                        .addSnapshotListener((docSnapshot, error) -> {
-                            Event updatedEvent = docSnapshot.toObject(Event.class);
-                            //What happens when the event has an update on the server
-                            Data.getProfiles(updatedEvent.getInvitedList(),
-                                    (p)->{
-                                        //Update local data
-                                        event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
-                                        event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
-                                        event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
-                                        event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
-
-                                        //Updating array
-                                        invitedPeople.clear();
-                                        invitedPeople.addAll(p);
-                                        inviteListAdapter.notifyDataSetChanged();
-
-                                        updateCapacityDisplay(Capacity,event);
-                                    },
-                                    e->{Log.d("Firestore Error",e.toString());});
-
-                        });
-
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Invited Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
                 .setPositiveButton("Export to CSV", (dialog, which) -> {})
-                .setOnDismissListener((D)->{inviteListListener.remove();})
                 .show();
     }
 
-    private void AcceptedListPopup(Event event, TextView Capacity){
+    private void AcceptedListPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
         ListView AcceptedListView = popupView.findViewById(R.id.popUp_Listview);
-
-        ArrayList<Profile> acceptedPeople = new ArrayList<>();
-        ArrayAdapter<Profile> acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
         AcceptedListView.setAdapter(acceptedListAdapter);
-
-
-        //Pull data
-        ListenerRegistration acceptedlistListener =
-                Data.getDb()
-                        .collection("events")
-                        .document(event.getEventId())
-                        .addSnapshotListener((docSnapshot, error) -> {
-                            Event updatedEvent = docSnapshot.toObject(Event.class);
-                            //What happens when the event has an update on the server
-                            Data.getProfiles(updatedEvent.getAcceptedEntrants(),
-                                    (p)->{
-                                        //Update local data
-                                        event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
-                                        event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
-                                        event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
-                                        event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
-
-                                        //Updating array
-                                        acceptedPeople.clear();
-                                        acceptedPeople.addAll(p);
-                                        acceptedListAdapter.notifyDataSetChanged();
-
-                                        updateCapacityDisplay(Capacity,event);
-                                    },
-                                    e->{Log.d("Firestore Error",e.toString());});
-
-                        });
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
                 .setPositiveButton("Export to CSV", (dialog, which) -> {})
-                .setOnDismissListener(dialog -> {acceptedlistListener.remove();})
                 .show();
     }
 
@@ -979,7 +932,5 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     private void updateCapacityDisplay(TextView Capacity, Event event){
         Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
-
-
     }
 }
