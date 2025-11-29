@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
-    android:orientation="vertical"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="16dp"
-    android:paddingTop="32dp">      <!-- pushes content away from status bar -->
+    android:paddingTop="32dp">
 
-    <!-- Subtitle (spaced properly now) -->
+    <!-- HEADING -->
+    <TextView
+        android:id="@+id/admin_events_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browse Events"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="6dp" />
+
+    <!-- SUBTITLE -->
     <TextView
         android:id="@+id/admin_events_subtitle"
         android:layout_width="match_parent"
@@ -18,20 +30,26 @@
         android:text="Search, review, or remove events."
         android:textColor="#BBBBBB"
         android:textSize="16sp"
-        android:fontFamily="@font/opensans"
         android:gravity="center"
         android:layout_marginBottom="12dp" />
 
-    <!-- Search bar -->
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#222222"
+        android:layout_marginBottom="16dp" />
+
+    <!-- SEARCH BAR -->
     <SearchView
         android:id="@+id/admin_events_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#111111"
         android:queryHint="Search events by title or date"
-        android:layout_marginBottom="16dp" />    <!-- spacing before first card -->
+        android:layout_marginBottom="16dp" />
 
-    <!-- List of event cards -->
+    <!-- LIST OF EVENTS -->
     <ListView
         android:id="@+id/admin_events_list"
         android:layout_width="match_parent"
@@ -39,21 +57,44 @@
         android:layout_weight="1"
         android:divider="@android:color/transparent"
         android:dividerHeight="20dp"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp" />
 
-    <!-- Remove Selected (red border button) -->
-    <Button
-        android:id="@+id/admin_events_remove"
+    <!-- BOTTOM BUTTONS -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Remove Selected"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:fontFamily="@font/opensans"
-        android:background="@drawable/bg_button_danger_border"
-        android:backgroundTint="@null"
-        app:backgroundTint="@null"
-        android:layout_marginTop="16dp" />
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
+
+        <!-- REMOVE SELECTED (danger) -->
+        <Button
+            android:id="@+id/admin_events_remove"
+            android:layout_width="309dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"
+            android:layout_gravity="center"
+            android:text="Remove Selected"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:backgroundTint="@null" />
+
+        <!--        &lt;!&ndash; ONLY ONE BACK BUTTON &ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/admin_events_back"-->
+<!--            android:layout_width="295dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:background="@drawable/bg_button_primary"-->
+<!--            android:backgroundTint="@null"-->
+<!--            android:text="Back"-->
+<!--            android:textAllCaps="false"-->
+<!--            android:textColor="#FFFFFF"-->
+<!--            android:textSize="16sp"-->
+<!--            app:backgroundTint="@null" />-->
+
+    </LinearLayout>
 
 </LinearLayout>

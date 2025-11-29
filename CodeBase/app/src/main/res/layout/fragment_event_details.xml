@@ -299,7 +299,7 @@
             android:background="@drawable/bg_button_secondary"
             android:text="No"
             android:textAllCaps="false"
-            android:textColor="#2D5EFF" />
+            android:textColor="#FFFFFF" />
 
         <View
             android:layout_width="12dp"

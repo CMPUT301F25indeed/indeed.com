@@ -1,5 +1,6 @@
 package com.example.indeedgambling;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -33,6 +35,16 @@ public class Admin_ManageProfilesFragment extends Fragment {
 
         // UI refs
         searchView = view.findViewById(R.id.admin_profiles_search);
+        // Make SearchView text white
+        int searchTextId = searchView.getContext().getResources()
+                .getIdentifier("android:id/search_src_text", null, null);
+
+        TextView searchText = searchView.findViewById(searchTextId);
+        if (searchText != null) {
+            searchText.setTextColor(Color.WHITE);
+            searchText.setHintTextColor(Color.GRAY);
+        }
+
         filterSpinner = view.findViewById(R.id.admin_profiles_filter);
         recyclerView = view.findViewById(R.id.admin_profiles_recycler);
         backBtn = view.findViewById(R.id.admin_browse_back);
@@ -52,6 +64,12 @@ public class Admin_ManageProfilesFragment extends Fragment {
                 new String[]{"All", "Entrant", "Organizer", "Admin"}
         );
         filterSpinner.setAdapter(spinnerAdapter);
+
+        // Make spinner selected text white
+        filterSpinner.post(() -> {
+            TextView tv = (TextView) filterSpinner.getSelectedView();
+            if (tv != null) tv.setTextColor(Color.WHITE);
+        });
 
         // Recycler setup
         adapter = new ProfileAdapter();
