@@ -148,7 +148,7 @@
         android:fontFamily="@font/opensans"
         android:text="Logout"
         android:textAllCaps="false"
-        android:textColor="#D32F2F"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"

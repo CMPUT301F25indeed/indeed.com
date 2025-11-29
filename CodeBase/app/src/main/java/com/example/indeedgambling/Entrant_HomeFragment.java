@@ -48,8 +48,11 @@ public class Entrant_HomeFragment extends Fragment {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
-                android.R.layout.simple_list_item_1,
-                optionsString);
+                R.layout.item_entrant_home_option,
+                R.id.entrant_option_text,
+                optionsString
+        );
+
         options.setAdapter(adapter);
 
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
