@@ -1,10 +1,14 @@
 package com.example.indeedgambling;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -131,7 +135,6 @@ public class EventDetailsFragment extends Fragment {
 
         if (entrantRelation.equals("accepted")) {
 
-
             yesBtn.setVisibility(View.GONE);
             noBtn.setVisibility(View.GONE);
             tryAgainBtn.setVisibility(View.VISIBLE);
@@ -139,7 +142,7 @@ public class EventDetailsFragment extends Fragment {
 
             tryAgainBtn.setEnabled(false);
         }
-        
+
         if (entrantRelation.equals("cancelled")) {
 
             tryAgainBtn.setText("Try Again?");
@@ -178,21 +181,58 @@ public class EventDetailsFragment extends Fragment {
         TextView status = v.findViewById(R.id.event_status);
         TextView category = v.findViewById(R.id.event_category);
 
+        // poster ImageView
+        ImageView posterView = v.findViewById(R.id.event_poster);
+
+        // --- POSTER LOADING LOGIC ---
+        if (posterView != null) {
+            String imageDocId = event.getImageUrl();
+            if (imageDocId != null && !imageDocId.isEmpty()) {
+                firebaseVM.getDb().collection("images")
+                        .document(imageDocId)
+                        .get()
+                        .addOnSuccessListener(doc -> {
+                            if (doc != null && doc.exists()) {
+                                String base64 = doc.getString("url");
+                                if (base64 != null && !base64.isEmpty()) {
+                                    try {
+                                        byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                                        posterView.setImageBitmap(bitmap);
+                                    } catch (Exception e) {
+                                        posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+                                    }
+                                } else {
+                                    posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+                                }
+                            } else {
+                                posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+                            }
+                        })
+                        .addOnFailureListener(e ->
+                                posterView.setImageResource(android.R.drawable.ic_menu_report_image));
+            } else {
+                // no poster set
+                posterView.setImageResource(android.R.drawable.ic_menu_report_image);
+            }
+        }
+        // --- END POSTER LOGIC ---
+
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
         if (event.getLocation() != null)
-            loc.setText("Location: " + event.getLocation());
+            loc.setText(event.getLocation());
 
         if (event.getCategory() != null)
-            category.setText("Category: " + event.getCategory());
+            category.setText(event.getCategory());
 
         if (event.getEventStart() != null && event.getEventEnd() != null)
-            dates.setText("Event Dates: " + sdf.format(event.getEventStart()) + " – " + sdf.format(event.getEventEnd()));
+            dates.setText(sdf.format(event.getEventStart()) + " – " + sdf.format(event.getEventEnd()));
 
         if (event.getRegistrationStart() != null && event.getRegistrationEnd() != null)
-            regPeriod.setText("Registration: " + sdf.format(event.getRegistrationStart()) + " – " + sdf.format(event.getRegistrationEnd()));
+            regPeriod.setText(sdf.format(event.getRegistrationStart()) + " – " + sdf.format(event.getRegistrationEnd()));
 
-        status.setText("Status: " + event.getStatus());
+        status.setText(event.getStatus());
 
         updateTotal(v);
     }
@@ -221,7 +261,7 @@ public class EventDetailsFragment extends Fragment {
         event.getWaitingList().add(entrantId);
 
         firebaseVM.joinWaitingList(event.getEventId(), entrantId, () -> {},
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                e1 -> Toast.makeText(getContext(), "Error: " + e1.getMessage(), Toast.LENGTH_SHORT).show());
 
         firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(), () -> {},
                 err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show());
@@ -274,7 +314,8 @@ public class EventDetailsFragment extends Fragment {
     private void updateTotal(View v) {
         if (event.getWaitingList() != null) {
             int totalEntrant = event.getWaitingList().size();
-            total.setText("Total: " + totalEntrant);
+            // just show the number, label is in XML
+            total.setText(String.valueOf(totalEntrant));
         }
     }
 
