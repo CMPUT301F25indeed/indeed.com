@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:text="Back to start"
         android:textAllCaps="false"
-        android:textColor="#0A66C2"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:fontFamily="@font/opensans"
         android:layout_marginTop="12dp"
