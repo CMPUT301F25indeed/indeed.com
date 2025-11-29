@@ -9,6 +9,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -71,17 +73,21 @@ public class OrganizerViewModel extends ViewModel {
      * @param onFailure Failure callback
      */
 
-    public void notifyWaitingList(String eventId, String message,
+    public void notifyWaitingList(String eventName, String eventId, String message,
                                   OnSuccessListener<Void> onSuccess,
                                   OnFailureListener onFailure) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Profile p = getCurrentOrganizer();
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("eventId", eventId);
         notification.put("message", message);
         notification.put("timestamp", FieldValue.serverTimestamp());
         notification.put("type", "waiting_list");
-        notification.put("status", "sent");
+        notification.put("senderId", p.getProfileId());
+        notification.put("senderEmail", p.getEmail());
+        notification.put("eventName", eventName);
 
         Log.d("FIREBASE", "Sending notification to Firestore: " + notification);
         db.collection("notifications").add(notification)
@@ -89,35 +95,41 @@ public class OrganizerViewModel extends ViewModel {
                 .addOnFailureListener(onFailure);
     }
 
-    public void notifySelectedEntrants(String eventId, String message,
+    public void notifySelectedEntrants(String eventName, String eventId, String message,
                                        OnSuccessListener<Void> onSuccess,
                                        OnFailureListener onFailure) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        Profile p = getCurrentOrganizer();
         Map<String, Object> notification = new HashMap<>();
         notification.put("eventId", eventId);
         notification.put("message", message);
         notification.put("timestamp", FieldValue.serverTimestamp());
         notification.put("type", "selected_entrants");
-        notification.put("status", "sent");
+        notification.put("senderId", p.getProfileId());
+        notification.put("senderEmail", p.getEmail());
+        notification.put("eventName", eventName);
 
         db.collection("notifications").add(notification)
                 .addOnSuccessListener(documentReference -> onSuccess.onSuccess(null))
                 .addOnFailureListener(onFailure);
     }
 
-    public void notifyCancelledEntrants(String eventId, List<String> cancelledEntrants, String message,
+    public void notifyCancelledEntrants(String eventName, String eventId, List<String> cancelledEntrants, String message,
                                         OnSuccessListener<Void> onSuccess,
                                         OnFailureListener onFailure) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        Profile p = getCurrentOrganizer();
         Map<String, Object> notification = new HashMap<>();
         notification.put("eventId", eventId);
         notification.put("message", message);
         notification.put("timestamp", FieldValue.serverTimestamp());
         notification.put("type", "cancelled_entrants");
         notification.put("cancelledEntrants", cancelledEntrants);
-        notification.put("status", "sent");
+        notification.put("senderId", p.getProfileId());
+        notification.put("senderEmail", p.getEmail());
+        notification.put("eventName", eventName);
 
         db.collection("notifications").add(notification)
                 .addOnSuccessListener(documentReference -> onSuccess.onSuccess(null))

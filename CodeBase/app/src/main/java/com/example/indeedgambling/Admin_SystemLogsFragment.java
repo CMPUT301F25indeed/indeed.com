@@ -25,9 +25,8 @@ public class Admin_SystemLogsFragment extends Fragment {
     private Spinner filterSpinner;
     private SearchView searchView;
 
-    // Instead of organizerIdToEmail — just store unique senderIds
-    private List<String> senderIdList = new ArrayList<>();
-    private String selectedSenderId = null; // null = All senders
+    private List<String> senderEmailList = new ArrayList<>();
+    private String selectedEmailOrSystem = null; // null = All senders
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,7 +47,7 @@ public class Admin_SystemLogsFragment extends Fragment {
         RecyclerView recycler = view.findViewById(R.id.admin_logs_recycler);
 
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new NotificationLoggedAdapter(fvm);
+        adapter = new NotificationLoggedAdapter();
         recycler.setAdapter(adapter);
 
         observeNotifications();
@@ -66,20 +65,21 @@ public class Admin_SystemLogsFragment extends Fragment {
 
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-
                 String chosen = (String) parent.getItemAtPosition(pos);
 
                 if (chosen.equals("All senders")) {
-                    selectedSenderId = null;
+                    selectedEmailOrSystem = null;
+                } else if (chosen.equals("System")) {
+                    selectedEmailOrSystem = "SYSTEM"; // special marker
                 } else {
-                    selectedSenderId = chosen; // the senderId string itself
+                    selectedEmailOrSystem = chosen; // the email string
                 }
 
                 applyFilters();
             }
 
             @Override public void onNothingSelected(AdapterView<?> parent) {
-                selectedSenderId = null;
+                selectedEmailOrSystem = null;
                 applyFilters();
             }
         });
@@ -101,15 +101,15 @@ public class Admin_SystemLogsFragment extends Fragment {
             fullList.clear();
             if (list != null) fullList.addAll(list);
 
-            buildSenderIdList();
+            buildSenderEmailList();
             applyFilters();
         });
     }
 
-    private void buildSenderIdList() {
-        // extract unique senderIds from notifications
-        senderIdList = fullList.stream()
-                .map(Notification::getSenderId)
+    private void buildSenderEmailList() {
+        // extract unique senderEmails from notifications
+        senderEmailList = fullList.stream()
+                .map(Notification::getSenderEmail)
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
@@ -120,20 +120,22 @@ public class Admin_SystemLogsFragment extends Fragment {
     private void updateSpinner() {
         List<String> entries = new ArrayList<>();
         entries.add("All senders");
-        entries.addAll(senderIdList);
+        entries.addAll(senderEmailList);
+        entries.add("System"); // extra tab for system notifications
 
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_dropdown_item,
                 entries
         );
-
         filterSpinner.setAdapter(spinnerAdapter);
 
-        if (selectedSenderId == null) {
-            filterSpinner.setSelection(0); // "All senders"
+        if (selectedEmailOrSystem == null) {
+            filterSpinner.setSelection(0);
+        } else if (selectedEmailOrSystem.equals("SYSTEM")) {
+            filterSpinner.setSelection(entries.indexOf("System"));
         } else {
-            int pos = entries.indexOf(selectedSenderId);
+            int pos = entries.indexOf(selectedEmailOrSystem);
             if (pos >= 0) filterSpinner.setSelection(pos);
         }
     }
@@ -152,11 +154,17 @@ public class Admin_SystemLogsFragment extends Fragment {
                             (n.getMessage() != null &&
                                     n.getMessage().toLowerCase().contains(search));
 
-            boolean matchesSender =
-                    (selectedSenderId == null) ||   // show all senders
-                            (n.getSenderId() != null && n.getSenderId().equals(selectedSenderId));
+            boolean matchesFilter;
 
-            if (matchesSearch && matchesSender) {
+            if (selectedEmailOrSystem == null) {
+                matchesFilter = true; // all notifications
+            } else if (selectedEmailOrSystem.equals("SYSTEM")) {
+                matchesFilter = "system".equalsIgnoreCase(n.getSenderId());
+            } else {
+                matchesFilter = selectedEmailOrSystem.equals(n.getSenderEmail());
+            }
+
+            if (matchesSearch && matchesFilter) {
                 filteredList.add(n);
             }
         }

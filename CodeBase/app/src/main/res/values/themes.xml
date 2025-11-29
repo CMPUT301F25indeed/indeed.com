@@ -2,18 +2,18 @@
 
     <style name="Base.Theme.IndeedGambling" parent="Theme.Material3.DayNight.NoActionBar">
 
-        <!-- App background -->
-        <item name="android:windowBackground">@color/white</item>
-        <item name="colorSurface">@color/white</item>
+        <!-- Dark background -->
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="colorSurface">@color/dark_background</item>
 
-        <!-- Buttons (blue background + white text) -->
-        <item name="colorPrimary">@color/indeed_color</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <!-- Buttons (same indeed blue) -->
+        <item name="colorPrimary">@color/indeed_color</item>   <!-- blue button -->
+        <item name="colorOnPrimary">@color/black</item>        <!-- text ON buttons -->
 
-        <!-- Normal text color (black everywhere except on buttons) -->
-        <item name="android:textColor">@color/black</item>
-        <item name="colorOnBackground">@color/black</item>
-        <item name="colorOnSurface">@color/black</item>
+        <!-- Dark mode text (white) -->
+        <item name="android:textColor">@color/white</item>
+        <item name="colorOnBackground">@color/white</item>
+        <item name="colorOnSurface">@color/white</item>
 
     </style>
 

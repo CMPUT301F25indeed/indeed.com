@@ -7,17 +7,33 @@
     android:background="@drawable/bg_button_secondary"
     android:layout_marginBottom="12dp">
 
-    <!-- Timestamp -->
-    <TextView
-        android:id="@+id/noti_timestamp"
-        android:layout_width="wrap_content"
+    <!-- Top row: timestamp (left) + senderEmail (right) -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="2 hours ago"
-        android:textSize="12sp"
-        android:textColor="#7AA9FF"
-        android:paddingBottom="4dp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="4dp">
 
-    <!-- Big Message -->
+        <TextView
+            android:id="@+id/noti_timestamp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="2 hours ago"
+            android:textSize="12sp"
+            android:textColor="#7AA9FF" />
+
+        <TextView
+            android:id="@+id/noti_sender_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="sender@example.com"
+            android:textSize="12sp"
+            android:textColor="#7AA9FF" />
+    </LinearLayout>
+
+    <!-- Message (big text) -->
     <TextView
         android:id="@+id/noti_message"
         android:layout_width="wrap_content"
@@ -28,12 +44,12 @@
         android:textStyle="bold"
         android:paddingBottom="6dp" />
 
-    <!-- Sender Name -->
+    <!-- Event Name (subtle text) -->
     <TextView
-        android:id="@+id/noti_sender_name"
+        android:id="@+id/noti_event_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sender Name"
+        android:text="Event Name Here"
         android:textSize="14sp"
         android:textColor="#CCCCCC" />
 

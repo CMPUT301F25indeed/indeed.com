@@ -19,11 +19,6 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
 
     private List<Notification> notifications = new ArrayList<>();
     private OnItemClickListener itemClickListener;
-    private FirebaseViewModel fvm;
-
-    public NotificationLoggedAdapter(FirebaseViewModel fvm) {
-        this.fvm = fvm;
-    }
 
     public interface OnItemClickListener {
         void onItemClick(Notification n);
@@ -38,7 +33,6 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
         notifyDataSetChanged();
     }
 
-
     @NonNull
     @Override
     public NotiViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -51,29 +45,28 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
     public void onBindViewHolder(@NonNull NotiViewHolder holder, int position) {
         Notification n = notifications.get(position);
 
+        // Timestamp
         holder.timestamp.setText(formatTimestamp(n.getTimestamp()));
+
+        // Message
         holder.message.setText(n.getMessage());
-        holder.senderName.setText("Loading...");
 
-        holder.senderName.setText(n.getSenderId());
-        // Observe sender profile
-//        fvm.getProfileLive(n.getSenderId()).observeForever(profile -> {
-//
-//            if (!holder.senderName.getTag().equals(n.getSenderId())) return;
-//
-//            if (profile != null) {
-//                holder.senderName.setText(profile.getEmail());
-//            } else {
-//                holder.senderName.setText("Unknown Sender");
-//            }
-//        });
+        // Sender email
+        if ("system".equals(n.getSenderId())) {
+            holder.senderEmail.setText("system");
+        } else {
+            holder.senderEmail.setText(n.getSenderEmail() != null ? n.getSenderEmail() : "Unknown Sender");
+        }
 
+        // Event name
+        holder.eventName.setText(n.getEventName() != null ? n.getEventName() : "N/A");
+
+        // Click listener
         holder.itemView.setOnClickListener(v -> {
             if (itemClickListener != null)
                 itemClickListener.onItemClick(n);
         });
     }
-
 
     @Override
     public int getItemCount() {
@@ -81,13 +74,14 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
     }
 
     static class NotiViewHolder extends RecyclerView.ViewHolder {
-        TextView timestamp, message, senderName;
+        TextView timestamp, message, senderEmail, eventName;
 
         NotiViewHolder(@NonNull View itemView) {
             super(itemView);
-            timestamp = itemView.findViewById(R.id.noti_timestamp);
-            message = itemView.findViewById(R.id.noti_message);
-            senderName = itemView.findViewById(R.id.noti_sender_name);
+            timestamp   = itemView.findViewById(R.id.noti_timestamp);
+            message     = itemView.findViewById(R.id.noti_message);
+            senderEmail = itemView.findViewById(R.id.noti_sender_email);
+            eventName   = itemView.findViewById(R.id.noti_event_name);
         }
     }
 
@@ -96,7 +90,6 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
         if (date == null) return "";
 
         long diff = new Date().getTime() - date.getTime();
-
         long mins = diff / (1000 * 60);
         long hours = mins / 60;
         long days = hours / 24;
