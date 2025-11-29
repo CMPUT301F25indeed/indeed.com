@@ -1,7 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.IndeedGambling" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+
+        <!-- Dark background -->
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="colorSurface">@color/dark_background</item>
+
+        <!-- Buttons (same indeed blue) -->
+        <item name="colorPrimary">@color/indeed_color</item>   <!-- blue button -->
+        <item name="colorOnPrimary">@color/black</item>        <!-- text ON buttons -->
+
+        <!-- Dark mode text (white) -->
+        <item name="android:textColor">@color/white</item>
+        <item name="colorOnBackground">@color/white</item>
+        <item name="colorOnSurface">@color/white</item>
+
     </style>
+
+    <style name="Theme.IndeedGambling" parent="Base.Theme.IndeedGambling" />
+
 </resources>

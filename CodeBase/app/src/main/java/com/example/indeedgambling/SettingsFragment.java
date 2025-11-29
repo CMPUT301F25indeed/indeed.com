@@ -1,7 +1,10 @@
 package com.example.indeedgambling;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +16,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Bundle;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatDelegate;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +33,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -278,7 +289,7 @@ public class SettingsFragment extends Fragment {
         if (!email.equals(emailEdit.getText().toString())) updates.put("email", newEmail);
         if (!phone.equals(phoneEdit.getText().toString())) updates.put("phone", newPhone);
         if (newNotifications != initialNotifications) updates.put("notificationsEnabled", newNotifications);
-        if (newLightMode != initialLightMode) updates.put("lightMode", newLightMode);
+        if (newLightMode != initialLightMode) updates.put("lightModeEnabled", newLightMode);
 
 
         // Check email first
@@ -320,6 +331,7 @@ public class SettingsFragment extends Fragment {
                 error -> Toast.makeText(requireContext(), "Update failed: " + error.getMessage(), Toast.LENGTH_SHORT).show()
         );
 
+
         if (role.equals("entrant")) {
             entrantVM.updateSettings(updates);
         }
@@ -331,6 +343,66 @@ public class SettingsFragment extends Fragment {
         if (role.equals("admin")) {
             adminVM.updateSettings(updates);
         }
+
+        // Update local variables so UI knows the new values
+        for (String key : updates.keySet()) {
+
+            if (key.equals("personName")) {
+                name = (String) updates.get(key);
+            }
+
+            if (key.equals("email")) {
+                email = (String) updates.get(key);
+            }
+
+            if (key.equals("phone")) {
+                phone = (String) updates.get(key);
+            }
+
+            if (key.equals("notificationsEnabled")) {
+                initialNotifications = (Boolean) updates.get(key);
+            }
+
+            if (key.equals("lightModeEnabled")) {
+                initialLightMode = (Boolean) updates.get(key);
+                saveAndApplyTheme(initialLightMode);
+            }
+
+            if (key.equals("profileImageUrl")) {
+                imageUrl = (String) updates.get(key);
+            }
+        }
+
+    }
+
+    private void saveAndApplyTheme(boolean isLightMode) {
+        // Save preference immediately (this always works)
+        int themeMode = isLightMode ?
+                AppCompatDelegate.MODE_NIGHT_NO :
+                AppCompatDelegate.MODE_NIGHT_YES;
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences("theme_prefs", Context.MODE_PRIVATE);
+        prefs.edit().putInt("theme_mode", themeMode).apply();
+
+        // Apply theme with delay and state checking
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            try {
+                // Check if activity is still valid
+                if (getActivity() == null || getActivity().isFinishing() || getActivity().isDestroyed()) {
+                    Log.d("ThemeDebug", "Activity not available, theme preference saved for next launch");
+                    return;
+                }
+
+                // Apply theme
+                AppCompatDelegate.setDefaultNightMode(themeMode);
+                Toast.makeText(requireContext(), "Theme updated successfully!", Toast.LENGTH_SHORT).show();
+
+            } catch (Exception e) {
+                Log.e("ThemeDebug", "Theme application failed: " + e.getMessage());
+                // Preference is still saved, so it will work on next app launch
+                Toast.makeText(requireContext(), "Theme saved - changes apply on restart", Toast.LENGTH_SHORT).show();
+            }
+        }, 1000); // 500ms delay
     }
 
 
