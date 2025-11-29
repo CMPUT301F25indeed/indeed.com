@@ -169,8 +169,8 @@ public class OrganizerViewModel extends ViewModel {
                 p.setNotificationsEnabled((Boolean) updates.get(key));
             }
 
-            if (key.equals("lightMode")) {
-                p.setLightMode((Boolean) updates.get(key));
+            if (key.equals("lightModeEnabled")) {
+                p.setLightModeEnabled((Boolean) updates.get(key));
             }
         }
 
