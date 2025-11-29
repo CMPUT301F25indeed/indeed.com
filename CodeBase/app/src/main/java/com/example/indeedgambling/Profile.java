@@ -1,5 +1,12 @@
 package com.example.indeedgambling;
 
+import android.app.Activity;
+import android.location.Location;
+import android.util.Pair;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+
 import java.util.List;
 
 /**
@@ -30,11 +37,12 @@ public class Profile {
     private boolean notificationsEnabled;
     private List<String> eventsJoined;
     private boolean roleVerified;
-
     private String passwordHash; // added
     private String deviceId;     // added for device login later
     private Boolean lightMode;
     private String profileImageUrl;
+    private double latitude;
+    private double longitude;
 
     /**
      * Required empty constructor for Firestore data mapping.
@@ -107,9 +115,35 @@ public class Profile {
         return profileImageUrl;
     }
 
+    public Boolean getLightMode() {
+        return lightMode;
+    }
+
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setLocation(Location newLocation){
+        longitude = newLocation.getLongitude();
+        latitude = newLocation.getLatitude();
+    }
+
 
     /** Ovverride of toString() that returns the profile name.
      * @return Profilename
