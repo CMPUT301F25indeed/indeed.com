@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -37,7 +36,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -94,7 +92,6 @@ public class SettingsFragment extends Fragment {
         adminVM = new ViewModelProvider(requireActivity()).get(AdminViewModel.class);
 
         Button backButton = view.findViewById(R.id.back_button);
-        TextView roleText = view.findViewById(R.id.role_text_profile);
 
         profileImage = view.findViewById(R.id.pfp_image);
         Button editPfpButton = view.findViewById(R.id.pfp_edit_button);
@@ -119,8 +116,6 @@ public class SettingsFragment extends Fragment {
             nameEdit.setText(name);
             emailEdit.setText(email);
             phoneEdit.setText(phone);
-
-            roleText.setText(role);
 
             // hide delete + notifications for non-entrant
             if (!role.equals("entrant")) {

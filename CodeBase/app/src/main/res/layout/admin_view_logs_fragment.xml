@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
     android:padding="16dp">
 
-    <!-- SPACER so heading is not stuck to top bar -->
+    <!-- Spacer so title is not glued to status bar -->
     <View
         android:layout_width="match_parent"
         android:layout_height="20dp" />
@@ -42,7 +43,7 @@
         android:background="#333333"
         android:layout_marginBottom="16dp" />
 
-    <!-- SEARCH -->
+    <!-- SEARCH BAR -->
     <SearchView
         android:id="@+id/admin_logs_search"
         android:layout_width="match_parent"
@@ -50,16 +51,25 @@
         android:queryHint="Search logs..."
         android:background="#111111"
         android:iconifiedByDefault="false"
-        android:layout_marginBottom="12dp"/>
+        android:layout_marginBottom="8dp" />
 
-    <!-- LOG LIST -->
-    <ListView
-        android:id="@+id/admin_logs_list"
+    <!-- FILTER SPINNER (used by admin_logs_filter in Java) -->
+    <Spinner
+        android:id="@+id/admin_logs_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:background="#111111"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" />
+
+    <!-- RECYCLER VIEW (used by admin_logs_recycler in Java) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/admin_logs_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:paddingTop="4dp" />
 
     <!-- BACK BUTTON -->
     <Button
@@ -67,9 +77,9 @@
         android:layout_width="322dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_gravity="center"
         android:background="@drawable/bg_button_primary"
         android:text="Back to Dashboard"
-        android:layout_gravity="center"
         android:textAllCaps="false"
         android:textColor="#FFFFFF" />
 
