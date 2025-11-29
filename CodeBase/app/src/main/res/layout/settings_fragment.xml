@@ -21,7 +21,7 @@
             android:id="@+id/back_button"
             android:layout_width="80dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_button_secondary"
+            android:background="@drawable/bg_button_primary"
             android:backgroundTint="@null"
             android:fontFamily="@font/opensans"
             android:text="Back"
@@ -101,7 +101,7 @@
                     android:textColor="#FFFFFF"
                     android:textSize="14sp"
                     android:fontFamily="@font/opensans"
-                    android:background="@drawable/bg_button_primary"
+                    android:background="@drawable/bg_button_secondary"
                     android:backgroundTint="@null"/>
             </LinearLayout>
 
