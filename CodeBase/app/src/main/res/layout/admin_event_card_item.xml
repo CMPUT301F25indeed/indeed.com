@@ -3,27 +3,30 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:background="@drawable/bg_admin_image_card">
 
+    <!-- Image fits full width, touches card edges -->
     <ImageView
         android:id="@+id/eventPosterImage"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-        android:background="#DDDDDD" />
+        android:scaleType="centerCrop"
+        android:cropToPadding="false" />
 
+    <!-- Title -> space is only here -->
     <TextView
         android:id="@+id/eventTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="12dp"
+        android:paddingTop="16dp"
         android:paddingBottom="16dp"
         android:gravity="center"
+        android:textColor="#FFFFFF"
         android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="#444444" />
+        android:textStyle="bold"/>
 </LinearLayout>

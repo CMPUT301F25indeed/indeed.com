@@ -1,5 +1,6 @@
 package com.example.indeedgambling;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.AdapterView;
+import android.widget.TextView;
+
 import com.example.indeedgambling.R;
 
 
@@ -37,6 +40,16 @@ public class Admin_BrowseEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.admin_browse_events_fragment, container, false);
 
         searchView = view.findViewById(R.id.admin_events_search);
+
+        // Make search text white
+        int searchTextId = searchView.getContext().getResources()
+                .getIdentifier("android:id/search_src_text", null, null);
+
+        TextView searchText = searchView.findViewById(searchTextId);
+        searchText.setTextColor(Color.WHITE);
+        searchText.setHintTextColor(Color.GRAY);
+
+
         listView   = view.findViewById(R.id.admin_events_list);
         backBtn    = view.findViewById(R.id.admin_events_remove); // reuse as Back
 
