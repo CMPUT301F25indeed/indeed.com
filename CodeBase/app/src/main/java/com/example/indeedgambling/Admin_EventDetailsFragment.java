@@ -121,7 +121,7 @@ public class Admin_EventDetailsFragment extends Fragment {
 
         if (event.getLocation() != null) {
             // only value, label is in XML
-            loc.setText(event.getLocation());
+            loc.setText(event.getLocationString());
         }
 
         if (event.getCategory() != null) {

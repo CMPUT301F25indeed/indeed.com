@@ -124,18 +124,31 @@
             android:textSize="14sp"
             android:fontFamily="@font/opensans" />
 
-        <EditText
+        <Button
             android:id="@+id/NewEventPopup_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:background="@drawable/bg_edittext_dark"
-            android:hint="Where will it happen?"
-            android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#777777"
-            android:textSize="16sp"
-            android:fontFamily="@font/opensans" />
+            android:textColor="@color/white"
+            android:text="Select Location"
+            android:layout_marginTop="8dp"/>
+
+        <CheckBox
+            android:id="@+id/NewEventPopup_GeoRequirement"
+            android:text="Restrict sign-up to radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/NewEventPopup_GeoRequirement_Radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Restriction Radius (meters)"
+            android:inputType="number"
+            android:textColor="@color/white"
+            android:textColorHint="@color/cardview_light_background"
+            android:layout_marginTop="8dp"/>
 
         <!-- POSTER SECTION -->
         <TextView
@@ -217,7 +230,7 @@
 
         <include
             android:id="@+id/EventOpen"
-            layout="@layout/datetime_picker" />
+            layout="@layout/datetime_picker"/>
 
         <!-- EVENT END -->
         <TextView

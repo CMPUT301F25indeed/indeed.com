@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -27,7 +28,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
+
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -52,7 +56,7 @@ import java.util.Map;
  */
 public class Organizer_UpcomingFragment extends Fragment {
 
-    // Server info
+    //Server info
     private FirebaseViewModel Data;
     private OrganizerViewModel organizerVM;
     private String orgID;
@@ -78,11 +82,16 @@ public class Organizer_UpcomingFragment extends Fragment {
     private final ArrayList<Profile> acceptedPeople = new ArrayList<>();
     private ArrayAdapter<Profile> acceptedListAdapter;
 
-    // Image / poster
+
+    private double lat;
+    private double lng;
+
+    //Other
     private static final int PICK_IMAGE_REQUEST = 999;
     private Uri selectedImageUri;
     private Event currentEventForUpdate;
     private Uri selectedPosterUri;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -94,14 +103,10 @@ public class Organizer_UpcomingFragment extends Fragment {
         orgID = organizerVM.getOrganizer().getValue().getProfileId();
 
         // --- profile list adapters ---
-        WaitingListAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, WaitingListArray);
-        inviteListAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, invitedPeople);
-        cancelledListAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, cancelledPeople);
-        acceptedListAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, acceptedPeople);
+        WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
+        inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
+        cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
+        acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
 
         // --- event card list ---
         EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
@@ -115,18 +120,25 @@ public class Organizer_UpcomingFragment extends Fragment {
         // Pull data for upcoming events
         RefreshUpcomingEventList();
 
-        // Home button
-        Button Home = view.findViewById(R.id.Organizer_Upcoming_HomeButton);
-        Home.setOnClickListener(v -> NavHostFragment.findNavController(this)
-                .navigate(R.id.action_organizerUpcomingFragment_to_organizerHomeFragment));
 
-        // Click event → event popup
+
+                    //Button Functionality
+
+
+
+        //HomeButton Function
+        Button Home = view.findViewById(R.id.Organizer_Upcoming_HomeButton);
+        Home.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this).navigate(R.id.action_organizerUpcomingFragment_to_organizerHomeFragment);
+        });
+
+        // Popup event on click
         EventList.setOnItemClickListener((parent, itemView, position, id) -> {
             Event clickedEvent = (Event) parent.getItemAtPosition(position);
             showEventPopup(clickedEvent);
         });
 
-        // New Event button
+        // +New Event button functionality
         Button NewEvent = view.findViewById(R.id.Organizer_Upcoming_NewEventButton);
         NewEvent.setOnClickListener(v -> showNewEventPopup());
 
@@ -135,10 +147,21 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     // ---------------- POPUPS ----------------
 
-    /** New event popup (simple text location version) */
-    private void showNewEventPopup() {
+                        //---------------- POPUPS -------------//
+    /**
+     * Displays a popup dialog to create a new event.
+     * <p>
+     * Handles user input for event name, description, location, category, criteria,
+     * maximum entrants, registration period, event runtime, and optional poster upload.
+     * Ensures dates are valid and compresses large images before uploading.
+     */
+
+    private void showNewEventPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.make_event, null);
+        //"Null" values
+        lat = -100;
+        lng = -100;
 
         Button uploadPosterButton = popupView.findViewById(R.id.NewEventPopup_UploadPosterButton);
         ImageView posterPreview = popupView.findViewById(R.id.NewEventPopup_PosterPreview);
@@ -150,36 +173,47 @@ public class Organizer_UpcomingFragment extends Fragment {
         });
 
         EditText NameInput = popupView.findViewById(R.id.NewEventPopup_NameDialog);
+        //US 02.01.04
         EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
         EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
         EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
-        EditText LocationInput = popupView.findViewById(R.id.NewEventPopup_Location);
+        Button LocationSelector = popupView.findViewById(R.id.NewEventPopup_Location);
+        CheckBox LocationRequirement = popupView.findViewById(R.id.NewEventPopup_GeoRequirement);
+        EditText RequirementRadius = popupView.findViewById(R.id.NewEventPopup_GeoRequirement_Radius);
         EditText CriteriaInput = popupView.findViewById(R.id.NewEventPopup_Criteria);
+
+
 
         View RegistrationOpen = popupView.findViewById(R.id.RegistrationOpen);
         View RegistrationClose = popupView.findViewById(R.id.RegistrationClose);
         View EventOpen = popupView.findViewById(R.id.EventOpen);
         View EventClose = popupView.findViewById(R.id.EventClose);
 
-        // Registration date/time
+
+
+        //Registration DateTime
         DatePicker RegStartDateInput = RegistrationOpen.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker RegStartTimeInput = RegistrationOpen.findViewById(R.id.DateTimePicker_TimeDialog);
         DatePicker RegEndDateInput = RegistrationClose.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker RegEndTimeInput = RegistrationClose.findViewById(R.id.DateTimePicker_TimeDialog);
 
-        // Event date/time
+        //Event DateTime
         DatePicker EventStartDateInput = EventOpen.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker EventStartTimeInput = EventOpen.findViewById(R.id.DateTimePicker_TimeDialog);
         DatePicker EventEndDateInput = EventClose.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker EventEndTimeInput = EventClose.findViewById(R.id.DateTimePicker_TimeDialog);
 
-        // no past events
-        long CurrentTime = new Date().getTime();
+        //Preventing making events in the past
+        Long CurrentTime = new Date().getTime();
         EventStartDateInput.setMinDate(CurrentTime);
         EventEndDateInput.setMinDate(CurrentTime);
+
+        //Prevent Registration in the past
         RegEndDateInput.setMinDate(CurrentTime);
         RegStartDateInput.setMinDate(CurrentTime);
 
+
+        //New Event Dialog
         AlertDialog NewEvent = new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
                 .setView(popupView)
@@ -187,91 +221,101 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setNegativeButton("Cancel", null)
                 .show();
 
+        //Map location chooser.
+        LocationSelector.setOnClickListener(v -> {
+            LocationPickerDialog dialog = new LocationPickerDialog((lat, lon) -> {
+                // Save to your event builder
+                this.lat = lat;
+                this.lng = lon;
+                Toast.makeText(getContext(),
+                        "Location selected:\n" + lat + ", " + lon,
+                        Toast.LENGTH_SHORT).show();
+            });
+
+            dialog.show(getParentFragmentManager(), "locationPicker");
+        });
+
+
+        //This allows not closing the dialog but refusing input
         NewEvent.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            Date RegStartDate = new GregorianCalendar(
-                    RegStartDateInput.getYear(),
-                    RegStartDateInput.getMonth(),
-                    RegStartDateInput.getDayOfMonth(),
-                    RegStartTimeInput.getHour(),
-                    RegStartTimeInput.getMinute()
-            ).getTime();
+            //Using GregorianCalander to get date class, since Date from values is depreciated
+            Date RegStartDate = new GregorianCalendar(RegStartDateInput.getYear(),RegStartDateInput.getMonth(),RegStartDateInput.getDayOfMonth(),RegStartTimeInput.getHour(),RegStartTimeInput.getMinute()).getTime();
+            Date RegEndDate = new GregorianCalendar(RegEndDateInput.getYear(),RegEndDateInput.getMonth(),RegEndDateInput.getDayOfMonth(),RegEndTimeInput.getHour(),RegEndTimeInput.getMinute()).getTime();
 
-            Date RegEndDate = new GregorianCalendar(
-                    RegEndDateInput.getYear(),
-                    RegEndDateInput.getMonth(),
-                    RegEndDateInput.getDayOfMonth(),
-                    RegEndTimeInput.getHour(),
-                    RegEndTimeInput.getMinute()
-            ).getTime();
+            Date EventStartDate = new GregorianCalendar(EventStartDateInput.getYear(),EventStartDateInput.getMonth(), EventStartDateInput.getDayOfMonth(), EventStartTimeInput.getHour(), EventStartTimeInput.getMinute()).getTime();
+            Date EventEndDate  = new GregorianCalendar(EventEndDateInput.getYear(),EventEndDateInput.getMonth(), EventEndDateInput.getDayOfMonth(), EventEndTimeInput.getHour(), EventEndTimeInput.getMinute()).getTime();
 
-            Date EventStartDate = new GregorianCalendar(
-                    EventStartDateInput.getYear(),
-                    EventStartDateInput.getMonth(),
-                    EventStartDateInput.getDayOfMonth(),
-                    EventStartTimeInput.getHour(),
-                    EventStartTimeInput.getMinute()
-            ).getTime();
 
-            Date EventEndDate = new GregorianCalendar(
-                    EventEndDateInput.getYear(),
-                    EventEndDateInput.getMonth(),
-                    EventEndDateInput.getDayOfMonth(),
-                    EventEndTimeInput.getHour(),
-                    EventEndTimeInput.getMinute()
-            ).getTime();
-
-            if (EventStartDate.after(EventEndDate)) {
-                WarningToast("Event Start cannot be BEFORE Event End!");
+            if (RequirementRadius.getText().toString().isBlank()){
+                WarningToast("A radius is required!");
                 return;
-            }
-            if (RegStartDate.after(RegEndDate)) {
-                WarningToast("Registration start cannot be BEFORE Registration End!");
-                return;
-            }
+            };
 
+
+            //String inputs
             String EventName = NameInput.getText().toString().trim();
             String Description = DescriptionInput.getText().toString().trim();
-            String Location = LocationInput.getText().toString().trim();
             String Category = CategoryInput.getText().toString().trim();
             String Criteria = CriteriaInput.getText().toString().trim();
             String MaxEnt = MaxEntrantsInput.getText().toString().trim();
+            int Radius = Integer.parseInt(RequirementRadius.getText().toString().trim());
+            boolean RadiusRequirement = LocationRequirement.isChecked();
 
-            if (EventName.isEmpty()) {
+
+
+            //Refuse incorrect start-end date for event
+            if (EventStartDate.after(EventEndDate)){
+                WarningToast("Event Start cannot be BEFORE Event End!");
+                return;
+            }
+            //Refuse incorrect start-end date for registration
+            if (RegStartDate.after(RegEndDate)){
+                WarningToast("Registration end cannot be BEFORE Registration start!");
+                return;
+            }
+
+
+
+            Log.d("Checkbox Test", Boolean.toString(RadiusRequirement));
+
+
+
+            //Refuse empty title
+            if (EventName.isEmpty()){
                 WarningToast("Event Title cannot be empty!");
                 return;
             }
-            if (Description.isEmpty()) {
+            //Require description
+            if (Description.isEmpty()){
                 WarningToast("Description cannot be empty!");
                 return;
             }
-            if (Location.isEmpty()) {
-                WarningToast("Must set a Location!");
+            //Require Location
+            if (lat == -100 || lng == -100){
+                WarningToast("Must choose a location for the event!");
                 return;
             }
-            if (Category.isEmpty()) {
+            //Require Category
+            if (Category.isEmpty()){
                 WarningToast("Event must have a Category!");
                 return;
             }
-            if (Criteria.isEmpty()) {
+            //Require Criteria
+            if (Criteria.isEmpty()){
                 WarningToast("Event must have a signup criteria!");
                 return;
             }
 
-            Event CreatedEvent = new Event(
-                    EventName,
-                    RegStartDate,
-                    RegEndDate,
-                    EventStartDate,
-                    EventEndDate,
-                    orgID,
-                    Description,
-                    Criteria,
-                    Category
-            );
-            // using string location style
-            CreatedEvent.setLocation(Location);
 
-            if (!MaxEnt.isBlank()) {
+            //US 02.01.04 : Optional for unlimited
+            Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,orgID,Description,Criteria,Category);
+            CreatedEvent.setLocation(lat,lng);
+
+
+            CreatedEvent.setRegistrationRadiusEnabled(RadiusRequirement);
+            CreatedEvent.setRegisterableradius(Radius);
+            //Optionals
+            if (!MaxEnt.isBlank()){
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
             }
 
@@ -282,21 +326,18 @@ public class Organizer_UpcomingFragment extends Fragment {
 
             Data.Add(CreatedEvent);
 
-            Runnable refreshUpcoming = () ->
-                    Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e ->
-                            Log.d("FIREBASE Error", "Error with Event results".concat(e.toString())));
+
 
             if (selectedImageUri != null) {
                 try {
-                    InputStream inputStream = requireContext()
-                            .getContentResolver()
-                            .openInputStream(selectedImageUri);
+                    InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                    if (bitmap.getByteCount() > 2_000_000) {
+                    // prevent giant posters
+                    if (bitmap.getByteCount() > 2_000_000) { // only compress if very big
                         bitmap = Bitmap.createScaledBitmap(bitmap, 600, 600, true);
                         Toast.makeText(requireContext(), "Poster compressed to fit upload size.", Toast.LENGTH_SHORT).show();
-                    } else if (bitmap.getByteCount() > 800_000) {
+                    } else if (bitmap.getByteCount() > 800_000) { // moderate resize
                         bitmap = Bitmap.createScaledBitmap(bitmap, 800, 800, true);
                     }
 
@@ -304,6 +345,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
 
+                    // Create image data document
                     Map<String, Object> imageData = new HashMap<>();
                     imageData.put("eventId", CreatedEvent.getEventId());
                     imageData.put("uploaderId", orgID);
@@ -311,36 +353,33 @@ public class Organizer_UpcomingFragment extends Fragment {
                     imageData.put("uploadedAt", new Date());
                     imageData.put("approved", true);
 
+                    // Store Base64 image inside /images collection
                     Data.getDb().collection("images")
                             .add(imageData)
                             .addOnSuccessListener(docRef -> {
                                 String imageDocId = docRef.getId();
-                                Data.updateEvent(
-                                        CreatedEvent.getEventId(),
+
+                                // Save imageDocId into event.imageUrl
+                                Data.updateEvent(CreatedEvent.getEventId(),
                                         Map.of("imageUrl", imageDocId),
                                         () -> {
                                             CreatedEvent.setImageUrl(imageDocId);
                                             Toast.makeText(requireContext(), "Poster saved!", Toast.LENGTH_SHORT).show();
-                                            refreshUpcoming.run();
                                         },
-                                        e -> {
-                                            Toast.makeText(requireContext(), "Failed to link poster!", Toast.LENGTH_SHORT).show();
-                                            refreshUpcoming.run();
-                                        });
+                                        e -> Toast.makeText(requireContext(), "Failed to link poster!", Toast.LENGTH_SHORT).show());
                             })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show();
-                                refreshUpcoming.run();
-                            });
+                            .addOnFailureListener(e -> Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     Toast.makeText(requireContext(), "Image convert failed", Toast.LENGTH_SHORT).show();
-                    refreshUpcoming.run();
                 }
-            } else {
-                refreshUpcoming.run();
             }
 
+
+            //Update the event list on the Upcoming screen.
+            RefreshUpcomingEventList();
+
+            //Close the popup
             NewEvent.dismiss();
         });
     }
@@ -350,16 +389,21 @@ public class Organizer_UpcomingFragment extends Fragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.organization_event_popup, null);
 
-        // UI refs
+        //Setting UI References
         TextView Description = popupView.findViewById(R.id.Organizer_EventPopup_Description);
         TextView Criteria = popupView.findViewById(R.id.Organizer_EventPopup_Criteria);
         TextView Category = popupView.findViewById(R.id.Organizer_EventPopup_Category);
         TextView Location = popupView.findViewById(R.id.Organizer_EventPopup_EventLocation);
-        TextView Capacity = popupView.findViewById(R.id.Organizer_EventPopup_Capacity);
+        TextView Radius = popupView.findViewById(R.id.Organizer_EventPopup_Radius);
+
+
+        ImageView QRCode = popupView.findViewById(R.id.Organizer_EventPopup_QR_Code);
         TextView RegPeriod = popupView.findViewById(R.id.Organizer_EventPopup_RegistrationPeriod);
         TextView RunTime = popupView.findViewById(R.id.Organizer_EventPopup_EventRuntime);
-        ImageView QRCode = popupView.findViewById(R.id.Organizer_EventPopup_QR_Code);
+        TextView Capacity = popupView.findViewById(R.id.Organizer_EventPopup_Capacity);
 
+
+        //Setting Button References
         Button updatePosterButton = popupView.findViewById(R.id.btnUpdatePoster);
         Button WaitListButton = popupView.findViewById(R.id.Organizer_EventPopup_WaitList);
         Button InviteListButton = popupView.findViewById(R.id.Organizer_EventPopup_InvList);
@@ -368,9 +412,13 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
+        CheckBox locationRequirement = popupView.findViewById(R.id.Organizer_EventPopup_RadiusEnabled);
 
-        // hide end-reg button if not needed
-        if (endRegButton != null && !event.RegistrationOpen()) {
+        locationRequirement.setChecked(event.isRegistrationRadiusEnabled());
+
+
+        //Hiding the end registration button if it is not needed
+        if (!event.RegistrationOpen()){
             endRegButton.setVisibility(View.GONE);
             ViewGroup parent = (ViewGroup) endRegButton.getParent();
             if (parent != null) {
@@ -378,27 +426,31 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
         }
 
+                                            //--    Setting Display Texts -- //
+
         // --- set text fields ---
         Description.setText(event.getDescription());
         Criteria.setText(event.getCriteria());
         Category.setText(event.getCategory());
 
-        RegPeriod.setText(event.getRegistrationStart().toString()
-                .concat(" - ")
-                .concat(event.getRegistrationEnd().toString()));
+        //Registration Period: Mon Nov 03 11:11:00 MST 2025 - Tues Nov 04 12:00:00 MST 2025
+        RegPeriod.setText(event.getRegistrationStart().toString().concat(" - ").concat(event.getRegistrationEnd().toString()));
 
-        RunTime.setText(event.getEventStart().toString()
-                .concat(" - ")
-                .concat(event.getEventEnd().toString()));
+        //RUNTIME
+        RunTime.setText(event.getEventStart().toString().concat(" - ").concat(event.getEventEnd().toString()));
 
-        if (event.hasLocation()) {
-            Location.setText("Location: " + event.getLocation());
-        }
+        //Location
+        Location.setText(event.getLocationString());
 
-        // capacity: from waiting + lost over max
-        updateCapacityDisplay(Capacity, event);
+        Radius.setText(Double.toString(event.getRegisterableradius()).concat(" meters"));
 
-        // Live listener on this event doc → keeps arrays + capacity fresh
+        //Event Capacity: 12/40, 3/Unlimited, 0/30
+        Capacity.setText((Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+
+
+
+
+        //Pull data
         ListenerRegistration EventListener =
                 Data.getDb()
                         .collection("events")
@@ -411,49 +463,52 @@ public class Organizer_UpcomingFragment extends Fragment {
                             Event updatedEvent = docSnapshot.toObject(Event.class);
                             if (updatedEvent == null) return;
 
-                            // update local event lists
-                            event.setWaitingList(new ArrayList<>(updatedEvent.getWaitingList()));
-                            event.setInvitedList(new ArrayList<>(updatedEvent.getInvitedList()));
+                            //Update local data
+                            event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
+                            event.setInvitedList((ArrayList<String>) updatedEvent.getInvitedList());
                             event.setLostList(updatedEvent.getLostList());
                             event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
                             event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
+                            updateCapacityDisplay(Capacity,event);
 
-                            // update capacity UI
-                            updateCapacityDisplay(Capacity, event);
 
-                            // Waitlist data (waiting + lost)
+                            //Waitlist Data
                             ArrayList<String> queryList = new ArrayList<>();
                             queryList.addAll(updatedEvent.getWaitingList());
                             queryList.addAll(updatedEvent.getLostList());
                             Data.getProfiles(queryList,
-                                    QueryResult -> {
+                                    (QueryResult)->{
+                                        //Updating arrays
                                         WaitingListArray.clear();
                                         WaitingListArray.addAll(QueryResult);
                                         WaitingListAdapter.notifyDataSetChanged();
                                     },
-                                    e -> Log.d("Firestore Error", e.toString()));
+                                    e->{Log.d("Firestore Error",e.toString());});
 
-                            // Invited list data
+                            //inviteList Data
                             Data.getProfiles(updatedEvent.getInvitedList(),
-                                    InvitedList -> {
+                                    (InvitedList)->{
+                                        //Updating array
                                         invitedPeople.clear();
                                         invitedPeople.addAll(InvitedList);
                                         inviteListAdapter.notifyDataSetChanged();
                                     },
-                                    e -> Log.d("Firestore Error", e.toString()));
+                                    e->Log.d("Firestore Error",e.toString()));
 
-                            // Cancelled list data
+                            //CancelledList Data
                             Data.getProfiles(updatedEvent.getCancelledEntrants(),
-                                    cancelledList -> {
+                                    (cancelledList)->{
+                                        //Updating array
                                         cancelledPeople.clear();
                                         cancelledPeople.addAll(cancelledList);
                                         cancelledListAdapter.notifyDataSetChanged();
                                     },
                                     e -> Log.d("Firestore Error", e.toString()));
 
-                            // Accepted list data
+                            //AcceptedList Data
                             Data.getProfiles(updatedEvent.getAcceptedEntrants(),
-                                    acceptedList -> {
+                                    (acceptedList)->{
+                                        //Updating array
                                         acceptedPeople.clear();
                                         acceptedPeople.addAll(acceptedList);
                                         acceptedListAdapter.notifyDataSetChanged();
@@ -461,7 +516,60 @@ public class Organizer_UpcomingFragment extends Fragment {
                                     e -> Log.d("Firestore Error", e.toString()));
                         });
 
-        // Poster update button
+
+
+        //-- Button Interactions -- //
+
+
+        //Waitlist Button Pop-up
+        WaitListButton.setOnClickListener(v -> {
+            WaitListPopup(event);
+        });
+
+        //Invited List Button Pop-up
+        InviteListButton.setOnClickListener(v -> {
+            InviteListPopup();
+        });
+
+        //Cancelled List Button Pop-up
+        CancelledListButton.setOnClickListener(v -> {
+            CancelledListPopup(event);
+        });
+
+        //Accepted List Pop-up
+        AcceptedListButton.setOnClickListener(v -> {
+            AcceptedListPopup();
+        });
+
+        //End Registration Now pop-up
+        endRegButton.setOnClickListener(v -> {
+            //Are you sure? popup
+            EndRegPopup(event);
+        });
+
+
+        AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
+                .setTitle(event.getEventName())
+                .setView(popupView)
+                .setNegativeButton("Close", null)
+                .setOnDismissListener(dialog -> {EventListener.remove();
+                //Update Checkbox to server if needed.
+                if (locationRequirement.isChecked() != event.isRegistrationRadiusEnabled()){
+                    //Locale change
+                    event.setRegistrationRadiusEnabled(locationRequirement.isChecked());
+                    //Push to server
+                    HashMap<String,Object> Update = new HashMap<String,Object>();
+                    Update.put("registrationRadiusEnabled",event.isRegistrationRadiusEnabled());
+                    Data.updateEvent(event.getEventId(),Update,()->{},e -> {Log.d("Firebase Error","Error Pushing to Server: ".concat(e.toString()));
+                        //Put event back to normal if error occured on server.
+                        event.setRegistrationRadiusEnabled(locationRequirement.isChecked());
+                    });
+                }
+                })
+                .show();
+
+        //Event Poster Buttons
+
         if (updatePosterButton != null) {
             updatePosterButton.setOnClickListener(v -> {
                 currentEventForUpdate = event;
@@ -486,6 +594,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                     AlertDialog dialog = builder.create();
                     dialog.show();
 
+                    // Fetch image from Firestore /images
                     Data.getDb().collection("images").document(imageDocId)
                             .addSnapshotListener((doc, err) -> {
                                 if (!dialog.isShowing()) return;
@@ -523,49 +632,21 @@ public class Organizer_UpcomingFragment extends Fragment {
             QRCode.setImageBitmap(qrBitmap);
         } else {
             QRCode.setImageResource(android.R.drawable.ic_dialog_alert);
+            Toast.makeText(requireContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
         }
 
-        // Button interactions
-        if (WaitListButton != null) {
-            WaitListButton.setOnClickListener(v -> WaitListPopup(event));
-        }
+        //Notification Pop-up, closes event pop-up
+        if (notificationButton != null){
+        notificationButton.setOnClickListener(v->{
+            Log.d("DEBUG", "Notification button clicked!");
+            //is button click working
+            //Toast.makeText(requireContext(), "Opening notifications...", Toast.LENGTH_SHORT).show();
+            organizerVM.setSelectedEvent(event);
+            //close current dialog/popup
+            eventDialog.dismiss();
 
-        if (InviteListButton != null) {
-            InviteListButton.setOnClickListener(v -> InviteListPopup());
-        }
-
-        if (CancelledListButton != null) {
-            CancelledListButton.setOnClickListener(v -> CancelledListPopup(event));
-        }
-
-        if (AcceptedListButton != null) {
-            AcceptedListButton.setOnClickListener(v -> AcceptedListPopup());
-        }
-
-        if (endRegButton != null) {
-            endRegButton.setOnClickListener(v -> EndRegPopup(event));
-        }
-
-        AlertDialog eventDialog = new AlertDialog.Builder(requireContext())
-                .setTitle(event.getEventName())
-                .setView(popupView)
-                .setNegativeButton("Close", null)
-                .setOnDismissListener(dialog -> {
-                    // stop listening to this event doc
-                    EventListener.remove();
-                })
-                .show();
-
-        // Notification button
-        if (notificationButton != null) {
-            notificationButton.setOnClickListener(v -> {
-                Log.d("DEBUG", "Notification button clicked!");
-                organizerVM.setSelectedEvent(event);
-                eventDialog.dismiss();
-                NavHostFragment.findNavController(Organizer_UpcomingFragment.this)
-                        .navigate(R.id.notificationSenderFragment);
-            });
-        }
+            NavHostFragment.findNavController(Organizer_UpcomingFragment.this).navigate(R.id.notificationSenderFragment);
+        });}
     }
 
     // poster update result
@@ -581,16 +662,16 @@ public class Organizer_UpcomingFragment extends Fragment {
                 return;
             }
 
-            // Only handle updates here, not new-event uploads
+            //  Only handle updates here, not new-event uploads
             if (currentEventForUpdate != null) {
                 try {
                     InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
-                    if (bitmap.getByteCount() > 2_000_000) {
+                    if (bitmap.getByteCount() > 2_000_000) { // only compress if very big
                         bitmap = Bitmap.createScaledBitmap(bitmap, 600, 600, true);
                         Toast.makeText(requireContext(), "Poster compressed to fit upload size.", Toast.LENGTH_SHORT).show();
-                    } else if (bitmap.getByteCount() > 800_000) {
+                    } else if (bitmap.getByteCount() > 800_000) { // moderate resize
                         bitmap = Bitmap.createScaledBitmap(bitmap, 800, 800, true);
                     }
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -607,23 +688,25 @@ public class Organizer_UpcomingFragment extends Fragment {
                     imageData.put("approved", true);
 
                     // Upload new poster after deleting old one
-                    Runnable uploadNewPoster = () -> Data.getDb().collection("images")
-                            .add(imageData)
-                            .addOnSuccessListener(docRef -> {
-                                String newDocId = docRef.getId();
-                                Data.updateEvent(
-                                        currentEventForUpdate.getEventId(),
-                                        Map.of("imageUrl", newDocId),
-                                        () -> {
-                                            currentEventForUpdate.setImageUrl(newDocId);
-                                            Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
-                                        },
-                                        e -> Toast.makeText(requireContext(), "Failed to link new poster!", Toast.LENGTH_SHORT).show()
+                    Runnable uploadNewPoster = () -> {
+                        Data.getDb().collection("images")
+                                .add(imageData)
+                                .addOnSuccessListener(docRef -> {
+                                    String newDocId = docRef.getId();
+                                    Data.updateEvent(
+                                            currentEventForUpdate.getEventId(),
+                                            Map.of("imageUrl", newDocId),
+                                            () -> {
+                                                currentEventForUpdate.setImageUrl(newDocId);
+                                                Toast.makeText(requireContext(), "Poster updated!", Toast.LENGTH_SHORT).show();
+                                            },
+                                            e -> Toast.makeText(requireContext(), "Failed to link new poster!", Toast.LENGTH_SHORT).show()
+                                    );
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show()
                                 );
-                            })
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(requireContext(), "Poster upload failed!", Toast.LENGTH_SHORT).show()
-                            );
+                    };
 
                     if (oldDocId != null && !oldDocId.isEmpty()) {
                         Data.getDb().collection("images").document(oldDocId)
@@ -645,24 +728,22 @@ public class Organizer_UpcomingFragment extends Fragment {
         }
     }
 
-    // ---------- WAITLIST / OTHER LIST POPUPS (original logic) ----------
 
-    // US 02.02.01 && US 02.06.01
-    private void WaitListPopup(Event event) {
+    //US 02.02.01 && US 02.06.01
+    private void WaitListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
-        Log.d("DEBUG", "PRE BUILDPOPUP");
+        Log.d("DEBUG","PRE BUILDPOPUP");
         View waitlistView = inflater.inflate(R.layout.organization_event_waitlist_popup, null);
         ListView WaitingList = waitlistView.findViewById(R.id.waitlistpopup_listview);
 
-        // use local adapter that snapshot listener keeps fresh
         WaitingList.setAdapter(WaitingListAdapter);
 
-        // Inviting Entrants button
+        //Inviting Entrants
         Button inviteEntrants = waitlistView.findViewById(R.id.waitlistpopup_inviteEntrants_Button);
         inviteEntrants.setOnClickListener(v1 -> {
-            // Skip if nobody to invite
-            if (event.getWaitingList().size() + event.getLostList().size() == 0) {
+            //Skip popup if there is nobody to invite
+            if (event.getWaitingList().size() + event.getLostList().size() == 0){
                 WarningToast("Nobody to invite!");
                 return;
             }
@@ -670,17 +751,19 @@ public class Organizer_UpcomingFragment extends Fragment {
             InviteNumberPopup(event, inflater);
         });
 
+        //Waitlist Actual popup
         new AlertDialog.Builder(requireContext())
                 .setTitle("Waitlist")
                 .setView(waitlistView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {
-                })
-                .show();
+                .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
     }
 
-    /** Cancelled entrants popup (uses local cancelledPeople list) */
-    private void CancelledListPopup(Event event) {
+    /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
+     * US 02.06.02 As an organizer I want to see a list of all the cancelled entrants
+     * @param event
+     */
+    private void CancelledListPopup(Event event){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -692,11 +775,9 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Cancelled Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Replace Entrants", (dialog, which) -> {
-                    replaceEntrants(event, inflater);
-                    // refresh events
-                    RefreshUpcomingEventList();
-                })
+                .setPositiveButton("Replace Entrants", (dialog, which) -> {replaceEntrants(event,inflater);
+                //Refresh Data
+                RefreshUpcomingEventList();})
                 .show();
     }
 
@@ -712,8 +793,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Invited Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {
-                })
+                .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
     }
 
@@ -729,8 +809,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {
-                })
+                .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
     }
 
@@ -739,20 +818,21 @@ public class Organizer_UpcomingFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Are you sure you want to end the registration period?")
                 .setMessage("Doing so will close the event")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    event.endRegistration(); // local
+                .setPositiveButton("Yes", ((dialog, which) -> {
+                    event.endRegistration(); //Update local
 
+                    //Update Server
                     Map<String, Object> update = new HashMap<>();
-                    update.put("registrationEnd", event.getRegistrationEnd());
+                    update.put("registrationEnd",event.getRegistrationEnd());
 
-                    Data.updateEvent(event.getEventId(), update,
-                            () -> {
+                    //Close popup of event on success and update events
+                    Data.updateEvent(event.getEventId(), update, ()->{
                                 WarningToast("Registration for ".concat(event.getEventName()).concat(" ended"));
                                 RefreshUpcomingEventList();
                             },
                             e -> Log.d("Firebase Error", "Error pushing registration changes to server:".concat(e.toString())));
-                })
-                .setNegativeButton("Never mind", null)
+                }))
+                .setNegativeButton("Never mind",null)
                 .show();
     }
 
@@ -760,36 +840,38 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     private void UpdateEventList(List<Event> eventsToShow) {
         EventArray.clear();
-        if (eventsToShow != null) {
-            EventArray.addAll(eventsToShow);
-        }
-        if (eventAdapter != null) {
-            eventAdapter.notifyDataSetChanged();
-        }
+        EventArray.addAll(eventsToShow);
+        //Notify the adapter
+        eventAdapter.notifyDataSetChanged();
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
     }
 
-    private void RefreshUpcomingEventList() {
-        new Thread(() ->
-                Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
-                    Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
-                })
-        ).start();
+
+    /** Refreshes the Upcoming Event list using a separate Thread
+     * Uses the Current Org ID for the Upcoming Events
+     */
+    private void RefreshUpcomingEventList(){
+        new Thread(()->{Data.fetchOrgsUpcomingEvents(orgID, this::UpdateEventList, e -> {
+            Log.d("Debug", "onCreateView: Error with results".concat(e.toString()));
+        });}).start();
     }
 
     // -------------------- HELPERS -------------------- //
 
-    /** Invite N entrants from waitlist (and lostlist) */
-    private void InviteNumberPopup(Event event, LayoutInflater inflater) {
-        View helperView = inflater.inflate(R.layout.text_input_helper, null);
+    /** POPUP that invites the entrants according to the number inputted by the user.
+     * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
+     * @param event Event whose waitlist and invitelist to affect
+     * @param inflater current screen inflator
+     */
+    private void InviteNumberPopup(Event event, LayoutInflater inflater){
+        View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Number of entrants to invite (Up to "
-                        .concat(Integer.toString(event.getWaitingList().size() + event.getLostList().size()))
-                        .concat(")"))
+                .setTitle("Number of entrants to invite (Up to ".concat(Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat(")"))
                 .setView(helperView)
-                .setPositiveButton("Confirm", (dialog, which) -> {
+                .setPositiveButton("Confirm",((dialog, which) -> {
+                    //Preventing non-numbers from being used
                     int number;
                     try {
                         number = Integer.parseInt(numberInp.getText().toString().trim());
@@ -800,81 +882,89 @@ public class Organizer_UpcomingFragment extends Fragment {
                     event.InviteEntrants(number);
 
                     Map<String, Object> update = new HashMap<>();
-                    update.put("waitingList", event.getWaitingList());
-                    update.put("lostList", event.getLostList());
-                    update.put("invitedList", event.getInvitedList());
+                    update.put("waitingList",event.getWaitingList());
+                    update.put("lostList",event.getLostList());
+                    update.put("invitedList",event.getInvitedList());
 
                     Data.updateEvent(event.getEventId(),
                             update,
-                            () -> {
-                            },
-                            e -> Log.d("Firebase Error",
-                                    "Error pushing wait/invlist changes to server:".concat(e.toString())));
-                })
-                .setNegativeButton("Cancel", null)
+                            ()->{},
+                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+
+                }))
+                .setNegativeButton("Cancel",null)
                 .show();
     }
 
-    /** Replace cancelled entrants with waiting ones */
-    private void replaceEntrants(Event event, LayoutInflater inflater) {
-        View helperView = inflater.inflate(R.layout.text_input_helper, null);
+
+
+    /** Replaces the cancelled entrants with a number upto the cancelled number
+     * US 02.05.03
+     * @param event Event to shuffle entrants around in
+     * @param inflater Display
+     */
+    private void replaceEntrants(Event event, LayoutInflater inflater){
+        View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
 
         int NumCancelled = event.getCancelledEntrants().size();
         int numWaiting = event.getLostList().size() + event.getWaitingList().size();
-        if (numWaiting == 0) {
+        if (numWaiting == 0){
             WarningToast("No waiting entrants to invite!");
             return;
         }
-        if (NumCancelled == 0) {
+        if (NumCancelled == 0){
             WarningToast("There are no Cancelled Entrants to replace!");
             return;
         }
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Number of entrants to replace (Up to "
-                        .concat(Integer.toString(Math.min(NumCancelled, numWaiting)))
-                        .concat(")"))
+                .setTitle("Number of entrants to replace (Up to ".concat(Integer.toString(Math.min(NumCancelled,numWaiting))).concat(")"))
                 .setView(helperView)
-                .setPositiveButton("Confirm", (dialog, which) -> {
+                .setPositiveButton("Confirm",((dialog, which) -> {
+                    //Preventing non-numbers from being used
                     int number;
+                    //If a non-int was passed, do nothing
                     try {
                         number = Integer.parseInt(numberInp.getText().toString().trim());
+                        WarningToast("Please enter only digits!");
                     } catch (Exception e) {
                         number = 0;
                     }
 
-                    if (number > event.getCancelledEntrants().size()) {
+                    //limit to cancelled entrant count
+                    if (number > event.getCancelledEntrants().size()){
                         number = event.getCancelledEntrants().size();
                     }
-
+                    //Send out invites
                     event.InviteEntrants(number);
 
                     Map<String, Object> update = new HashMap<>();
-                    update.put("waitingList", event.getWaitingList());
-                    update.put("lostList", event.getLostList());
-                    update.put("invitedList", event.getInvitedList());
+                    update.put("waitingList",event.getWaitingList());
+                    update.put("lostList",event.getLostList());
+                    update.put("invitedList",event.getInvitedList());
 
                     Data.updateEvent(event.getEventId(),
                             update,
-                            () -> {
-                            },
-                            e -> Log.d("Firebase Error",
-                                    "Error pushing wait/invlist changes to server:".concat(e.toString())));
-                })
-                .setNegativeButton("Cancel", null)
+                            ()->{},
+                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+
+                }))
+                .setNegativeButton("Cancel",null)
                 .show();
     }
 
-    private void WarningToast(String warning) {
+
+    /** EoA function that makes Toasts easier. Standard Toast popup helper
+     * @param warning Message for Toast to display
+     */
+    private void WarningToast(String warning){
         Toast WarningToast = new Toast(requireContext());
         WarningToast.setText(warning);
         WarningToast.show();
     }
 
-    private void updateCapacityDisplay(TextView Capacity, Event event) {
-        String cap = (event.getWaitingList().size() + event.getLostList().size())
-                + "/" + event.getMaxWaitingEntrantsString();
-        Capacity.setText("Waitlist Capacity: " + cap);
+    private void updateCapacityDisplay(TextView Capacity, Event event){
+        Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
     }
 }

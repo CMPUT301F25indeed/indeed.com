@@ -53,7 +53,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolde
         Event e = list.get(position);
 
         holder.title.setText(e.getEventName());
-        holder.desc.setText(e.getLocation());   // or description, your choice
+        holder.desc.setText(e.getLocationString());   // or description, your choice
 
         holder.itemView.setOnClickListener(v -> listener.clicked(e));
 

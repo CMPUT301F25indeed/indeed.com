@@ -2,6 +2,8 @@ package com.example.indeedgambling;
 
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.util.Pair;
+
 import com.example.indeedgambling.QRCodeGenerator;
 
 import androidx.annotation.NonNull;
@@ -16,13 +18,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+/** Represents an event in spacetime that entrants can sign up to, and can be invited to.
+ */
 public class Event implements Serializable {
     private String eventId;
     private String eventName;
     private String description;
-    private String organizerId; //Where are we getting the ID from, and how to we use to it refernce the organizer? Hashes are not unique.
+    private String organizerId;
     private String category;
-    private String location;
+    private double latitude;
+    private double longitude;
+    private boolean RegistrationRadiusEnabled;
+    private double Registerableradius;
     private Date eventStart;
     private Date eventEnd;
     private Date registrationStart;
@@ -94,8 +101,6 @@ public class Event implements Serializable {
         //qrCodeURL = QRCodeURL;
 
         this.status = getStatus();
-
-        this.location = Location;
 
         //Event ID : Hash of OrgIdEventnameEventstart
         this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
@@ -351,20 +356,6 @@ public class Event implements Serializable {
         this.category = category;
     }
 
-    /** Returns the Event's saved location as a string
-     * @return Location of event
-     */
-    public String getLocation() {
-        return location;
-    }
-
-    /** Overwrites the event's location with the arguments.
-     * @param location New location for the event
-     */
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     /** Returns the URL where the Image is saved.
      * @return String for the URL
      */
@@ -531,7 +522,44 @@ public class Event implements Serializable {
         this.lostList = lostList;
     }
 
-//---------------------------------------------------- Helpers ---------------------------//
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        checkLatitudeValid(latitude);
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        checkLongitudeValid(longitude);
+        this.longitude = longitude;
+    }
+
+    public double getRegisterableradius() {
+        return Registerableradius;
+    }
+
+    /** Updates the radius, in meters. Uses absolute values for arguments
+     * @param registerableradius Distance in Meters to allow for signup.
+     */
+    public void setRegisterableradius(double registerableradius) {
+        Registerableradius = Math.abs(registerableradius);
+    }
+
+    public boolean isRegistrationRadiusEnabled() {
+        return RegistrationRadiusEnabled;
+    }
+
+    public void setRegistrationRadiusEnabled(boolean registrationRadiusEnabled) {
+        RegistrationRadiusEnabled = registrationRadiusEnabled;
+    }
+
+    //---------------------------------------------------- Helpers ---------------------------//
     /** Helper function that checks if RIGHT NOW is before reg period opens
      * @return True if before Reg Open, false otherwise
      */
@@ -555,6 +583,7 @@ public class Event implements Serializable {
     /** Help function that will return the meaning of the max. 0 => unlimited, normal otherwise.
      * @return String of Max Waiting Entrants. Returns "Unlimited" instead of 0.
      */
+    @com.google.firebase.firestore.Exclude //Prevents adding the result of the string to Firebase
     public String getMaxWaitingEntrantsString(){
         if (maxWaitingEntrants == 0){
             return "Unlimited";
@@ -599,15 +628,44 @@ public class Event implements Serializable {
      */
     public boolean waitList_registrable() {
         return (!this.atCapacity()) && this.RegistrationOpen();
-
     }
 
-    /** Returns if the event has a defined location
-     * May be removed if locations are mandatory
-     * @return True if Location defined.
+    /** Also checks the locational requirements for waitlisting
+     * @param latitude
+     * @param longitude
+     * @return True if possible, False otherwise
      */
-    public boolean hasLocation(){
-        return !(location == null);
+    public boolean waitlist_registerable(double latitude, double longitude) {
+        return waitList_registrable() && coordinates_in_range(latitude,longitude);
+    }
+
+    /** Checks if the passed coordinates are in range using Haversin formula
+     * @param latitude Must be in [-90, +90] degrees
+     * @param longitude Must be in [-180, 180] degrees
+     * @return True if coordinates in range, or if the range requirement is disabled.
+     */
+    public boolean coordinates_in_range(double latitude, double longitude) {
+        //If there is no enforcement on radius, it cannot be out of range
+        if (!isRegistrationRadiusEnabled()){
+          return true;
+        }
+
+        //Throw error if coordinates not valid
+        checkLatitudeValid(latitude);
+        checkLongitudeValid(longitude);
+
+        final double R = 6371000; // Earth radius in meters
+
+        double dLat = Math.toRadians(latitude - this.latitude);
+        double dLon = Math.toRadians(longitude - this.longitude);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(this.latitude)) * Math.cos(Math.toRadians(latitude)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return distance <= Registerableradius;
     }
 
     /** Moves a random selection of entrants from the waitlist/lostlist to the invited list. DOES NOT TALK TO SERVER DIRECTLY
@@ -650,6 +708,7 @@ public class Event implements Serializable {
     }
 
     /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER
+     *  Does NOT check coordinates
      * @param entrantID ID to try to add
      * @return TRUE if added, FALSE if not.
      */
@@ -662,7 +721,6 @@ public class Event implements Serializable {
     }
 
     /** Ends registration now. Does not do any checks for goodness or graciousness.
-     *
      */
     public void endRegistration(){
         //Checks if registration ends in the past. Only updates if it would end in the future.
@@ -670,7 +728,49 @@ public class Event implements Serializable {
         if (registrationEnd.after(new Date())){
             this.registrationEnd = new Date();
         }
+    }
 
+    /** Updates an Events coordinates in degrees to the passed location.
+     * @param lat Must be in [-90, +90] degrees
+     * @param lng Must be in [-180, 180] degrees
+     */
+    public void setLocation(double lat, double lng){
+        //Throw error if coordinates not valid
+        checkLatitudeValid(lat);
+        checkLongitudeValid(lng);
+        longitude = lng;
+        latitude = lat;
+    }
+
+    @com.google.firebase.firestore.Exclude
+    public Pair<Double,Double> getLocation(){
+        return new Pair<>(latitude,longitude);
+    }
+
+
+    @com.google.firebase.firestore.Exclude
+    public String getLocationString(){
+        return Double.toString(latitude).concat(", ".concat(Double.toString(longitude)));
+    }
+
+    /** Argument validity helper
+     * Throws an argument if latitude is out of range
+     */
+    @com.google.firebase.firestore.Exclude
+    private void checkLatitudeValid(double lat){
+        if (Math.abs(lat) > 90){
+            throw new IllegalArgumentException("Latitude must be between -90 and +90 degrees!");
+        }
+    }
+
+    /** Argument validity helper
+     * Throws an argument if longitude is out of range
+     * @param lng
+     */
+    private void checkLongitudeValid(double lng){
+        if (Math.abs(lng)> 180){
+            throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees!");
+        }
     }
 
 

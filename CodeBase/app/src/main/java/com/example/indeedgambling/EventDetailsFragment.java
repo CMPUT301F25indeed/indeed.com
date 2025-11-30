@@ -221,7 +221,7 @@ public class EventDetailsFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
         if (event.getLocation() != null)
-            loc.setText("Location: " + event.getLocation());
+            loc.setText("Location: " + event.getLocationString());
 
         if (event.getCategory() != null)
             category.setText("Category: " + event.getCategory());
@@ -255,13 +255,12 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-        if (event.tryaddtoWaitingList(entrantId)) {
+        if (!event.tryaddtoWaitingList(entrantId)) {
             Toast.makeText(getContext(), "Waitlist is FULL!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         entrantVM.addEventToEntrant(event.getEventId());
-        event.getWaitingList().add(entrantId);
 
         firebaseVM.joinWaitingList(event.getEventId(), entrantId, () -> {},
                 e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
