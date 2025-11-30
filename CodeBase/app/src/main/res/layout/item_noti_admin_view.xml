@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,47 +8,57 @@
     android:background="@drawable/bg_button_secondary"
     android:layout_marginBottom="12dp">
 
-    <!-- Top row: timestamp (left) + senderEmail (right) -->
+    <!-- Top Row: "time | email" -->
+    <TextView
+        android:id="@+id/noti_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2 hours ago  |  sender@example.com"
+        android:textSize="12sp"
+        android:textColor="#7AA9FF"
+        android:paddingBottom="8dp" />
+
+    <!-- Message + Remove Button Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="4dp">
+        android:paddingBottom="6dp">
 
+        <!-- Notification Message -->
         <TextView
-            android:id="@+id/noti_timestamp"
+            android:id="@+id/noti_message"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="2 hours ago"
-            android:textSize="12sp"
-            android:textColor="#7AA9FF" />
+            android:text="This is the notification message."
+            android:textSize="18sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:singleLine="true" />
 
-        <TextView
-            android:id="@+id/noti_sender_email"
+        <!-- Remove Button -->
+        <Button
+            android:id="@+id/noti_remove_btn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="sender@example.com"
-            android:textSize="12sp"
-            android:textColor="#7AA9FF" />
+            android:layout_height="38dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_button_danger_border"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"
+            android:stateListAnimator="@null"
+            android:text="Remove"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Message (big text) -->
-    <TextView
-        android:id="@+id/noti_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="This is the notification message."
-        android:textSize="18sp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:paddingBottom="6dp" />
-
-    <!-- Event Name (subtle text) -->
+    <!-- Event Name -->
     <TextView
         android:id="@+id/noti_event_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Event Name Here"
         android:textSize="14sp"
