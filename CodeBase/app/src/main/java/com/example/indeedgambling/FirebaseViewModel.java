@@ -2,7 +2,6 @@ package com.example.indeedgambling;
 
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -12,15 +11,12 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,8 +43,8 @@ public class FirebaseViewModel extends ViewModel {
     private final MutableLiveData<List<Profile>> profilesLive = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Event>> eventsLive = new MutableLiveData<>(new ArrayList<>());
 
-    private ListenerRegistration profilesReg;
-    private ListenerRegistration eventsReg;
+    private com.google.firebase.firestore.ListenerRegistration profilesReg;
+    private com.google.firebase.firestore.ListenerRegistration eventsReg;
 
     /**
      *
@@ -469,7 +465,7 @@ public class FirebaseViewModel extends ViewModel {
     }
 
     /**
-     * Helper used for US 01.04.01 and 01.04.02.
+     * Helper used for US 01.04.01 and 01.04.02 (and now organizer stories).
      */
     public void sendLotteryResultNotification(String eventId,
                                               String entrantId,
@@ -496,6 +492,150 @@ public class FirebaseViewModel extends ViewModel {
                     n.setTimestamp(new Date());
 
                     sendNotification(n, onOk, onErr);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * US 02.05.01
+     * Notify all invited entrants (invitedList) that they won the lottery.
+     */
+    public void notifyInvitedEntrantsLotteryWin(String eventId,
+                                                Runnable onOk,
+                                                Consumer<Exception> onErr) {
+
+        EVENTS.document(eventId).get()
+                .addOnSuccessListener(doc -> {
+                    Event event = doc.toObject(Event.class);
+                    if (event == null) {
+                        onErr.accept(new Exception("Event not found"));
+                        return;
+                    }
+
+                    List<String> invited = event.getInvitedList();
+                    if (invited == null || invited.isEmpty()) {
+                        onOk.run();
+                        return;
+                    }
+
+                    AtomicInteger counter = new AtomicInteger(0);
+                    int total = invited.size();
+
+                    for (String entrantId : invited) {
+                        sendLotteryResultNotification(
+                                eventId,
+                                entrantId,
+                                true,
+                                () -> {
+                                    if (counter.incrementAndGet() == total) {
+                                        onOk.run();
+                                    }
+                                },
+                                onErr
+                        );
+                    }
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * US 02.06.03
+     * Fetches Profile objects for all entrants who enrolled in the event
+     * (whose IDs are in acceptedEntrants).
+     */
+    public void getEventAcceptedEntrants(String eventId,
+                                         Consumer<List<Profile>> onResult,
+                                         Consumer<Exception> onErr) {
+
+        EVENTS.document(eventId).get()
+                .addOnSuccessListener(doc -> {
+                    Event event = doc.toObject(Event.class);
+                    if (event == null) {
+                        onErr.accept(new Exception("Event not found"));
+                        return;
+                    }
+
+                    List<String> acceptedIds = event.getAcceptedEntrants();
+                    if (acceptedIds == null || acceptedIds.isEmpty()) {
+                        onResult.accept(new ArrayList<>());
+                        return;
+                    }
+
+                    PROFILES.whereIn("profileId", acceptedIds)
+                            .orderBy("personName")
+                            .get()
+                            .addOnSuccessListener(q ->
+                                    onResult.accept(q.toObjects(Profile.class)))
+                            .addOnFailureListener(onErr::accept);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
+
+    /**
+     * US 02.06.04
+     * Cancels all invited entrants who did not sign up (non-responders),
+     * and sends them LOTTERY_LOSS notifications.
+     */
+    public void cancelNonRespondingInvitedEntrants(String eventId,
+                                                   Runnable onOk,
+                                                   Consumer<Exception> onErr) {
+
+        EVENTS.document(eventId).get()
+                .addOnSuccessListener(doc -> {
+                    Event event = doc.toObject(Event.class);
+                    if (event == null) {
+                        onErr.accept(new Exception("Event not found"));
+                        return;
+                    }
+
+                    List<String> invited =
+                            event.getInvitedList() != null
+                                    ? new ArrayList<>(event.getInvitedList())
+                                    : new ArrayList<>();
+
+                    List<String> accepted =
+                            event.getAcceptedEntrants() != null
+                                    ? new ArrayList<>(event.getAcceptedEntrants())
+                                    : new ArrayList<>();
+
+                    List<String> toCancel = new ArrayList<>();
+
+                    for (String id : invited) {
+                        if (!accepted.contains(id)) {
+                            toCancel.add(id);
+                        }
+                    }
+
+                    if (toCancel.isEmpty()) {
+                        onOk.run();
+                        return;
+                    }
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("invitedList", accepted);
+                    updates.put("cancelledEntrants",
+                            FieldValue.arrayUnion(toCancel.toArray(new String[0])));
+
+                    EVENTS.document(eventId).update(updates)
+                            .addOnSuccessListener(v -> {
+                                AtomicInteger counter = new AtomicInteger(0);
+                                int total = toCancel.size();
+
+                                for (String entrantId : toCancel) {
+                                    sendLotteryResultNotification(
+                                            eventId,
+                                            entrantId,
+                                            false,
+                                            () -> {
+                                                if (counter.incrementAndGet() == total) {
+                                                    onOk.run();
+                                                }
+                                            },
+                                            onErr
+                                    );
+                                }
+                            })
+                            .addOnFailureListener(onErr::accept);
                 })
                 .addOnFailureListener(onErr::accept);
     }

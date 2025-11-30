@@ -1,125 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/notification_sender_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send Notification"
-            android:textSize="24sp"
+            android:text="Organizer Notifications"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="24dp" />
+            android:paddingBottom="8dp" />
 
-        <!-- Event ID Selection -->
         <TextView
+            android:id="@+id/notification_event_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Event ID *"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:text="Event info"
+            android:paddingBottom="16dp" />
 
-        <EditText
-            android:id="@+id/edit_event_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Event ID"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Notification Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Notification Title *"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/edit_notification_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="e.g., Event Update, Important Notice"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Notification Message -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Message Content *"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/edit_notification_message"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:hint="Type your notification message here..."
-            android:inputType="textMultiLine"
-            android:gravity="top"
-            android:padding="12dp"
-            android:layout_marginBottom="24dp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send To *"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <RadioGroup
-            android:id="@+id/radio_recipient_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="24dp">
-
-            <RadioButton
-                android:id="@+id/radio_waiting_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="All Waiting List Entrants"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-
-            <RadioButton
-                android:id="@+id/radio_selected_entrants"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="All Selected Entrants"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-
-            <RadioButton
-                android:id="@+id/radio_cancelled_entrants"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="All Cancelled Entrants"
-                android:textSize="16sp" />
-
-        </RadioGroup>
-
-        <!-- Send Button -->
         <Button
-            android:id="@+id/button_send_notification"
+            android:id="@+id/button_notify_invited"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send Notification"
-            android:textSize="18sp"
-            android:backgroundTint="#2196F3"
-            android:textColor="@android:color/white"
-            android:padding="16dp" />
+            android:text="Notify invited entrants (lottery win)" />
+
+        <Button
+            android:id="@+id/button_show_enrolled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show enrolled entrants"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/button_cancel_nonresponders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel non-responders (lottery loss)"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/notification_enrolled_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enrolled entrants:"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp" />
+
+        <ListView
+            android:id="@+id/list_enrolled_entrants"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:dividerHeight="1dp" />
+
+        <Button
+            android:id="@+id/button_notifications_back"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 </ScrollView>
