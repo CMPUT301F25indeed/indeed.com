@@ -4,6 +4,7 @@
     <color name="purple_500">#6200EE</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="darkmode_hint">#c2bfff</color>
 
     <color name="indeed_color">#0A66C2</color>
 

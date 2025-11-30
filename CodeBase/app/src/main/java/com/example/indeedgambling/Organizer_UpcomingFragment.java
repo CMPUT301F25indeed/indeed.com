@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,7 +30,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
+
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -82,11 +86,15 @@ public class Organizer_UpcomingFragment extends Fragment {
     ArrayAdapter<Profile> acceptedListAdapter;
 
 
+    private double lat;
+    private double lng;
+
     //Other
     private static final int PICK_IMAGE_REQUEST = 999;
     private Uri selectedImageUri;
     private Event currentEventForUpdate;
     private Uri selectedPosterUri;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -155,6 +163,9 @@ public class Organizer_UpcomingFragment extends Fragment {
     private void showNewEventPopup(){
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.make_event, null);
+        //"Null" values
+        lat = -100;
+        lng = -100;
 
         Button uploadPosterButton = popupView.findViewById(R.id.NewEventPopup_UploadPosterButton);
         ImageView posterPreview = popupView.findViewById(R.id.NewEventPopup_PosterPreview);
@@ -170,8 +181,11 @@ public class Organizer_UpcomingFragment extends Fragment {
         EditText MaxEntrantsInput = popupView.findViewById(R.id.NewEventPopup_MaxEntrantsDialog);
         EditText DescriptionInput = popupView.findViewById(R.id.NewEventPopup_Description);
         EditText CategoryInput = popupView.findViewById(R.id.NewEventPopup_Category);
-        EditText LocationInput = popupView.findViewById(R.id.NewEventPopup_Location);
+        Button LocationSelector = popupView.findViewById(R.id.NewEventPopup_Location);
+        CheckBox LocationRequirement = popupView.findViewById(R.id.NewEventPopup_GeoRequirement);
+        EditText RequirementRadius = popupView.findViewById(R.id.NewEventPopup_GeoRequirement_Radius);
         EditText CriteriaInput = popupView.findViewById(R.id.NewEventPopup_Criteria);
+
 
 
         View RegistrationOpen = popupView.findViewById(R.id.RegistrationOpen);
@@ -210,6 +224,21 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Confirm",null)
                 .setNegativeButton("Cancel", null).show();
 
+        //Map location chooser.
+        LocationSelector.setOnClickListener(v -> {
+            LocationPickerDialog dialog = new LocationPickerDialog((lat, lon) -> {
+                // Save to your event builder
+                this.lat = lat;
+                this.lng = lon;
+                Toast.makeText(getContext(),
+                        "Location selected:\n" + lat + ", " + lon,
+                        Toast.LENGTH_SHORT).show();
+            });
+
+            dialog.show(getParentFragmentManager(), "locationPicker");
+        });
+
+
         //This allows not closing the dialog but refusing input
         NewEvent.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             //Using GregorianCalander to get date class, since Date from values is depreciated
@@ -232,14 +261,17 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
 
-
             //String inputs
             String EventName = NameInput.getText().toString().trim();
             String Description = DescriptionInput.getText().toString().trim();
-            String Location = LocationInput.getText().toString().trim();
             String Category = CategoryInput.getText().toString().trim();
             String Criteria = CriteriaInput.getText().toString().trim();
             String MaxEnt = MaxEntrantsInput.getText().toString().trim();
+            int Radius = Integer.parseInt(RequirementRadius.getText().toString().trim());
+            boolean RadiusRequirement = LocationRequirement.isChecked();
+
+            Log.d("Checkbox Test", Boolean.toString(RadiusRequirement));
+
 
 
             //Refuse empty title
@@ -253,8 +285,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                 return;
             }
             //Require Location
-            if (Location.isEmpty()){
-                WarningToast("Must set a Location!");
+            if (lat == -100 || lng == -100){
+                WarningToast("Must choose a location for the event!");
                 return;
             }
             //Require Category
@@ -269,17 +301,19 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
 
 
-            //Event(String EventName, Date RegistrationOpen, Date RegistrationClose, Date EventStart, Date EventEnd, String OrgID, String Description, String Critera, String Category, String QRCodeURL, int MaxEntrants) {
-            //
-
             //US 02.01.04 : Optional for unlimited
             Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,orgID,Description,Criteria,Category);
-            CreatedEvent.setLocation(Location);
+            CreatedEvent.setLocation(lng,lat);
 
+
+            CreatedEvent.setRegistrationRadiusEnabled(RadiusRequirement);
+            CreatedEvent.setRegisterableradius(Radius);
             //Optionals
             if (!MaxEnt.isBlank()){
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
             }
+
+
             // Generate QR code for the new event
             Bitmap qrCodeBitmap = CreatedEvent.generateQRCode();
             if (qrCodeBitmap != null) {
@@ -360,6 +394,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         TextView Criteria = popupView.findViewById(R.id.Organizer_EventPopup_Criteria);
         TextView Category = popupView.findViewById(R.id.Organizer_EventPopup_Category);
         TextView Location = popupView.findViewById(R.id.Organizer_EventPopup_EventLocation);
+        TextView Radius = popupView.findViewById(R.id.Organizer_EventPopup_Radius);
 
 
         ImageView QRCode = popupView.findViewById(R.id.Organizer_EventPopup_QR_Code);
@@ -377,7 +412,9 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
+        CheckBox locationRequirement = popupView.findViewById(R.id.Organizer_EventPopup_RadiusEnabled);
 
+        locationRequirement.setChecked(event.isRegistrationRadiusEnabled());
 
 
         //Hiding the end registration button if it is not needed
@@ -385,8 +422,6 @@ public class Organizer_UpcomingFragment extends Fragment {
             endRegButton.setVisibility(View.GONE);
             ((ViewGroup) endRegButton.getParent()).removeView(endRegButton);
         }
-
-
 
                                             //--    Setting Display Texts -- //
 
@@ -404,10 +439,13 @@ public class Organizer_UpcomingFragment extends Fragment {
         RunTime.setText(event.getEventStart().toString().concat(" - ").concat(event.getEventEnd().toString()));
 
         //Location
-        Location.setText(event.getLocation());
+        Location.setText(event.getLocationString());
+
+        Radius.setText(Double.toString(event.getRegisterableradius()).concat(" meters"));
 
         //Event Capacity: 12/40, 3/Unlimited, 0/30
         Capacity.setText((Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+
 
 
 
@@ -475,11 +513,6 @@ public class Organizer_UpcomingFragment extends Fragment {
 
 
 
-
-
-
-
-
         //-- Button Interactions -- //
 
 
@@ -514,7 +547,20 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle(event.getEventName())
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setOnDismissListener(dialog -> {EventListener.remove();})
+                .setOnDismissListener(dialog -> {EventListener.remove();
+                //Update Checkbox to server if needed.
+                if (locationRequirement.isChecked() != event.isRegistrationRadiusEnabled()){
+                    //Locale change
+                    event.setRegistrationRadiusEnabled(locationRequirement.isChecked());
+                    //Push to server
+                    HashMap<String,Object> Update = new HashMap<String,Object>();
+                    Update.put("registrationRadiusEnabled",event.isRegistrationRadiusEnabled());
+                    Data.updateEvent(event.getEventId(),Update,()->{},e -> {Log.d("Firebase Error","Error Pushing to Server: ".concat(e.toString()));
+                        //Put event back to normal if error occured on server.
+                        event.setRegistrationRadiusEnabled(locationRequirement.isChecked());
+                    });
+                }
+                })
                 .show();
 
         //Event Poster Buttons
@@ -929,5 +975,10 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     private void updateCapacityDisplay(TextView Capacity, Event event){
         Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
+    }
+
+    private void updateNewEventLocation(double lat, double lng){
+        this.lat = lat;
+        this.lng = lng;
     }
 }

@@ -12,12 +12,16 @@
             android:id="@+id/NewEventPopup_NameDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textColorHint="@color/darkmode_hint"
             android:hint="Event Title" />
 
         <EditText
             android:id="@+id/NewEventPopup_Description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textColorHint="@color/darkmode_hint"
             android:hint="Description"
             android:minLines="2"
             android:layout_marginTop="8dp"/>
@@ -26,6 +30,8 @@
             android:id="@+id/NewEventPopup_Criteria"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textColorHint="@color/darkmode_hint"
             android:hint="Criteria for Sign-up"
             android:layout_marginTop="8dp"/>
 
@@ -33,14 +39,35 @@
             android:id="@+id/NewEventPopup_Category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textColorHint="@color/darkmode_hint"
             android:hint="Category"
             android:layout_marginTop="8dp"/>
 
-        <EditText
+        <Button
             android:id="@+id/NewEventPopup_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Location"
+            android:textColor="@color/white"
+            android:text="Select Location"
+            android:layout_marginTop="8dp"/>
+
+        <CheckBox
+            android:id="@+id/NewEventPopup_GeoRequirement"
+            android:text="Restrict sign-up to radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/NewEventPopup_GeoRequirement_Radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Restriction Radius (meters)"
+            android:inputType="number"
+            android:textColor="@color/white"
+            android:textColorHint="@color/cardview_light_background"
             android:layout_marginTop="8dp"/>
 
         <TextView
@@ -48,7 +75,7 @@
             android:layout_height="wrap_content"
             android:text="Event Poster"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:layout_marginTop="12dp" />
 
@@ -56,6 +83,7 @@
             android:id="@+id/NewEventPopup_UploadPosterButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Upload Poster (Optional)"
             android:textAllCaps="false"
             android:textSize="16sp"
@@ -89,6 +117,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Registration End"
+            android:textColor="@color/white"
             android:layout_marginBottom="-20sp"/>
 
         <include
@@ -98,6 +127,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Event Start"
             android:layout_marginBottom="-20sp"/>
 
@@ -108,6 +138,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="Event End"
             android:layout_marginBottom="-20sp"/>
 
@@ -120,6 +151,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Capacity (optional)"
+            android:textColor="@color/white"
+            android:textColorHint="@color/darkmode_hint"
             android:inputType="number"
             android:layout_marginTop="10dp"/>
     </LinearLayout>

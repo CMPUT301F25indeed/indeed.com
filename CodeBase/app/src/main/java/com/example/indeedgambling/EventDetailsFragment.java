@@ -198,7 +198,7 @@ public class EventDetailsFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
         if (event.getLocation() != null)
-            loc.setText("Location: " + event.getLocation());
+            loc.setText("Location: " + event.getLocationString());
 
         if (event.getCategory() != null)
             category.setText("Category: " + event.getCategory());

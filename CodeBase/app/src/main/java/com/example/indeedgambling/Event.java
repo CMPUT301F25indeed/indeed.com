@@ -2,6 +2,8 @@ package com.example.indeedgambling;
 
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.util.Pair;
+
 import com.example.indeedgambling.QRCodeGenerator;
 
 import androidx.annotation.NonNull;
@@ -22,7 +24,10 @@ public class Event implements Serializable {
     private String description;
     private String organizerId; //Where are we getting the ID from, and how to we use to it refernce the organizer? Hashes are not unique.
     private String category;
-    private String location;
+    private double latitude;
+    private double longitude;
+    private boolean RegistrationRadiusEnabled;
+    private double Registerableradius;
     private Date eventStart;
     private Date eventEnd;
     private Date registrationStart;
@@ -94,8 +99,6 @@ public class Event implements Serializable {
         //qrCodeURL = QRCodeURL;
 
         this.status = getStatus();
-
-        this.location = Location;
 
         //Event ID : Hash of OrgIdEventnameEventstart
         this.eventId = new HashUtil().sha256(organizerId.concat(eventName).concat(EventStart.toString()));
@@ -351,20 +354,6 @@ public class Event implements Serializable {
         this.category = category;
     }
 
-    /** Returns the Event's saved location as a string
-     * @return Location of event
-     */
-    public String getLocation() {
-        return location;
-    }
-
-    /** Overwrites the event's location with the arguments.
-     * @param location New location for the event
-     */
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     /** Returns the URL where the Image is saved.
      * @return String for the URL
      */
@@ -531,7 +520,39 @@ public class Event implements Serializable {
         this.lostList = lostList;
     }
 
-//---------------------------------------------------- Helpers ---------------------------//
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getRegisterableradius() {
+        return Registerableradius;
+    }
+
+    public void setRegisterableradius(double registerableradius) {
+        Registerableradius = registerableradius;
+    }
+
+    public boolean isRegistrationRadiusEnabled() {
+        return RegistrationRadiusEnabled;
+    }
+
+    public void setRegistrationRadiusEnabled(boolean registrationRadiusEnabled) {
+        RegistrationRadiusEnabled = registrationRadiusEnabled;
+    }
+
+    //---------------------------------------------------- Helpers ---------------------------//
     /** Helper function that checks if RIGHT NOW is before reg period opens
      * @return True if before Reg Open, false otherwise
      */
@@ -555,6 +576,7 @@ public class Event implements Serializable {
     /** Help function that will return the meaning of the max. 0 => unlimited, normal otherwise.
      * @return String of Max Waiting Entrants. Returns "Unlimited" instead of 0.
      */
+    @com.google.firebase.firestore.Exclude //Prevents adding the result of the string to Firebase
     public String getMaxWaitingEntrantsString(){
         if (maxWaitingEntrants == 0){
             return "Unlimited";
@@ -599,15 +621,25 @@ public class Event implements Serializable {
      */
     public boolean waitList_registrable() {
         return (!this.atCapacity()) && this.RegistrationOpen();
-
     }
 
-    /** Returns if the event has a defined location
-     * May be removed if locations are mandatory
-     * @return True if Location defined.
+    /** Also checks the locational requirements for waitlisting
+     * @param latitude
+     * @param longitude
+     * @return True if possible, False otherwise
      */
-    public boolean hasLocation(){
-        return !(location == null);
+    public boolean waitlist_registerable(double latitude, double longitude) {
+        return waitList_registrable() && coordinates_in_range(latitude,longitude);
+    }
+
+    /** Also checks if there is an imposed range
+     * @return
+     */
+    public boolean coordinates_in_range(double latitude, double longitude) {
+        //if (!range){
+        //  return true;
+        //}
+        return (Math.abs(this.latitude - latitude) <= this.Registerableradius) && Math.abs(this.longitude - longitude) <= this.Registerableradius;
     }
 
     /** Moves a random selection of entrants from the waitlist/lostlist to the invited list. DOES NOT TALK TO SERVER DIRECTLY
@@ -670,7 +702,22 @@ public class Event implements Serializable {
         if (registrationEnd.after(new Date())){
             this.registrationEnd = new Date();
         }
+    }
 
+    public void setLocation(double lat, double lng){
+        longitude = lng;
+        latitude = lat;
+    }
+
+    @com.google.firebase.firestore.Exclude
+    public Pair<Double,Double> getLocation(){
+        return new Pair<>(latitude,longitude);
+    }
+
+
+    @com.google.firebase.firestore.Exclude
+    public String getLocationString(){
+        return Double.toString(latitude).concat(", ".concat(Double.toString(longitude)));
     }
 
 
