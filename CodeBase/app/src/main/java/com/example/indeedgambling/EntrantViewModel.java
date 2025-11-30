@@ -27,6 +27,19 @@ public class EntrantViewModel extends ViewModel {
         entrant.setValue(e);
     }
 
+    /**
+     * Clears entrant information from local ViewModel.
+     *
+     * Used during logout to ensure:
+     * - No user data is retained
+     * - App returns to a clean state
+     * - Auto-login does not occur unless deviceId is still set in Firestore
+     */
+    public void clearEntrant() {
+        entrant.setValue(null);
+    }
+
+
     /** @return Entrant object for direct access*/
     public Entrant getCurrentEntrant() {
         return entrant.getValue();

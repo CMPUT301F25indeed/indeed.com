@@ -1,5 +1,8 @@
 package com.example.indeedgambling;
 
+
+
+
 import android.net.Uri;
 import android.util.Log;
 
@@ -127,6 +130,33 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Profile CRUD
     // -------------------------
+    /**
+     * Finds a user profile in Firestore by matching the stored deviceId.
+     *
+     * Supports device-based automatic login by checking whether this device
+     * is linked to any existing profile.
+     *
+     * Returns:
+     * - Matching Profile object if found
+     * - null if no linked deviceId exists
+     */
+    public void findProfileByDeviceId(String deviceId,
+                                      Consumer<Profile> onResult,
+                                      Consumer<Exception> onError) {
+
+        PROFILES.whereEqualTo("deviceId", deviceId)
+                .get()
+                .addOnSuccessListener(q -> {
+                    if (q.isEmpty()) {
+                        onResult.accept(null);
+                    } else {
+                        Profile p = q.getDocuments().get(0).toObject(Profile.class);
+                        onResult.accept(p);
+                    }
+                })
+                .addOnFailureListener(onError::accept);
+    }
+
 
     /**
      * Creates or updates a profile in Firestore.
@@ -185,11 +215,41 @@ public class FirebaseViewModel extends ViewModel {
      * @param profileId ID of profile
      * @param updates   fields to update
      */
-    public void updateProfile(String profileId, Map<String, Object> updates, Runnable onOk, Consumer<Exception> onErr) {
-        PROFILES.document(profileId).update(updates)
-                .addOnSuccessListener(v -> onOk.run())
-                .addOnFailureListener(onErr::accept);
+    /**
+     * Updates fields of a profile document in Firestore.
+     *
+     * @param profileId ID of the profile to update
+     * @param updates   Key–value pairs to update in Firestore
+     * @param onSuccess Callback executed on success
+     * @param onError   Callback executed on failure
+     */
+    public void updateProfile(String profileId,
+                              Map<String, Object> updates,
+                              Runnable onSuccess,
+                              java.util.function.Consumer<Exception> onError) {
+
+        if (profileId == null || updates == null) {
+            if (onError != null) {
+                onError.accept(new Exception("Null arguments"));
+            }
+            return;
+        }
+
+        db.collection("profiles")
+                .document(profileId)
+                .update(updates)
+                .addOnSuccessListener(unused -> {
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (onError != null) {
+                        onError.accept(e);
+                    }
+                });
     }
+
 
     /**
      * Loads a profile based on email+password hash
@@ -450,6 +510,25 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Invitations / accept
     // -------------------------
+    public void getInvitationStatus(String eventId,
+                                    String entrantId,
+                                    Consumer<String> onResult,
+                                    Consumer<Exception> onErr) {
+
+        String docId = eventId + "_" + entrantId;
+
+        INVITES.document(docId).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        onResult.accept("none");
+                        return;
+                    }
+                    String status = doc.getString("status");
+                    if (status == null) status = "none";
+                    onResult.accept(status);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
 
 
     /**

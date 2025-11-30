@@ -59,25 +59,39 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         titleView.setText(name);
 
         // ----- Status text -----
-        String listName = event.whichList(entrantId); // "waiting", "invited", "accepted", "cancelled", maybe null
+        // whichList may return things like: "waitlist", "waiting", "waitingList",
+        // "invited", "accepted", "cancelled", or maybe null.
+        String listName = event.whichList(entrantId);
         String statusText;
-        switch (listName) {
-            case "waiting":
-                statusText = "On waitlist";
-                break;
-            case "invited":
-                statusText = "Invited – tap to respond";
-                break;
-            case "accepted":
-                statusText = "Accepted";
-                break;
-            case "cancelled":
-                statusText = "Cancelled";
-                break;
-            default:
-                statusText = "Not active";
-                break;
+
+        if (listName == null) {
+            statusText = "Not active";
+        } else {
+            switch (listName) {
+                case "waitlist":
+                case "waiting":
+                case "waitingList":
+                    statusText = "On waitlist";
+                    break;
+
+                case "invited":
+                    statusText = "Invited – tap to respond";
+                    break;
+
+                case "accepted":
+                    statusText = "Accepted";
+                    break;
+
+                case "cancelled":
+                    statusText = "Cancelled";
+                    break;
+
+                default:
+                    statusText = "Not active";
+                    break;
+            }
         }
+
         statusView.setText(statusText);
 
         // ----- Image placeholder (rounded grey background) -----
@@ -98,7 +112,7 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                 .document(imageDocId)
                 .get()
                 .addOnSuccessListener((DocumentSnapshot doc) -> {
-                    if (!doc.exists()) return;
+                    if (doc == null || !doc.exists()) return;
 
                     // still same row?
                     Object tag = imageView.getTag();
