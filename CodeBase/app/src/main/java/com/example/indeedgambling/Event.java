@@ -18,11 +18,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+/** Represents an event in spacetime that entrants can sign up to, and can be invited to.
+ */
 public class Event implements Serializable {
     private String eventId;
     private String eventName;
     private String description;
-    private String organizerId; //Where are we getting the ID from, and how to we use to it refernce the organizer? Hashes are not unique.
+    private String organizerId;
     private String category;
     private double latitude;
     private double longitude;
@@ -525,6 +527,7 @@ public class Event implements Serializable {
     }
 
     public void setLatitude(double latitude) {
+        checkLatitudeValid(latitude);
         this.latitude = latitude;
     }
 
@@ -533,6 +536,7 @@ public class Event implements Serializable {
     }
 
     public void setLongitude(double longitude) {
+        checkLongitudeValid(longitude);
         this.longitude = longitude;
     }
 
@@ -540,8 +544,11 @@ public class Event implements Serializable {
         return Registerableradius;
     }
 
+    /** Updates the radius, in meters. Uses absolute values for arguments
+     * @param registerableradius Distance in Meters to allow for signup.
+     */
     public void setRegisterableradius(double registerableradius) {
-        Registerableradius = registerableradius;
+        Registerableradius = Math.abs(registerableradius);
     }
 
     public boolean isRegistrationRadiusEnabled() {
@@ -632,14 +639,33 @@ public class Event implements Serializable {
         return waitList_registrable() && coordinates_in_range(latitude,longitude);
     }
 
-    /** Also checks if there is an imposed range
-     * @return
+    /** Checks if the passed coordinates are in range using Haversin formula
+     * @param latitude Must be in [-90, +90] degrees
+     * @param longitude Must be in [0, 180] degrees
+     * @return True if coordinates in range, or if the range requirement is disabled.
      */
     public boolean coordinates_in_range(double latitude, double longitude) {
-        //if (!range){
-        //  return true;
-        //}
-        return (Math.abs(this.latitude - latitude) <= this.Registerableradius) && Math.abs(this.longitude - longitude) <= this.Registerableradius;
+        //If there is no enforcement on radius, it cannot be out of range
+        if (!isRegistrationRadiusEnabled()){
+          return true;
+        }
+
+        //Throw error if coordinates not valid
+        checkLatitudeValid(latitude);
+        checkLongitudeValid(longitude);
+
+        final double R = 6371000; // Earth radius in meters
+
+        double dLat = Math.toRadians(latitude - this.latitude);
+        double dLon = Math.toRadians(longitude - this.longitude);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(this.latitude)) * Math.cos(Math.toRadians(latitude)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return distance <= Registerableradius;
     }
 
     /** Moves a random selection of entrants from the waitlist/lostlist to the invited list. DOES NOT TALK TO SERVER DIRECTLY
@@ -682,6 +708,7 @@ public class Event implements Serializable {
     }
 
     /** Attempts to add a ID string to the waitingList. Will not if at capacity. DOES NOT INTERACT WITH SERVER
+     *  Does NOT check coordinates
      * @param entrantID ID to try to add
      * @return TRUE if added, FALSE if not.
      */
@@ -694,7 +721,6 @@ public class Event implements Serializable {
     }
 
     /** Ends registration now. Does not do any checks for goodness or graciousness.
-     *
      */
     public void endRegistration(){
         //Checks if registration ends in the past. Only updates if it would end in the future.
@@ -704,7 +730,14 @@ public class Event implements Serializable {
         }
     }
 
+    /** Updates an Events coordinates in degrees to the passed location.
+     * @param lat Must be in [-90, +90] degrees
+     * @param lng Must be in [0, 180] degrees
+     */
     public void setLocation(double lat, double lng){
+        //Throw error if coordinates not valid
+        checkLatitudeValid(lat);
+        checkLongitudeValid(lng);
         longitude = lng;
         latitude = lat;
     }
@@ -718,6 +751,26 @@ public class Event implements Serializable {
     @com.google.firebase.firestore.Exclude
     public String getLocationString(){
         return Double.toString(latitude).concat(", ".concat(Double.toString(longitude)));
+    }
+
+    /** Argument validity helper
+     * Throws an argument if latitude is out of range
+     */
+    private void checkLatitudeValid(double lat){
+        if (Math.abs(lat) > 90){
+            throw new IllegalArgumentException("Latitude must be between -90 and +90 degrees!");
+        }
+    }
+
+    /** ARgument validity helper
+     * Throws an argument if longitude is out of range
+     *
+     * @param lng
+     */
+    private void checkLongitudeValid(double lng){
+        if (lng > 180 || lng < 0){
+            throw new IllegalArgumentException("Longitude must be between 0 and 180 degrees!");
+        }
     }
 
 

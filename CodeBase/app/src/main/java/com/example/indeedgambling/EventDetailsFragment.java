@@ -255,7 +255,7 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-        if (event.tryaddtoWaitingList(entrantId)) {
+        if (!event.tryaddtoWaitingList(entrantId)) {
             Toast.makeText(getContext(), "Waitlist is FULL!", Toast.LENGTH_SHORT).show();
             return;
         }
