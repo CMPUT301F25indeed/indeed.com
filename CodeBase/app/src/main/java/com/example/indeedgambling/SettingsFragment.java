@@ -376,7 +376,7 @@ public class SettingsFragment extends Fragment {
 
             if (key.equals("lightModeEnabled")) {
                 initialLightMode = (Boolean) updates.get(key);
-                saveAndApplyTheme(initialLightMode);
+                //saveAndApplyTheme(initialLightMode);
             }
 
             if (key.equals("profileImageUrl")) {

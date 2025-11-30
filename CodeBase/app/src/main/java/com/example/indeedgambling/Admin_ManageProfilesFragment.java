@@ -83,7 +83,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
         });
 
         // Recycler setup
-        adapter = new ProfileAdapter();
+        adapter = new ProfileAdapter(fvm);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 

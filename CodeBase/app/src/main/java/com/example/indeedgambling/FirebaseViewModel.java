@@ -1400,6 +1400,58 @@ public class FirebaseViewModel extends ViewModel {
     }
 
 
+    /**
+     * Deletes a notification if all its fields match exactly.
+     * Null values are considered equal to nulls in Firestore document.
+     *
+     * @param n Notification to delete
+     */
+    public void deleteNotification(Notification n) {
+        if (n == null) return;
+
+        NOTIFS.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        boolean match = matchesNotification(doc, n);
+                        if (match) {
+                            NOTIFS.document(doc.getId())
+                                    .delete()
+                                    .addOnSuccessListener(v -> {
+                                        // Optional: log or notify deletion success
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Optional: log or handle failure
+                                    });
+                            break; // delete only the first matching document
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Optional: handle query failure
+                });
+    }
+
+    /**
+     * Compares a Firestore document to a Notification object, field by field.
+     * Nulls are treated as equal.
+     */
+    private boolean matchesNotification(DocumentSnapshot doc, Notification n) {
+        return equalsNullable(doc.getString("senderId"), n.getSenderId())
+                && equalsNullable(doc.getString("receiverId"), n.getReceiverId())
+                && equalsNullable(doc.getString("eventId"), n.getEventId())
+                && equalsNullable(doc.getString("type"), n.getType())
+                && equalsNullable(doc.getString("message"), n.getMessage())
+                && equalsNullable(doc.getDate("timestamp"), n.getTimestamp())
+                && equalsNullable(doc.getString("senderEmail"), n.getSenderEmail())
+                && equalsNullable(doc.getString("eventName"), n.getEventName());
+    }
+
+    /** Helper for null-safe comparison */
+    private <T> boolean equalsNullable(T a, T b) {
+        return (a == null && b == null) || (a != null && a.equals(b));
+    }
+
+
 
 }
 

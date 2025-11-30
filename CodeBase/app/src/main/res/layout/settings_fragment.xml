@@ -15,7 +15,7 @@
         android:paddingEnd="16dp"
         android:paddingBottom="16dp">
 
-        <!-- BLUE BORDER BACK BUTTON -->
+        <!-- BACK BUTTON -->
         <Button
             android:id="@+id/back_button"
             android:layout_width="80dp"
@@ -28,7 +28,7 @@
             android:textColor="#FFFFFF"
             android:textSize="14sp" />
 
-        <!-- TITLE CENTERED -->
+        <!-- TITLE CENTER -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,26 +40,34 @@
             android:textSize="26sp" />
     </RelativeLayout>
 
-    <!-- ROLE TEXT -->
+    <!-- NEW HEADER TEXT -->
     <TextView
         android:id="@+id/role_text_profile"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="8dp"
         android:fontFamily="@font/opensans"
-        android:text="Role: User"
+        android:text="Change your destiny"
         android:textColor="#BBBBBB"
         android:textSize="16sp" />
 
-    <!-- MAIN CONTENT SCROLLABLE -->
+    <!-- DIVIDER UNDER HEADER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- MAIN CONTENT SCROLLING -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- THIS IS THE FIX: A single LinearLayout that contains all the scrollable content. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,16 +75,15 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
-            <!-- PROFILE PHOTO SECTION -->
-            <!-- PROFILE PHOTO SECTION -->
+            <!-- PROFILE IMAGE + EDIT -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:paddingVertical="20dp">
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp">
 
-                <!-- Circular Profile Image -->
                 <ImageView
                     android:id="@+id/pfp_image"
                     android:layout_width="199dp"
@@ -86,7 +93,6 @@
                     android:clipToOutline="true"
                     android:scaleType="centerCrop" />
 
-                <!-- Edit Button under image -->
                 <Button
                     android:id="@+id/pfp_edit_button"
                     android:layout_width="wrap_content"
@@ -101,12 +107,11 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-
             <!-- NAME -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="8dp"
                 android:fontFamily="@font/opensans"
                 android:text="Name"
                 android:textColor="#FFFFFF"
@@ -127,7 +132,7 @@
 
             <!-- EMAIL -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:fontFamily="@font/opensans"
@@ -151,7 +156,7 @@
 
             <!-- PHONE -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:fontFamily="@font/opensans"
@@ -173,23 +178,26 @@
                 android:textColorHint="#777777"
                 android:textSize="16sp" />
 
-            <!-- SWITCHES -->
+            <!-- LIGHT MODE SWITCH (hidden at startup) -->
             <LinearLayout
                 android:id="@+id/light_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="20dp">
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
 
+                <!-- When using weight in a horizontal layout, width must be 0dp -->
                 <TextView
-                    android:layout_width="328dp"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:fontFamily="@font/opensans"
                     android:text="Light Mode"
                     android:textColor="#FFFFFF"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:fontFamily="@font/opensans" />
 
                 <Switch
                     android:id="@+id/settings_lightmode_switch"
@@ -197,22 +205,25 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+            <!-- NOTIFICATIONS SWITCH (hidden at startup) -->
             <LinearLayout
                 android:id="@+id/noti_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="20dp">
+                android:gravity="center_vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:fontFamily="@font/opensans"
                     android:text="Notifications"
                     android:textColor="#FFFFFF"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:fontFamily="@font/opensans" />
 
                 <Switch
                     android:id="@+id/settings_notif_switch"
@@ -220,51 +231,40 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-        </LinearLayout>
-        <!-- End of the single child wrapper -->
+            <!-- DELETE BUTTON MOVED INSIDE SCROLL (hidden at startup) -->
+            <Button
+                android:id="@+id/delete_profile_button"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_button_danger_border"
+                android:backgroundTint="@null"
+                android:text="Delete Profile"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:fontFamily="@font/opensans"
+                android:visibility="gone" />
 
+            <!-- bottom spacer so save button isn't glued to content -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="12dp" />
+
+        </LinearLayout>
     </ScrollView>
 
-    <!-- STATIC BOTTOM BUTTONS (NOT SCROLLING) -->
-    <LinearLayout
+    <!-- STATIC SAVE BUTTON AT BOTTOM -->
+    <Button
+        android:id="@+id/save_settings_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <!-- SAVE (Primary Blue) -->
-        <Button
-            android:id="@+id/save_settings_button"
-            android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:background="@drawable/bg_button_primary"
-            android:text="Save Changes"
-            android:textColor="#FFFFFF"
-            android:textAllCaps="false"
-            android:textSize="16sp"
-            android:fontFamily="@font/opensans"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp" />
-
-        <Button
-            android:id="@+id/delete_profile_button"
-            android:layout_width="335dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_button_danger_border"
-            android:backgroundTint="@null"
-            android:fontFamily="@font/opensans"
-            android:paddingLeft="40dp"
-            android:paddingRight="40dp"
-            android:text="Delete Profile"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:backgroundTint="@null" />
-
-
-
-    </LinearLayout>
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_button_primary"
+        android:text="Save Changes"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans" />
 
 </LinearLayout>
