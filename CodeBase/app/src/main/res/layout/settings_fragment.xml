@@ -18,8 +18,10 @@
         <!-- BACK BUTTON -->
         <Button
             android:id="@+id/back_button"
-            android:layout_width="80dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:background="@drawable/bg_button_primary"
             android:backgroundTint="@null"
             android:fontFamily="@font/opensans"
@@ -28,12 +30,13 @@
             android:textColor="#FFFFFF"
             android:textSize="14sp" />
 
+
         <!-- TITLE CENTER -->
         <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
+            android:layout_centerInParent="true"
             android:fontFamily="@font/ibmplexserif_semibold"
             android:text="Settings"
             android:textColor="#FFFFFF"
@@ -45,11 +48,12 @@
         android:id="@+id/role_text_profile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:fontFamily="@font/opensans"
+        android:gravity="center"
         android:text="Change your destiny"
+        android:textAlignment="center"
         android:textColor="#BBBBBB"
         android:textSize="16sp" />
 
@@ -178,32 +182,7 @@
                 android:textColorHint="#777777"
                 android:textSize="16sp" />
 
-            <!-- LIGHT MODE SWITCH (hidden at startup) -->
-            <LinearLayout
-                android:id="@+id/light_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:visibility="gone">
 
-                <!-- When using weight in a horizontal layout, width must be 0dp -->
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Light Mode"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/opensans" />
-
-                <Switch
-                    android:id="@+id/settings_lightmode_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
 
             <!-- NOTIFICATIONS SWITCH (hidden at startup) -->
             <LinearLayout
@@ -239,6 +218,8 @@
                 android:layout_marginTop="12dp"
                 android:background="@drawable/bg_button_danger_border"
                 android:backgroundTint="@null"
+                android:foreground="@null"
+                app:backgroundTint="@null"
                 android:text="Delete Profile"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"

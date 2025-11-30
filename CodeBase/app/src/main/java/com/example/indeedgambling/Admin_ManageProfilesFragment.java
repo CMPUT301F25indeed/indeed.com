@@ -106,40 +106,60 @@ public class Admin_ManageProfilesFragment extends Fragment {
 
         // Delete profile logic
         adapter.setOnDeleteClickListener(profile -> {
-            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Profile")
-                    .setMessage("Are you sure you want to delete this profile?\n\n" + profile.getEmail())
-                    .setPositiveButton("Yes", (dialog, which) -> {
 
-                        // ENTRANT CLEANUP
-                        if (profile.getRole().equalsIgnoreCase("entrant")) {
-                            fvm.deleteProfileAndCleanOpenEvents(
-                                    profile,
-                                    () -> Toast.makeText(requireContext(), "Entrant removed from all events", Toast.LENGTH_SHORT).show(),
-                                    e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                            );
-                            return;
-                        }
+            View dialogView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_confirm, null);
 
-                        // ORGANIZER CLEANUP
-                        if (profile.getRole().equalsIgnoreCase("organizer")) {
-                            fvm.deleteAllOrganizerEvents(
-                                    profile.getProfileId(),
-                                    () -> {
-                                        fvm.deleteProfile(profile.getProfileId());
-                                        Toast.makeText(requireContext(), "Organizer and all their events deleted", Toast.LENGTH_SHORT).show();
-                                    },
-                                    e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                            );
-                            return;
-                        }
+            TextView title = dialogView.findViewById(R.id.dialog_title);
+            TextView message = dialogView.findViewById(R.id.dialog_message);
+            Button cancelBtn = dialogView.findViewById(R.id.dialog_cancel);
+            Button yesBtn = dialogView.findViewById(R.id.dialog_yes);
 
-                        // DEFAULT → simple delete
-                        fvm.deleteProfile(profile.getProfileId());
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
+            // Set dynamic message
+            message.setText("Are you sure you want to delete " + profile.getEmail() + "?");
+
+            androidx.appcompat.app.AlertDialog dialog =
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setView(dialogView)
+                            .create();
+
+            cancelBtn.setOnClickListener(v -> dialog.dismiss());
+
+            yesBtn.setOnClickListener(v -> {
+
+                // ENTRANT CLEANUP
+                if (profile.getRole().equalsIgnoreCase("entrant")) {
+                    fvm.deleteProfileAndCleanOpenEvents(
+                            profile,
+                            () -> Toast.makeText(requireContext(), "Entrant removed from all events", Toast.LENGTH_SHORT).show(),
+                            e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                    );
+                    dialog.dismiss();
+                    return;
+                }
+
+                // ORGANIZER CLEANUP
+                if (profile.getRole().equalsIgnoreCase("organizer")) {
+                    fvm.deleteAllOrganizerEvents(
+                            profile.getProfileId(),
+                            () -> {
+                                fvm.deleteProfile(profile.getProfileId());
+                                Toast.makeText(requireContext(), "Organizer and all their events deleted", Toast.LENGTH_SHORT).show();
+                            },
+                            e -> Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                    );
+                    dialog.dismiss();
+                    return;
+                }
+
+                // DEFAULT delete
+                fvm.deleteProfile(profile.getProfileId());
+                dialog.dismiss();
+            });
+
+            dialog.show();
         });
+
 
         // Search
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

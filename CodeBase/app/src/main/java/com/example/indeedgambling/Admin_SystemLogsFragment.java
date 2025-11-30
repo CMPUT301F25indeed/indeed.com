@@ -93,12 +93,14 @@ public class Admin_SystemLogsFragment extends Fragment {
         TextView senderView  = dialogView.findViewById(R.id.dialog_noti_sender);
         TextView messageView = dialogView.findViewById(R.id.dialog_noti_message);
         TextView timeView    = dialogView.findViewById(R.id.dialog_noti_time);
+        TextView typeView    = dialogView.findViewById(R.id.dialog_noti_type);
         Button okButton      = dialogView.findViewById(R.id.dialog_noti_ok);
 
         eventView.setText(notification.getEventName() != null ? notification.getEventName() : "N/A");
         senderView.setText(notification.getSenderEmail() != null ? notification.getSenderEmail() : "system");
         messageView.setText(notification.getMessage() != null ? notification.getMessage() : "");
         timeView.setText(formatTimestamp(notification.getTimestamp()));
+        typeView.setText(notification.getType() != null ? notification.getType() : "N/A");
 
         androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setView(dialogView)
@@ -119,12 +121,6 @@ public class Admin_SystemLogsFragment extends Fragment {
         long hours = mins / 60;
         long days = hours / 24;
 
-        if (mins < 60)
-            return mins + " min ago";
-        if (hours < 24)
-            return hours + " hours ago";
-        if (days < 7)
-            return days + " days ago";
 
         return new java.text.SimpleDateFormat("MMM d, yyyy • h:mm a", java.util.Locale.getDefault()).format(date);
     }

@@ -74,6 +74,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="20dp"
         android:padding="12dp" />
 
     <!-- FIXED BOTTOM BUTTON -->

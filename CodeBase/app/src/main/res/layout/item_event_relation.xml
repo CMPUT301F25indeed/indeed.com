@@ -23,6 +23,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sample Event Name"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"

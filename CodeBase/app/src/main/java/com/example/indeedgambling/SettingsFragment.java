@@ -51,8 +51,8 @@ public class SettingsFragment extends Fragment {
 
     private EditText nameEdit, emailEdit, phoneEdit;
 
-    private boolean initialNotifications, initialLightMode;
-    private Switch lightModeSwitch, notificationsSwitch;
+    private boolean initialNotifications;
+    private Switch notificationsSwitch;
     private ImageView profileImage;
 
     private ActivityResultLauncher<String> imagePickerLauncher;
@@ -100,11 +100,12 @@ public class SettingsFragment extends Fragment {
         emailEdit = view.findViewById(R.id.settings_email);
         phoneEdit = view.findViewById(R.id.settings_phone);
 
-        lightModeSwitch = view.findViewById(R.id.settings_lightmode_switch);
         notificationsSwitch = view.findViewById(R.id.settings_notif_switch);
 
         Button deleteProfileButton = view.findViewById(R.id.delete_profile_button);
         Button saveButton = view.findViewById(R.id.save_settings_button);
+
+        LinearLayout myLayout = view.findViewById(R.id.noti_layout);
 
         // load profile data
         fvm.getProfileById(profileID, profile -> {
@@ -120,18 +121,18 @@ public class SettingsFragment extends Fragment {
             // hide delete + notifications for non-entrant
             if (!role.equals("entrant")) {
                 deleteProfileButton.setVisibility(View.GONE);
-                LinearLayout myLayout = view.findViewById(R.id.noti_layout);
                 myLayout.setVisibility(View.GONE);
+            } else{
+                deleteProfileButton.setVisibility(View.VISIBLE);
+                myLayout.setVisibility(View.VISIBLE);
+
             }
 
             initialNotifications = Boolean.TRUE.equals(profile.isNotificationsEnabled());
-            initialLightMode = Boolean.TRUE.equals(profile.isLightModeEnabled());
 
             notificationsSwitch.setChecked(initialNotifications);
-            lightModeSwitch.setChecked(initialLightMode);
 
             updateSwitchColor(notificationsSwitch, initialNotifications);
-            updateSwitchColor(lightModeSwitch, initialLightMode);
 
             // ----- NEW: load profile image using Base64 from /images -----
             imageUrl = profile.getProfileImageUrl(); // now stores image doc id
@@ -174,9 +175,7 @@ public class SettingsFragment extends Fragment {
             updateSwitchColor(notificationsSwitch, isChecked);
         });
 
-        lightModeSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
-            updateSwitchColor(lightModeSwitch, isChecked);
-        });
+
 
         deleteProfileButton.setOnClickListener(v -> {
             if (!role.equals("entrant")) return;
@@ -207,19 +206,7 @@ public class SettingsFragment extends Fragment {
         saveButton.setOnClickListener(v -> saveProfileChanges());
 
         backButton.setOnClickListener(v -> {
-            NavController nav = NavHostFragment.findNavController(this);
-
-            if (role.equals("entrant")) {
-                nav.navigate(R.id.action_settingsFragment_to_entrantHomeFragment);
-            }
-
-            if (role.equals("organizer")) {
-                nav.navigate(R.id.action_settingsFragment_to_organizerHomeFragment);
-            }
-
-            if (role.equals("admin")) {
-                nav.navigate(R.id.action_settingsFragment_to_adminHomeFragment);
-            }
+            NavHostFragment.findNavController(this).navigateUp();
         });
 
         return view;
@@ -240,7 +227,6 @@ public class SettingsFragment extends Fragment {
         String newPhone = phoneEdit.getText().toString().trim();
 
         boolean newNotifications = notificationsSwitch.isChecked();
-        boolean newLightMode = lightModeSwitch.isChecked();
 
         if (newName.isEmpty()) {
             nameEdit.setError("Name required");
@@ -266,7 +252,6 @@ public class SettingsFragment extends Fragment {
         if (!email.equals(newEmail)) updates.put("email", newEmail);
         if (!phone.equals(newPhone)) updates.put("phone", newPhone);
         if (newNotifications != initialNotifications) updates.put("notificationsEnabled", newNotifications);
-        if (newLightMode != initialLightMode) updates.put("lightModeEnabled", newLightMode);
 
         // Check email first
         fvm.checkEmailExists(newEmail, exists -> {
@@ -374,10 +359,6 @@ public class SettingsFragment extends Fragment {
                 initialNotifications = (Boolean) updates.get(key);
             }
 
-            if (key.equals("lightModeEnabled")) {
-                initialLightMode = (Boolean) updates.get(key);
-                //saveAndApplyTheme(initialLightMode);
-            }
 
             if (key.equals("profileImageUrl")) {
                 imageUrl = (String) updates.get(key);
@@ -385,48 +366,4 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    private void saveAndApplyTheme(boolean isLightMode) {
-        int themeMode = isLightMode ?
-                AppCompatDelegate.MODE_NIGHT_NO :
-                AppCompatDelegate.MODE_NIGHT_YES;
-
-        SharedPreferences prefs = requireActivity().getSharedPreferences("theme_prefs", Context.MODE_PRIVATE);
-        prefs.edit().putInt("theme_mode", themeMode).apply();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            try {
-                if (getActivity() == null || getActivity().isFinishing() || getActivity().isDestroyed()) {
-                    Log.d("ThemeDebug", "Activity not available, theme preference saved for next launch");
-                    return;
-                }
-
-                AppCompatDelegate.setDefaultNightMode(themeMode);
-                Toast.makeText(requireContext(), "Theme updated successfully!", Toast.LENGTH_SHORT).show();
-
-            } catch (Exception e) {
-                Log.e("ThemeDebug", "Theme application failed: " + e.getMessage());
-                Toast.makeText(requireContext(), "Theme saved - changes apply on restart", Toast.LENGTH_SHORT).show();
-            }
-        }, 1000);
-    }
-
-    // (old helper kept, but no longer used directly for the new flow)
-    private void useProfileImage(Uri uri) {
-        fvm.uploadProfilePicture(profileID, uri,
-                downloadUrl -> {
-
-                    profileImage = requireView().findViewById(R.id.pfp_image);
-
-                    Glide.with(requireContext())
-                            .load(downloadUrl)
-                            //.placeholder(R.drawable.default_pfp)
-                            .into(profileImage);
-
-                    fvm.updateProfilePicture(profileID, downloadUrl,
-                            () -> {}, err -> err.printStackTrace());
-                },
-                exception -> {
-                    exception.printStackTrace();
-                });
-    }
 }
