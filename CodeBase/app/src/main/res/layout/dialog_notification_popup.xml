@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:padding="0dp"
+    android:background="@color/slight_bright_black">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@color/slight_bright_black">
+
+        <!-- Notification Title -->
+        <TextView
+            android:id="@+id/dialog_noti_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notification Details"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:paddingBottom="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/indeed_color"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Event -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event:"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/dialog_noti_event"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:paddingBottom="12dp"/>
+
+        <!-- Sender -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="From:"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/dialog_noti_sender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:paddingBottom="12dp"/>
+
+        <!-- Message -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Message:"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/dialog_noti_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:paddingBottom="12dp"/>
+
+        <!-- Type -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Type:"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/dialog_noti_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:paddingBottom="16dp"/>
+
+        <!-- Time -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Time:"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/dialog_noti_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:paddingBottom="16dp"/>
+
+        <!-- OK Button -->
+        <Button
+            android:id="@+id/dialog_noti_ok"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="OK"
+            android:textColor="@color/indeed_color"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="8dp"/>
+    </LinearLayout>
+</ScrollView>

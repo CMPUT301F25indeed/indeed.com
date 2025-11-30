@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //applySavedTheme();
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -40,9 +39,4 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
-//    private void applySavedTheme() {
-//        SharedPreferences prefs = getSharedPreferences("theme_prefs", MODE_PRIVATE);
-//        int themeMode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-//        AppCompatDelegate.setDefaultNightMode(themeMode);
-//    }
 }

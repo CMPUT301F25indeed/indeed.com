@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,17 +20,28 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
 
     private List<Notification> notifications = new ArrayList<>();
     private OnItemClickListener itemClickListener;
+    private OnRemoveClickListener removeClickListener;
 
+    /** Click for item (optional) */
     public interface OnItemClickListener {
         void onItemClick(Notification n);
+    }
+
+    /** Click for Remove button */
+    public interface OnRemoveClickListener {
+        void onRemoveClick(Notification n);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.itemClickListener = listener;
     }
 
+    public void setOnRemoveClickListener(OnRemoveClickListener listener) {
+        this.removeClickListener = listener;
+    }
+
     public void setNotifications(List<Notification> list) {
-        this.notifications = list;
+        this.notifications = list != null ? list : new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -45,26 +57,26 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
     public void onBindViewHolder(@NonNull NotiViewHolder holder, int position) {
         Notification n = notifications.get(position);
 
-        // Timestamp
-        holder.timestamp.setText(formatTimestamp(n.getTimestamp()));
+        // Combined header: "time | email"
+        String time = formatTimestamp(n.getTimestamp());
+        String email = "system".equals(n.getSenderId()) ? "system" :
+                (n.getSenderEmail() != null ? n.getSenderEmail() : "Unknown Sender");
+        holder.header.setText(time + "  |  " + email);
 
         // Message
         holder.message.setText(n.getMessage());
 
-        // Sender email
-        if ("system".equals(n.getSenderId())) {
-            holder.senderEmail.setText("system");
-        } else {
-            holder.senderEmail.setText(n.getSenderEmail() != null ? n.getSenderEmail() : "Unknown Sender");
-        }
-
         // Event name
         holder.eventName.setText(n.getEventName() != null ? n.getEventName() : "N/A");
 
-        // Click listener
+        // Item click
         holder.itemView.setOnClickListener(v -> {
-            if (itemClickListener != null)
-                itemClickListener.onItemClick(n);
+            if (itemClickListener != null) itemClickListener.onItemClick(n);
+        });
+
+        // Remove button click
+        holder.removeBtn.setOnClickListener(v -> {
+            if (removeClickListener != null) removeClickListener.onRemoveClick(n);
         });
     }
 
@@ -74,14 +86,15 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
     }
 
     static class NotiViewHolder extends RecyclerView.ViewHolder {
-        TextView timestamp, message, senderEmail, eventName;
+        TextView header, message, eventName;
+        Button removeBtn;
 
         NotiViewHolder(@NonNull View itemView) {
             super(itemView);
-            timestamp   = itemView.findViewById(R.id.noti_timestamp);
-            message     = itemView.findViewById(R.id.noti_message);
-            senderEmail = itemView.findViewById(R.id.noti_sender_email);
-            eventName   = itemView.findViewById(R.id.noti_event_name);
+            header     = itemView.findViewById(R.id.noti_header);
+            message    = itemView.findViewById(R.id.noti_message);
+            eventName  = itemView.findViewById(R.id.noti_event_name);
+            removeBtn  = itemView.findViewById(R.id.noti_remove_btn);
         }
     }
 

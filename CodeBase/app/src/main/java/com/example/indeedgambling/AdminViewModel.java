@@ -55,9 +55,7 @@ public class AdminViewModel extends ViewModel {
                 admin.setNotificationsEnabled((Boolean) updates.get(key));
             }
 
-            if (key.equals("lightModeEnabled")) {
-                admin.setLightModeEnabled((Boolean) updates.get(key));
-            }
+
         }
     }
 
