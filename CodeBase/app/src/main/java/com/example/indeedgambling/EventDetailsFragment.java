@@ -1,7 +1,22 @@
+/**
+ * Displays full details for a selected event and handles all Entrant
+ * actions related to registration, waitlist interaction, invitation
+ * response, and status updates.
+ *
+ * Supports two modes:
+ *  - Normal navigation: event object passed through arguments.
+ *  - QR scan mode: eventId passed through arguments, all buttons disabled.
+ *
+ * Features:
+ *  - Shows event name, description, category, date/time, location, status.
+ *  - Allows Entrants to join or leave the waitlist.
+ *  - Allows Entrants to accept or reject invitations.
+ *  - Updates live waitlist status and total counts.
+ *  - Collects Entrant location (with permission) and updates Firestore.
+ */
 package com.example.indeedgambling;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +27,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -23,9 +37,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Objects;
 
 public class EventDetailsFragment extends Fragment {
 
@@ -41,27 +53,24 @@ public class EventDetailsFragment extends Fragment {
     private TextView name, desc, waitlistStatus, total;
     private Button yesBtn, noBtn, backBtn, tryAgainBtn;
 
-    // set when QR is used
     private String scannedEventId = null;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState
+    ) {
         View v = inflater.inflate(R.layout.fragment_event_details, container, false);
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
 
         entrantId = entrantVM.returnID();
-        //Location data
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireContext());
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
         updateUserLocation();
 
-
-        // read QR argument
         if (getArguments() != null) {
             scannedEventId = getArguments().getString("eventId");
         }
@@ -77,27 +86,19 @@ public class EventDetailsFragment extends Fragment {
 
         backBtn.setOnClickListener(v1 -> requireActivity().onBackPressed());
 
-        // -----------------------------------
-        // CASE 1 — OPENED FROM QR SCAN
-        // -----------------------------------
         if (scannedEventId != null && !scannedEventId.isEmpty()) {
-
             firebaseVM.getEventById(
                     scannedEventId,
                     loadedEvent -> {
                         this.event = loadedEvent;
                         loadEventDetails(v);
-                        disableAllEntrantActions();  // <<--- FIX
+                        disableAllEntrantActions();
                     },
                     error -> Toast.makeText(getContext(), "Failed to load event", Toast.LENGTH_SHORT).show()
             );
-
             return v;
         }
 
-        // -----------------------------------
-        // CASE 2 — Normal navigation
-        // -----------------------------------
         if (getArguments() != null) {
             event = (Event) getArguments().getSerializable("event");
             loadEventDetails(v);
@@ -107,16 +108,12 @@ public class EventDetailsFragment extends Fragment {
         return v;
     }
 
-    // =====================================================================
-    // =====================================================================
     private void applyEntrantButtonLogic(View v) {
-
         if (event == null) return;
 
         entrantRelation = event.whichList(entrantId);
 
         if (entrantRelation.equals("none") || entrantRelation.equals("waitlist")) {
-
             yesBtn.setText("Join\n Waitlist");
             noBtn.setText("Leave\n Waitlist");
             yesBtn.setVisibility(View.VISIBLE);
@@ -135,7 +132,6 @@ public class EventDetailsFragment extends Fragment {
         }
 
         if (entrantRelation.equals("invited")) {
-
             yesBtn.setText("Accept\n Invite");
             noBtn.setText("Reject\n Invite");
             yesBtn.setVisibility(View.VISIBLE);
@@ -147,30 +143,22 @@ public class EventDetailsFragment extends Fragment {
         }
 
         if (entrantRelation.equals("accepted")) {
-
-
             yesBtn.setVisibility(View.GONE);
             noBtn.setVisibility(View.GONE);
             tryAgainBtn.setVisibility(View.VISIBLE);
             tryAgainBtn.setText("Already Accepted");
-
             tryAgainBtn.setEnabled(false);
         }
 
         if (entrantRelation.equals("cancelled")) {
-
             tryAgainBtn.setText("Try Again?");
             yesBtn.setVisibility(View.GONE);
             noBtn.setVisibility(View.GONE);
             tryAgainBtn.setVisibility(View.VISIBLE);
-
             tryAgainBtn.setOnClickListener(v1 -> clickedTryAgain(v));
         }
     }
 
-    // =====================================================================
-    //   QR MODE — disables everything
-    // =====================================================================
     private void disableAllEntrantActions() {
         yesBtn.setVisibility(View.GONE);
         noBtn.setVisibility(View.GONE);
@@ -182,7 +170,6 @@ public class EventDetailsFragment extends Fragment {
         tryAgainBtn.setEnabled(false);
     }
 
-    // =====================================================================
     private void loadEventDetails(View v) {
         if (event == null) return;
 
@@ -214,10 +201,7 @@ public class EventDetailsFragment extends Fragment {
         updateTotal(v);
     }
 
-    // =====================================================================
-    // =====================================================================
     private void clickedJoinWaitlist(View v) {
-
         if (entrantId == null) {
             Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
             return;
@@ -229,26 +213,32 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-        if (!(event.tryaddtoWaitingList(entrantId))) {
-            event.getWaitingList().remove(entrantId); //lazy coding cuz im not changing methods
+        if (!event.tryaddtoWaitingList(entrantId)) {
+            event.getWaitingList().remove(entrantId);
             Toast.makeText(getContext(), "Waitlist is FULL!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         entrantVM.addEventToEntrant(event.getEventId());
 
-        firebaseVM.joinWaitingList(event.getEventId(), entrantId, () -> {},
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        firebaseVM.joinWaitingList(
+                event.getEventId(),
+                entrantId,
+                () -> {},
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
 
-        firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(), () -> {},
-                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show());
+        firebaseVM.upsertEntrant(
+                entrantVM.getCurrentEntrant(),
+                () -> {},
+                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
+        );
 
         Toast.makeText(getContext(), "Joined waitlist!", Toast.LENGTH_SHORT).show();
         updateTotal(v);
     }
 
     private void clickedLeaveWaitlist(View v) {
-
         if (entrantId == null) {
             Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
             return;
@@ -263,20 +253,30 @@ public class EventDetailsFragment extends Fragment {
         event.getWaitingList().remove(entrantId);
         entrantVM.removeEventFromEntrant(event.getEventId());
 
-        firebaseVM.leaveWaitingList(event.getEventId(), entrantId, () -> {},
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        firebaseVM.leaveWaitingList(
+                event.getEventId(),
+                entrantId,
+                () -> {},
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
 
-        firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(), () -> {},
-                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show());
+        firebaseVM.upsertEntrant(
+                entrantVM.getCurrentEntrant(),
+                () -> {},
+                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
+        );
 
         Toast.makeText(getContext(), "Removed from waitlist.", Toast.LENGTH_SHORT).show();
         updateTotal(v);
     }
 
     private void clickedAcceptInvite(View v) {
-        firebaseVM.signUpForEvent(event.getEventId(), entrantId,
+        firebaseVM.signUpForEvent(
+                event.getEventId(),
+                entrantId,
                 () -> Toast.makeText(getContext(), "Signed up successfully!", Toast.LENGTH_SHORT).show(),
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
 
     private void clickedRejectInvite(View v) {
@@ -287,7 +287,6 @@ public class EventDetailsFragment extends Fragment {
         Toast.makeText(getContext(), "Trying again...", Toast.LENGTH_SHORT).show();
     }
 
-    // =====================================================================
     private void updateTotal(View v) {
         if (event.getWaitingList() != null) {
             int totalEntrant = event.getWaitingList().size();
@@ -296,7 +295,6 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void updateWaitlistStatus() {
-
         if (event == null) return;
 
         if (entrantId != null &&
@@ -309,50 +307,47 @@ public class EventDetailsFragment extends Fragment {
             yesBtn.setText("Joined\nWaitlist");
 
         } else {
-
             waitlistStatus.setVisibility(View.GONE);
             yesBtn.setEnabled(true);
             yesBtn.setText("Join\n Waitlist");
         }
     }
 
+    private void updateUserLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED) {
 
-    /** Updates the Entrant's location if permission is granted.
-     *  Pushes directly to server.
-     */
-    private void updateUserLocation(){
-        Log.d("Tag","In Update Location");
-        if (ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            //Ask for permission if they have not blocked it.
-            ActivityCompat.requestPermissions(requireActivity(), new String[] {"android.permission.ACCESS_COARSE_LOCATION","android.permission.ACCESS_FINE_LOCATION"},101);
-
-
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    new String[]{"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"},
+                    101
+            );
             return;
         }
-        Log.d("Tag","Has Permission");
-        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-            //Get Entrant
-            Entrant entrant = entrantVM.getCurrentEntrant();
-            if (entrant == null){
-                Log.d("NULL ERROR", "updateUserLocation: Entrant is NULL!!");
-                return;
-            }
-            entrant.setLocation(location);
-            firebaseVM.upsertEntrant(entrant,()->{Log.d("Updated location", "Updated Location");},e -> {
-                Log.d("Firebase Location Issue","EventDetails".concat(e.toString()));
-            });
-        }).addOnFailureListener(e -> {
-            Log.d("Firebase Location Issue","EventDetails".concat(e.toString()));
-        });
 
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    Entrant entrant = entrantVM.getCurrentEntrant();
+                    if (entrant == null) return;
+
+                    entrant.setLocation(location);
+                    firebaseVM.upsertEntrant(
+                            entrant,
+                            () -> {},
+                            e -> Log.d("Firebase Location Issue", "EventDetails" + e)
+                    );
+                })
+                .addOnFailureListener(e ->
+                        Log.d("Firebase Location Issue", "EventDetails" + e)
+                );
     }
+
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
@@ -362,18 +357,13 @@ public class EventDetailsFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == 101) {
-
-            // If at least 1 permission is granted → continue
             if (grantResults.length > 0 &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                Log.d("Tag", "User granted 1-time permission");
-                updateUserLocation();   // <-- Continue normally
-            }
-            else {
+                updateUserLocation();
+            } else {
                 Toast.makeText(getContext(), "Location permission denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
-
 }

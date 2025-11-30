@@ -1,8 +1,13 @@
+/**
+ * Displays all available events for Entrants to browse.
+ * Supports filtering by category and optional date/time range.
+ * Integrates with Firebase to load events and applies filters through
+ * fetchEventsByCategoryAndDate. Navigates to event details when an
+ * event is selected.
+ */
 package com.example.indeedgambling;
 
-import android.Manifest;
 import android.app.AlertDialog;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,15 +22,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,10 +42,11 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState
+    ) {
         View v = inflater.inflate(R.layout.entrant_browse_fragment, container, false);
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
@@ -62,13 +64,11 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
         homeBtn.setOnClickListener(view ->
                 NavHostFragment.findNavController(Entrant_BrowseFragment.this)
-                        .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment));
+                        .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment)
+        );
 
-        //Filter button click opens dialog
         Button filterBtn = v.findViewById(R.id.entrant_filter_button_browse);
         filterBtn.setOnClickListener(view -> showFilterDialog());
-
-
 
         return v;
     }
@@ -77,15 +77,9 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
     public void clicked(Event e) {
         Bundle bundle = new Bundle();
         bundle.putSerializable("event", e);
-        //Get Location of Entrant.
-
         NavHostFragment.findNavController(this)
                 .navigate(R.id.action_entrant_BrowseFragment_to_eventDetailsFragment, bundle);
     }
-
-    // ----------------------------------------------------
-    //  Filter feature for US 01.01.04 (Hardcoded categories)
-    // ----------------------------------------------------
 
     private void showFilterDialog() {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_filter_events, null);
@@ -96,7 +90,6 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
         Button btnApply = dialogView.findViewById(R.id.btn_apply);
 
-        // ✅ Hardcoded categories (no duplicates)
         List<String> categories = new ArrayList<>();
         categories.add("All");
         categories.add("Sports");
@@ -125,11 +118,13 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         categories.add("Food & Drinks");
         categories.add("Other");
 
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_dropdown_item, categories);
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                categories
+        );
         categorySpinner.setAdapter(categoryAdapter);
 
-        // Custom date+time picker
         startDateEdit.setOnClickListener(v -> showCustomDateTimeDialog(startDateEdit));
         endDateEdit.setOnClickListener(v -> showCustomDateTimeDialog(endDateEdit));
 
@@ -150,22 +145,26 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
             try {
                 if (!startText.isEmpty()) startDate = sdf.parse(startText);
                 if (!endText.isEmpty()) endDate = sdf.parse(endText);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception ignored) {}
 
-            firebaseVM.fetchEventsByCategoryAndDate(selectedCategory, startDate, endDate, events -> {
-                if (events != null && !events.isEmpty()) {
-                    adapter.setData(events);
-                } else {
-                    adapter.setData(new ArrayList<>());
-                }
-                adapter.notifyDataSetChanged();
-                dialog.dismiss();
-            }, err -> {
-                Toast.makeText(getContext(), "Filter failed: " + err.getMessage(), Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-            });
+            firebaseVM.fetchEventsByCategoryAndDate(
+                    selectedCategory,
+                    startDate,
+                    endDate,
+                    events -> {
+                        if (events != null && !events.isEmpty()) {
+                            adapter.setData(events);
+                        } else {
+                            adapter.setData(new ArrayList<>());
+                        }
+                        adapter.notifyDataSetChanged();
+                        dialog.dismiss();
+                    },
+                    err -> {
+                        Toast.makeText(getContext(), "Filter failed: " + err.getMessage(), Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+            );
         });
 
         dialog.show();
@@ -198,6 +197,4 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
 
         dialog.show();
     }
-
-
 }
