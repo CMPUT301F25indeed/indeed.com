@@ -584,7 +584,8 @@ public class Organizer_UpcomingFragment extends Fragment {
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Number of entrants to invite (Up to " + event.getWaitingList().size() + ")")
+                .setTitle("Number of entrants to invite (Up to " +
+                        (event.getWaitingList().size() + event.getLostList().size()) + ")")
                 .setView(helperView)
                 .setPositiveButton("Confirm", (dialog, which) -> {
                     int number;
@@ -598,15 +599,18 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                     Map<String, Object> update = new HashMap<>();
                     update.put("waitingList", event.getWaitingList());
+                    update.put("lostList", event.getLostList());   // 🔵 add back
                     update.put("invitedList", event.getInvitedList());
 
                     Data.updateEvent(event.getEventId(), update,
                             () -> RefreshWaitlist(event, waitlistView),
-                            e -> Log.d("Firebase Error", "Error pushing wait/invlist changes to server:".concat(e.toString())));
+                            e -> Log.d("Firebase Error",
+                                    "Error pushing wait/invlist changes to server:".concat(e.toString())));
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
 
     // -------- list helpers ----------
 
