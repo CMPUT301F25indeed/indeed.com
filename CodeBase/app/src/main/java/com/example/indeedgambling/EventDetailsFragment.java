@@ -21,6 +21,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -340,4 +341,68 @@ public class EventDetailsFragment extends Fragment {
             yesBtn.setText("Join\n Waitlist");
         }
     }
+
+
+    // Xan code for location, was giving erros so commented out for now
+
+//    /** Updates the Entrant's location if permission is granted.
+//     *  Pushes directly to server.
+//     */
+//    private void updateUserLocation(){
+//        Log.d("Tag","In Update Location");
+//        if (ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            //Ask for permission if they have not blocked it.
+//            ActivityCompat.requestPermissions(requireActivity(), new String[] {"android.permission.ACCESS_COARSE_LOCATION","android.permission.ACCESS_FINE_LOCATION"},101);
+//
+//
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
+//        Log.d("Tag","Has Permission");
+//        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+//            //Get Entrant
+//            Entrant entrant = entrantVM.getCurrentEntrant();
+//            if (entrant == null){
+//                Log.d("NULL ERROR", "updateUserLocation: Entrant is NULL!!");
+//                return;
+//            }
+//            entrant.setLocation(location);
+//            firebaseVM.upsertEntrant(entrant,()->{Log.d("Updated location", "Updated Location");},e -> {
+//                Log.d("Firebase Location Issue","EventDetails".concat(e.toString()));
+//            });
+//        }).addOnFailureListener(e -> {
+//            Log.d("Firebase Location Issue","EventDetails".concat(e.toString()));
+//        });
+//
+//    }
+//    @Override
+//    public void onRequestPermissionsResult(
+//            int requestCode,
+//            @NonNull String[] permissions,
+//            @NonNull int[] grantResults
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        if (requestCode == 101) {
+//
+//            // If at least 1 permission is granted → continue
+//            if (grantResults.length > 0 &&
+//                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//
+//                Log.d("Tag", "User granted 1-time permission");
+//                updateUserLocation();   // <-- Continue normally
+//            }
+//            else {
+//                Toast.makeText(getContext(), "Location permission denied", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
+
 }
+
