@@ -1,81 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#000000"
-    android:paddingTop="32dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp">
+    android:padding="16dp">
 
-    <!-- Top row: Back button + Title -->
-    <RelativeLayout
+    <!-- Spacer so title is not glued to status bar -->
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp">
+        android:layout_height="20dp" />
 
-        <Button
-            android:id="@+id/admin_logs_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentStart="true"
-            android:text="←"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/bg_button_danger_border" />
-
-        <TextView
-            android:id="@+id/admin_logs_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="System Logs"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/opensans"
-            android:textColor="#FFFFFF"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
-    </RelativeLayout>
-
-    <!-- Subtitle -->
+    <!-- HEADING -->
     <TextView
-        android:id="@+id/admin_logs_subtitle"
+        android:id="@+id/admin_logs_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search, filter, and review notifications."
-        android:textColor="#BBBBBB"
-        android:textSize="16sp"
-        android:layout_marginBottom="12dp"
+        android:text="System Logs"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:gravity="center"
-        android:fontFamily="@font/opensans" />
+        android:layout_marginBottom="6dp" />
 
-    <!-- Search bar -->
+    <!-- QUOTE -->
+    <TextView
+        android:id="@+id/admin_logs_quote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Every action leaves a trace."
+        android:textColor="#CCCCCC"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginBottom="16dp" />
+
+    <!-- SEARCH BAR -->
     <SearchView
         android:id="@+id/admin_logs_search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+        android:queryHint="Search logs..."
         android:background="#111111"
-        android:queryHint="Search logs by sender, action, or date"
-        android:layout_marginBottom="12dp" />
+        android:iconifiedByDefault="false"
+        android:layout_marginBottom="8dp" />
 
-    <!-- Dropdown Filter -->
+    <!-- FILTER SPINNER (used by admin_logs_filter in Java) -->
     <Spinner
         android:id="@+id/admin_logs_filter"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
         android:background="#111111"
-        android:padding="10dp"
-        android:layout_marginBottom="16dp"
-        android:spinnerMode="dropdown" />
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" />
 
-    <!-- RecyclerView for notifications/logs -->
+    <!-- RECYCLER VIEW (used by admin_logs_recycler in Java) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/admin_logs_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp" />
+        android:paddingTop="4dp" />
+
+    <!-- BACK BUTTON -->
+    <Button
+        android:id="@+id/admin_logs_back"
+        android:layout_width="322dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_button_primary"
+        android:text="Back to Dashboard"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
 
 </LinearLayout>

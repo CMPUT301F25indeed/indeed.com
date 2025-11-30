@@ -1,242 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="18dp">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_admin_image_card"
+        android:padding="20dp">
 
-        <ImageButton
-            android:id="@+id/Organizer_EventPopup_View_Event_Poster"
-            android:layout_width="match_parent"
+        <!-- QR CODE (CENTERED) -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="View Event Poster"
-            android:contentDescription="Event Poster"/>
+            android:text="Event QR Code"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="6dp"/>
 
-        <!-- to display qr code!-->
         <ImageView
             android:id="@+id/Organizer_EventPopup_QR_Code"
-            android:layout_gravity="center"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:contentDescription="Event QR Code"/>
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bg_event_image_rounded"
+            android:padding="12dp"
+            android:contentDescription="Event QR Code"
+            android:layout_marginBottom="20dp" />
 
-        <!-- Formatting Description label and text -->
-        <LinearLayout
+        <!-- SECTION: EVENT INFO -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Details"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="15sp"
-                    android:text="Description: "
-                    android:textStyle="italic">
-                </TextView>
+            android:textColor="#DDDDDD"
+            android:layout_marginBottom="8dp" />
 
-                <TextView
-                    android:id="@+id/Organizer_EventPopup_Description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-        <!-- Event Criteria -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Criteria"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Criteria: "
-                android:textStyle="italic"/>
+            android:textColor="#DDDDDD"
+            android:layout_marginBottom="6dp" />
 
-            <TextView
-                android:id="@+id/Organizer_EventPopup_Criteria"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-        <!-- Event Category -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Category: "
-                android:textStyle="italic"/>
-            <TextView
-                android:id="@+id/Organizer_EventPopup_Category"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+            android:textColor="#DDDDDD"
+            android:layout_marginBottom="6dp" />
 
-        <!-- Event Location -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/Organizer_EventPopup_EventLocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Location: "
-                android:textStyle="italic"/>
-            <TextView
-                android:id="@+id/Organizer_EventPopup_EventLocation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+            android:textColor="#DDDDDD"
+            android:layout_marginBottom="12dp" />
 
-        <!-- Registration Period -->
-        <LinearLayout
+        <!-- SECTION: DATES -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Timeline"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Registration Period: "
-                android:textStyle="italic"/>
+            android:textColor="#BBBBBB"
+            android:layout_marginBottom="3dp" />
 
-            <TextView
-                android:id="@+id/Organizer_EventPopup_RegistrationPeriod"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-    <!-- Event Capacity -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/Organizer_EventPopup_EventRuntime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Event Runtime: "
-                android:textStyle="italic"/>
+            android:textColor="#BBBBBB"
+            android:layout_marginBottom="3dp" />
 
-            <TextView
-                android:id="@+id/Organizer_EventPopup_EventRuntime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/Organizer_EventPopup_Capacity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Waitlist Signees: "
-                android:textStyle="italic"/>
+            android:textColor="#BBBBBB"
+            android:layout_marginBottom="15dp" />
 
-            <TextView
-                android:id="@+id/Organizer_EventPopup_Capacity"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
-
-
-
-
-
-
-        <!-- Button grid at bottom of screen -->
+        <!-- GRID BUTTONS -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:orientation="horizontal"
-            android:columnCount="2">
-                <Button
-                    android:id="@+id/Organizer_EventPopup_WaitList"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="View Waiting List">
-                </Button>
+            android:columnCount="2"
+            android:rowOrderPreserved="false">
 
-                <Button
-                    android:id="@+id/Organizer_EventPopup_InvList"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="View Invited List">
-                </Button>
+            <Button
+                android:id="@+id/Organizer_EventPopup_WaitList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Waiting List"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
-                <Button
-                    android:id="@+id/Organizer_EventPopup_CancelledList"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="View Cancelled List"/>
+            <Button
+                android:id="@+id/Organizer_EventPopup_InvList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Invited List"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
-                <Button
-                    android:id="@+id/Organizer_EventPopup_AcceptedList"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="View Accepted List"/>
+            <!-- now with ID -->
+            <Button
+                android:id="@+id/Organizer_EventPopup_CancelledList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Cancelled List"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
-                <Button
-                    android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="End Registration"
-                    />
+            <!-- now with ID -->
+            <Button
+                android:id="@+id/Organizer_EventPopup_AcceptedList"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Accepted List"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
-                <!-- New: Update poster button inside grid -->
-                <Button
-                    android:id="@+id/btnUpdatePoster"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="Update Event Poster"
-                    android:textAllCaps="false" />
+            <Button
+                android:id="@+id/btnUpdatePoster"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Update Poster"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
-                <Button
-                    android:id="@+id/btnViewPoster"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="View Event Poster"
-                    android:textAllCaps="false" />
+            <Button
+                android:id="@+id/btnViewPoster"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="View Event Poster"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
-                <Button
-                    android:id="@+id/btnSendNotifications"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:text="Send Notifications"
-                    android:textColor="@android:color/white" />
-
+            <Button
+                android:id="@+id/btnSendNotifications"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Send Notifications"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
         </GridLayout>
 
-
-        <!--        &lt;!&ndash; NEW: Button to update event poster &ndash;&gt;-->
-<!--        <Button-->
-<!--            android:id="@+id/Organizer_EventPopup_UpdatePosterButton"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Update Event Poster"-->
-<!--            android:textAllCaps="false"-->
-<!--            android:layout_marginTop="12dp"-->
-<!--            android:padding="10dp" />-->
+        <!-- End Registration button (needs ID for Java) -->
+        <Button
+            android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="End Registration Now"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
+
 </ScrollView>

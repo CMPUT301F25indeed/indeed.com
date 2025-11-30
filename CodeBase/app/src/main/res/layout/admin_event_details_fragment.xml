@@ -192,7 +192,7 @@
                 android:backgroundTint="@null"
                 android:text="Remove Event"
                 android:textAllCaps="false"
-                android:textColor="#D32F2F"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 app:backgroundTint="@null" />
         </LinearLayout>

@@ -2,28 +2,82 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/entrant_notifications_root"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
-    <ListView
-        android:id="@+id/entrant_notifications_list"
+    <!-- Centered Title -->
+    <TextView
+        android:id="@+id/notifications_title"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
-        android:padding="16dp"
+        android:layout_height="wrap_content"
+        android:text="Notifications"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:fontFamily="@font/ibmplexserif_semibold"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:textAlignment="center"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/entrant_notifications_home_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Centered Subtitle -->
+    <TextView
+        android:id="@+id/notifications_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Stay updated with the latest activity."
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        android:fontFamily="@font/opensans"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        app:layout_constraintTop_toBottomOf="@id/notifications_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Divider Line Under Subtitle -->
+    <View
+        android:id="@+id/notifications_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="#333333"
+        app:layout_constraintTop_toBottomOf="@id/notifications_subtitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ListView WITH item dividers -->
+    <ListView
+        android:id="@+id/entrant_notifications_list"
+        android:layout_width="411dp"
+        android:layout_height="506dp"
+        android:clipToPadding="false"
+        android:divider="#333333"
+        android:dividerHeight="1dp"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@id/entrant_notifications_home_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/notifications_divider" />
+
+    <!-- Primary Home Button -->
     <Button
         android:id="@+id/entrant_notifications_home_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="280dp"
+        android:layout_height="42dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/bg_button_primary"
+        android:fontFamily="@font/opensans"
+        android:paddingLeft="28dp"
+        android:paddingTop="10dp"
+        android:paddingRight="28dp"
+        android:paddingBottom="10dp"
         android:text="Home"
-        android:layout_marginBottom="16dp"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

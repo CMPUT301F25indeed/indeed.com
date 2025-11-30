@@ -3,21 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#000000"
-    android:padding="16dp">
+    android:orientation="vertical">
 
     <!-- TOP BAR -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="20dp"
+        android:paddingTop="32dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:paddingTop="32dp">
+        android:paddingBottom="16dp">
 
-
-    <!-- BLUE BORDER BACK BUTTON -->
+        <!-- BLUE BORDER BACK BUTTON -->
         <Button
             android:id="@+id/back_button"
             android:layout_width="80dp"
@@ -34,26 +32,26 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textSize="26sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/ibmplexserif_semibold"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:fontFamily="@font/ibmplexserif_semibold"
+            android:text="Settings"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp" />
     </RelativeLayout>
 
-    <!-- Role Header Text (dynamic user role) -->
+    <!-- ROLE TEXT -->
     <TextView
-        android:id="@+id/role_header_text"
-        android:layout_width="match_parent"
+        android:id="@+id/role_text_profile"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User: Role. Your role determines your app access and available settings."
-        android:textColor="#BBBBBB"
-        android:textSize="16sp"
-        android:fontFamily="@font/opensans"
         android:layout_marginStart="20dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="12dp"/>
+        android:layout_marginBottom="12dp"
+        android:fontFamily="@font/opensans"
+        android:text="Role: User"
+        android:textColor="#BBBBBB"
+        android:textSize="16sp" />
 
     <!-- MAIN CONTENT SCROLLABLE -->
     <ScrollView
@@ -61,156 +59,151 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
+        <!-- THIS IS THE FIX: A single LinearLayout that contains all the scrollable content. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-            <!-- PHOTO ROW -->
+            <!-- PROFILE PHOTO SECTION -->
+            <!-- PROFILE PHOTO SECTION -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="12dp">
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingVertical="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Photo"
-                    android:textSize="18sp"
-                    android:textColor="#FFFFFF"
-                    android:fontFamily="@font/opensans"/>
-
+                <!-- Circular Profile Image -->
                 <ImageView
                     android:id="@+id/pfp_image"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:background="#222222"
-                    android:scaleType="centerCrop"/>
+                    android:layout_width="199dp"
+                    android:layout_height="191dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/circle_mask"
+                    android:clipToOutline="true"
+                    android:scaleType="centerCrop" />
 
-                <!-- Small Primary Edit Button -->
+                <!-- Edit Button under image -->
                 <Button
                     android:id="@+id/pfp_edit_button"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/bg_button_secondary"
+                    android:backgroundTint="@null"
+                    android:fontFamily="@font/opensans"
                     android:text="Edit"
                     android:textAllCaps="false"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
-                    android:fontFamily="@font/opensans"
-                    android:background="@drawable/bg_button_secondary"
-                    android:backgroundTint="@null"/>
+                    android:textSize="14sp" />
             </LinearLayout>
+
 
             <!-- NAME -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/opensans"
                 android:text="Name"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:fontFamily="@font/opensans"
-                android:layout_marginTop="20dp"/>
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/settings_name"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
+                android:background="@drawable/bg_edittext_dark"
+                android:fontFamily="@font/opensans"
                 android:hint="Enter your name"
+                android:padding="12dp"
                 android:textColor="#FFFFFF"
                 android:textColorHint="#777777"
-                android:fontFamily="@font/opensans"
-                android:background="@drawable/bg_edittext_dark"
-                android:padding="12dp"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
 
             <!-- EMAIL -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/opensans"
                 android:text="Email"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:fontFamily="@font/opensans"
-                android:layout_marginTop="20dp"/>
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/settings_email"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
+                android:background="@drawable/bg_edittext_dark"
+                android:fontFamily="@font/opensans"
                 android:hint="Enter your email"
                 android:inputType="textEmailAddress"
+                android:padding="12dp"
                 android:textColor="#FFFFFF"
                 android:textColorHint="#777777"
-                android:fontFamily="@font/opensans"
-                android:background="@drawable/bg_edittext_dark"
-                android:padding="12dp"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
 
             <!-- PHONE -->
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/opensans"
                 android:text="Phone"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:fontFamily="@font/opensans"
-                android:layout_marginTop="20dp"/>
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/settings_phone"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
+                android:background="@drawable/bg_edittext_dark"
+                android:fontFamily="@font/opensans"
                 android:hint="Enter phone number"
                 android:inputType="phone"
+                android:padding="12dp"
                 android:textColor="#FFFFFF"
                 android:textColorHint="#777777"
-                android:fontFamily="@font/opensans"
-                android:background="@drawable/bg_edittext_dark"
-                android:padding="12dp"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
 
             <!-- SWITCHES -->
             <LinearLayout
                 android:id="@+id/light_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingVertical="20dp"
-                android:visibility="gone">
+                android:orientation="horizontal"
+                android:paddingVertical="20dp">
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="328dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/opensans"
                     android:text="Light Mode"
                     android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/opensans"/>
+                    android:textSize="16sp" />
 
                 <Switch
                     android:id="@+id/settings_lightmode_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <!-- Notifications -->
             <LinearLayout
                 android:id="@+id/noti_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingVertical="20dp"
-                android:visibility="gone">
+                android:orientation="horizontal"
+                android:paddingVertical="20dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -224,10 +217,12 @@
                 <Switch
                     android:id="@+id/settings_notif_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
         </LinearLayout>
+        <!-- End of the single child wrapper -->
+
     </ScrollView>
 
     <!-- STATIC BOTTOM BUTTONS (NOT SCROLLING) -->
@@ -242,28 +237,33 @@
             android:id="@+id/save_settings_button"
             android:layout_width="match_parent"
             android:layout_height="46dp"
+            android:background="@drawable/bg_button_primary"
             android:text="Save Changes"
             android:textColor="#FFFFFF"
             android:textAllCaps="false"
             android:textSize="16sp"
             android:fontFamily="@font/opensans"
-            android:background="@drawable/bg_button_primary"
-            android:backgroundTint="@null"/>
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp" />
 
-        <!-- DELETE (Red Border) -->
         <Button
             android:id="@+id/delete_profile_button"
-            android:layout_width="match_parent"
-            android:layout_height="46dp"
+            android:layout_width="335dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_danger_border"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/opensans"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
             android:text="Delete Profile"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:fontFamily="@font/opensans"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_button_danger_border"
-            android:backgroundTint="@null"
             app:backgroundTint="@null" />
+
+
 
     </LinearLayout>
 

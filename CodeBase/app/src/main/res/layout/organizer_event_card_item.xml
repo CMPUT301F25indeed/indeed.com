@@ -9,7 +9,7 @@
     android:layout_marginBottom="10dp"
     android:background="@drawable/bg_admin_image_card">
 
-    <!-- Wrapper that clips the image WITH SAFE SPACING -->
+    <!-- Poster wrapper -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="180dp"
@@ -22,16 +22,16 @@
         android:outlineProvider="background">
 
         <ImageView
-            android:id="@+id/eventPosterImage"
+            android:id="@+id/organizerEventPosterImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:adjustViewBounds="true" />
     </FrameLayout>
 
-    <!-- Admin event title -->
+    <!-- Event title -->
     <TextView
-        android:id="@+id/eventTitleText"
+        android:id="@+id/organizerEventTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"

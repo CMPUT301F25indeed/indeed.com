@@ -147,7 +147,7 @@
                 android:backgroundTint="@null"
                 app:backgroundTint="@null"
                 android:text="Remove Image"
-                android:textColor="#D32F2F"
+                android:textColor="#FFFFFF"
                 android:textAllCaps="false"
                 android:textSize="16sp"/>
         </LinearLayout>

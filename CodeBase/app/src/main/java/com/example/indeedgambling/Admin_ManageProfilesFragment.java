@@ -1,5 +1,6 @@
 package com.example.indeedgambling;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,14 +9,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.lifecycle.ViewModelProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,6 @@ public class Admin_ManageProfilesFragment extends Fragment {
 
     private List<Profile> fullList = new ArrayList<>();
     private List<Profile> filteredList = new ArrayList<>();
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -61,16 +62,25 @@ public class Admin_ManageProfilesFragment extends Fragment {
         );
         filterSpinner.setAdapter(spinnerAdapter);
 
+        // Make spinner selected text white (initial)
+        filterSpinner.post(() -> {
+            TextView tv = (TextView) filterSpinner.getSelectedView();
+            if (tv != null) tv.setTextColor(Color.WHITE);
+        });
+
+        // Re-filter when spinner value changes
         filterSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+            public void onItemSelected(android.widget.AdapterView<?> parent, View v, int position, long id) {
+                if (v instanceof TextView) {
+                    ((TextView) v).setTextColor(Color.WHITE);
+                }
                 applyFilters();
             }
 
             @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
         });
-
 
         // Recycler setup
         adapter = new ProfileAdapter();
@@ -85,7 +95,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
             }
         });
 
-
+        // Open profile details on click (if your adapter supports it)
         adapter.setOnItemClickListener(profile -> {
             Bundle args = new Bundle();
             args.putString("profileID", profile.getProfileId());
@@ -94,7 +104,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
                     .navigate(R.id.action_adminManageProfilesFragment_to_profileDetailsFragment, args);
         });
 
-
+        // Delete profile logic
         adapter.setOnDeleteClickListener(profile -> {
             new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                     .setTitle("Delete Profile")
@@ -124,21 +134,17 @@ public class Admin_ManageProfilesFragment extends Fragment {
                             return;
                         }
 
-                        // DEFAULT → simple delete (Admin cannot be deleted from adapter anyway)
+                        // DEFAULT → simple delete
                         fvm.deleteProfile(profile.getProfileId());
                     })
                     .setNegativeButton("No", null)
                     .show();
         });
 
-
-
         // Search
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
+            public boolean onQueryTextSubmit(String query) { return false; }
 
             @Override
             public boolean onQueryTextChange(String newText) {
@@ -147,10 +153,8 @@ public class Admin_ManageProfilesFragment extends Fragment {
             }
         });
 
-
         return view;
     }
-
 
     private void applyFilters() {
         String search = searchView.getQuery().toString().toLowerCase().trim();
@@ -160,16 +164,15 @@ public class Admin_ManageProfilesFragment extends Fragment {
 
         for (Profile p : fullList) {
 
-            // ----- ROLE FILTER -----
+            // Role filter
             boolean matchesRole;
-
             if (selected.equals("All")) {
                 matchesRole = true;
             } else {
                 matchesRole = p.getRole().equalsIgnoreCase(selected);
             }
 
-            // ----- SEARCH FILTER -----
+            // Search filter (name or email)
             boolean matchesSearch =
                     p.getPersonName().toLowerCase().contains(search) ||
                             p.getEmail().toLowerCase().contains(search);
@@ -181,5 +184,4 @@ public class Admin_ManageProfilesFragment extends Fragment {
 
         adapter.setProfiles(filteredList);
     }
-
 }

@@ -1,7 +1,7 @@
 package com.example.indeedgambling;
 
-import android.Manifest;
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,15 +17,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +48,8 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         RecyclerView recyclerView = v.findViewById(R.id.entrant_events_browse);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new EventsAdapter(this);
+        adapter = new EventsAdapter(this, firebaseVM);
+
         recyclerView.setAdapter(adapter);
 
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {
@@ -64,11 +61,9 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
                 NavHostFragment.findNavController(Entrant_BrowseFragment.this)
                         .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment));
 
-        //Filter button click opens dialog
+        // 🔹 Added: Filter button click opens dialog
         Button filterBtn = v.findViewById(R.id.entrant_filter_button_browse);
         filterBtn.setOnClickListener(view -> showFilterDialog());
-
-
 
         return v;
     }
@@ -77,8 +72,6 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
     public void clicked(Event e) {
         Bundle bundle = new Bundle();
         bundle.putSerializable("event", e);
-        //Get Location of Entrant.
-
         NavHostFragment.findNavController(this)
                 .navigate(R.id.action_entrant_BrowseFragment_to_eventDetailsFragment, bundle);
     }
@@ -198,6 +191,4 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
 
         dialog.show();
     }
-
-
 }
