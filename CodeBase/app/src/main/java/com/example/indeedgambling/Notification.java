@@ -31,9 +31,12 @@ public class Notification {
     private String type;
     private String message;
     private Date timestamp;
+    private String senderEmail;
+    private String eventName;
 
     /** Required empty constructor for Firestore serialization */
     public Notification() {}
+
 
     public String getSenderId() { return senderId; }
     public void setSenderId(String senderId) { this.senderId = senderId; }
@@ -52,4 +55,20 @@ public class Notification {
 
     public Date getTimestamp() { return timestamp; }
     public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
+    }
 }

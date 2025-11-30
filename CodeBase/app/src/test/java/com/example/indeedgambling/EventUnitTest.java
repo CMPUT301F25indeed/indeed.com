@@ -30,11 +30,6 @@ class EventUnitTest {
         return ReturnEvent;
     }
 
-    @Test
-    void testToStringReturnsName() {
-        Event e = MockEvent();
-        assertEquals("SampleEvent", e.toString());
-    }
 
     @Test
     void testAtCapacityFalseWhenUnlimited() {

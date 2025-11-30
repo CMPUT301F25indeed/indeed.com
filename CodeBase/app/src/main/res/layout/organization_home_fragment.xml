@@ -1,91 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="#000000"
+    android:padding="24dp">
 
+    <!-- Greeting -->
+
+    <!-- Tagline -->
+
+    <!-- Divider -->
     <TextView
         android:id="@+id/Organizer_HomeMessageText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/organizer_home_defaultMessage"
-        android:textAlignment="center"
-        android:textSize="32sp"
+        android:layout_marginTop="60dp"
+        android:fontFamily="@font/ibmplexserif_semibold"
+        android:gravity="center"
+        android:text="Hi Organizer"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </TextView>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/Organizer_HomeSubMessageText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:textSize="16sp"
-        android:text="@string/organizer_home_SubMessage"
-        android:textAlignment="center"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/opensans"
+        android:gravity="center"
+        android:text="Your events, your journey."
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/Organizer_HomeMessageText">
-    </TextView>
+        app:layout_constraintTop_toBottomOf="@id/Organizer_HomeMessageText" />
 
-    <GridLayout
-        android:id="@+id/gridLayout"
-        android:layout_width="wrap_content"
+    <View
+        android:id="@+id/Organizer_HomeDivider"
+        android:layout_width="60dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="16dp"
+        android:background="#333333"
+        app:layout_constraintTop_toBottomOf="@id/Organizer_HomeSubMessageText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Prompt text -->
+
+    <!-- Button column (replaces old GridLayout, keeps same id) -->
+
+    <TextView
+        android:id="@+id/Organizer_HomePromptText"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:columnCount="1"
+        android:layout_marginTop="36dp"
+        android:fontFamily="@font/opensans"
+        android:gravity="center"
+        android:text="What would you like to manage today?"
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/Organizer_HomeDivider" />
+
+    <LinearLayout
+        android:id="@+id/gridLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/Organizer_HomeLogoutButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/Organizer_HomeSubMessageText">
+        app:layout_constraintTop_toBottomOf="@+id/Organizer_HomeSubMessageText">
+
+        <!-- Browse Events -->
+
+        <!-- spacing between buttons -->
 
         <Button
             android:id="@+id/Organizer_HomeBrowseEventsButton"
-            android:layout_width="222sp"
-            android:layout_height="60sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/opensans"
             android:text="@string/organizer_home_Browse_text"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"></Button>
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:backgroundTint="@null" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <!-- Upcoming Events -->
         <Button
             android:id="@+id/Organizer_HomeUpcomingEventsButton"
-            android:layout_width="222sp"
-            android:layout_height="60sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/opensans"
             android:text="@string/organizer_home_UpcomingText"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"></Button>
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:backgroundTint="@null" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <!-- History -->
         <Button
             android:id="@+id/Organizer_HomeHistoryButton"
-            android:layout_width="222sp"
-            android:layout_height="60sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/opensans"
             android:text="@string/organizer_home_HistoryText"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"></Button>
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:backgroundTint="@null" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
+
+        <!-- My Profile -->
         <Button
             android:id="@+id/Organizer_HomeProfileButton"
-            android:layout_width="222sp"
-            android:layout_height="60sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/opensans"
             android:text="My Profile"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"></Button>
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:backgroundTint="@null" />
 
-    </GridLayout>
+    </LinearLayout>
 
+    <!-- Logout (red hollow danger button at bottom) -->
     <Button
         android:id="@+id/Organizer_HomeLogoutButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="32dp"
         android:text="Logout"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:background="@drawable/bg_button_danger_border"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-    </Button>
-
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

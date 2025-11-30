@@ -13,6 +13,7 @@ public class LoginFragment extends Fragment {
     private FirebaseViewModel vm;
     private EntrantViewModel entrantVM;
     private OrganizerViewModel organizerVM;
+    private AdminViewModel adminVM;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -24,9 +25,18 @@ public class LoginFragment extends Fragment {
         EditText password = view.findViewById(R.id.login_password);
         Button loginBtn = view.findViewById(R.id.btn_login);
 
+        Button backBtn = view.findViewById(R.id.btn_back);
+
+        backBtn.setOnClickListener(v ->
+                Navigation.findNavController(v).popBackStack()
+        );
+
+
         vm = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
+        adminVM = new ViewModelProvider(requireActivity()).get(AdminViewModel.class);
+
         FirebaseFirestore db = vm.getDb();
 
         loginBtn.setOnClickListener(v -> {
@@ -64,6 +74,8 @@ public class LoginFragment extends Fragment {
                                 Navigation.findNavController(view).navigate(R.id.organizerHomeFragment);
                             }
                             else {
+                                Admin a  = q.getDocuments().get(0).toObject(Admin.class);
+                                adminVM.setAdmin(a);
                                 Navigation.findNavController(view).navigate(R.id.adminHomeFragment);
                             }
 

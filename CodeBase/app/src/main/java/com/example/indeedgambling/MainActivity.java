@@ -1,7 +1,9 @@
 package com.example.indeedgambling;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
@@ -14,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //applySavedTheme();
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -36,4 +39,10 @@ public class MainActivity extends AppCompatActivity {
         return navHostFragment != null && navHostFragment.getNavController().navigateUp()
                 || super.onSupportNavigateUp();
     }
+
+//    private void applySavedTheme() {
+//        SharedPreferences prefs = getSharedPreferences("theme_prefs", MODE_PRIVATE);
+//        int themeMode = prefs.getInt("theme_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//        AppCompatDelegate.setDefaultNightMode(themeMode);
+//    }
 }

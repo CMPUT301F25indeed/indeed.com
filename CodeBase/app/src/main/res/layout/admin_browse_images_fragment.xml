@@ -1,36 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="12dp"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="32dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    android:background="#000000">
 
+    <!-- HEADING -->
+    <TextView
+        android:id="@+id/admin_images_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browse Images"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="6dp" />
+
+    <!-- SUBTITLE / QUOTE -->
+    <TextView
+        android:id="@+id/admin_images_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search, review, or remove uploaded images."
+        android:textColor="#BBBBBB"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#222222"
+        android:layout_marginBottom="16dp" />
+
+    <!-- SEARCH BAR -->
     <SearchView
         android:id="@+id/admin_images_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:queryHint="Search images by uploader/event"/>
+        android:queryHint="Search images by uploader or event"
+        android:background="#111111"
+        android:layout_marginBottom="16dp" />
 
+    <!-- LISTVIEW -->
     <ListView
         android:id="@+id/admin_images_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
         android:layout_weight="1"
-        android:layout_marginTop="8dp"/>
+        android:divider="@android:color/transparent"
+        android:dividerHeight="20dp"
+        android:layout_marginTop="8dp" />
 
+    <!-- REMOVE SELECTED -->
     <Button
         android:id="@+id/admin_images_remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Remove Selected"/>
+        android:text="Remove Selected"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:background="@drawable/bg_button_danger_border"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
+        android:layout_marginTop="16dp" />
 
+    <!-- BACK BUTTON (CENTERED) -->
     <Button
         android:id="@+id/admin_images_back"
-        android:layout_width="match_parent"
+        android:layout_width="294dp"
         android:layout_height="wrap_content"
-        android:text="Back"
-        android:layout_marginTop="8dp"/>
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
+        android:text="Back to Dashboard"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null" />
+
 </LinearLayout>

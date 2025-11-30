@@ -26,6 +26,10 @@ public class Organizer_HomeFragment extends Fragment {
 
         view = inflater.inflate(R.layout.organization_home_fragment, container, false);
 
+
+        OrganizerViewModel organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
+        Profile organizer = organizerVM.getCurrentOrganizer();
+
         //Logout button setup
         Button LogoutButton = view.findViewById(R.id.Organizer_HomeLogoutButton);
         LogoutButton.setOnClickListener(v ->
@@ -52,7 +56,15 @@ public class Organizer_HomeFragment extends Fragment {
         //Profile Button function
         Button ProfileButton = view.findViewById(R.id.Organizer_HomeProfileButton);
         ProfileButton.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).navigate(R.id.action_orgHome_to_profile);
+
+            Bundle args = new Bundle();
+            args.putString("profileID", organizer.getProfileId());
+
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.settingsFragment, args);
+
+
+
         });
 
 

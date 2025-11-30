@@ -1,30 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="12dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="16dp">
 
+    <!-- Spacer so title is not glued to status bar -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
+    <!-- HEADING -->
+    <TextView
+        android:id="@+id/admin_logs_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="System Logs"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:layout_marginBottom="6dp" />
+
+    <!-- QUOTE -->
+    <TextView
+        android:id="@+id/admin_logs_quote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Every action leaves a trace."
+        android:textColor="#CCCCCC"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginBottom="16dp" />
+
+    <!-- SEARCH BAR -->
     <SearchView
         android:id="@+id/admin_logs_search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:queryHint="Search logs by action/sender/date"/>
+        android:layout_height="48dp"
+        android:queryHint="Search logs..."
+        android:background="#111111"
+        android:iconifiedByDefault="false"
+        android:layout_marginBottom="8dp" />
 
-    <ListView
-        android:id="@+id/admin_logs_list"
+    <!-- FILTER SPINNER (used by admin_logs_filter in Java) -->
+    <Spinner
+        android:id="@+id/admin_logs_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:background="#111111"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" />
+
+    <!-- RECYCLER VIEW (used by admin_logs_recycler in Java) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/admin_logs_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
         android:layout_weight="1"
-        android:layout_marginTop="8dp"/>
+        android:paddingTop="4dp" />
 
+    <!-- BACK BUTTON -->
     <Button
         android:id="@+id/admin_logs_back"
-        android:layout_width="match_parent"
+        android:layout_width="322dp"
         android:layout_height="wrap_content"
-        android:text="Back"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_button_primary"
+        android:text="Back to Dashboard"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
+
 </LinearLayout>

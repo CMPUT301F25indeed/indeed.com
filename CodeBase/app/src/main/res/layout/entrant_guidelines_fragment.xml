@@ -4,9 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="@android:color/black">
+    android:background="#000000"
+    android:padding="24dp">
 
+    <!-- Scrollable content -->
     <ScrollView
         android:id="@+id/guidelines_scroll"
         android:layout_width="0dp"
@@ -22,39 +23,70 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Main Title -->
             <TextView
                 android:id="@+id/guidelines_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Guidelines For Entrants"
-                android:textSize="24sp"
+                android:text="Guidelines"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/white" />
+                android:gravity="center"
+                android:fontFamily="@font/ibmplexserif_semibold"
+                android:layout_marginTop="24dp"/>
 
+            <!-- Subtitle -->
+            <TextView
+                android:id="@+id/guidelines_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="For Entrants"
+                android:textColor="#BBBBBB"
+                android:textSize="15sp"
+                android:gravity="center"
+                android:fontFamily="@font/opensans"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Divider -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="@android:color/darker_gray"
-                android:layout_marginBottom="16dp" />
+                android:layout_height="1dp"
+                android:background="#444444"
+                android:layout_marginBottom="20dp"/>
 
+
+            <!-- Body text -->
             <TextView
                 android:id="@+id/guidelines_body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:lineSpacingExtra="4dp"
+                android:textColor="#DDDDDD"
+                android:lineSpacingExtra="6dp"
+                android:fontFamily="@font/opensans"
                 android:text="@string/Guidelines_for_Entrant"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="32dp"/>
         </LinearLayout>
     </ScrollView>
 
+    <!-- Home Button -->
     <Button
         android:id="@+id/guidelines_home_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="24dp"
         android:text="Home"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

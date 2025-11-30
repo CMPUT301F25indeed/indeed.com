@@ -79,7 +79,6 @@ public class NotificationSenderFragment extends Fragment {
             Toast.makeText(requireContext(),
                     "No event selected. Open from an upcoming event.",
                     Toast.LENGTH_SHORT).show();
-            // Optional: go back
             NavHostFragment.findNavController(this)
                     .navigate(R.id.action_notificationSender_to_organizerUpcoming);
             return;

@@ -1,6 +1,8 @@
 package com.example.indeedgambling;
 
 import android.app.AlertDialog;
+import android.graphics.Color;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +48,8 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         RecyclerView recyclerView = v.findViewById(R.id.entrant_events_browse);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new EventsAdapter(this);
+        adapter = new EventsAdapter(this, firebaseVM);
+
         recyclerView.setAdapter(adapter);
 
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {

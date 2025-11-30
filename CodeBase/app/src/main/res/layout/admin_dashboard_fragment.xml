@@ -1,53 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="16dp"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="24dp">
+
+    <!-- Title -->
+
+    <!-- Subtitle -->
+
+    <!-- Browse Events (first in chain) -->
+
+    <!-- Browse Profiles -->
+
+    <!-- Browse Images -->
+
+    <!-- View Logs -->
+
+    <!-- Logout (last in chain, anchored to bottom) -->
 
     <TextView
         android:id="@+id/admin_title"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Admin Dashboard"
-        android:textStyle="bold"
-        android:textSize="22sp"
+        android:layout_marginTop="44dp"
+        android:fontFamily="@font/ibmplexserif_semibold"
         android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:text="Welcome, Admin"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/admin_subtitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/opensans"
+        android:gravity="center"
+        android:text="What would you like to manage today?"
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_title" />
 
     <Button
         android:id="@+id/admin_browse_events"
-        android:layout_width="220dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Browse Events"/>
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
+        android:text="Browse Events"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_subtitle"
+        app:layout_constraintVertical_chainStyle="spread" />
 
     <Button
         android:id="@+id/admin_browse_profiles"
-        android:layout_width="220dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
         android:text="Browse Profiles"
-        android:layout_marginTop="10dp"/>
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_browse_events" />
 
     <Button
         android:id="@+id/admin_browse_images"
-        android:layout_width="220dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
         android:text="Browse Images"
-        android:layout_marginTop="10dp"/>
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_browse_profiles" />
+
 
     <Button
-        android:id="@+id/admin_view_logs"
-        android:layout_width="220dp"
+        android:id="@+id/admin_settings"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="View Logs"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="116dp"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
+        android:text="Settings"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_browse_images" />
+
 
     <Button
         android:id="@+id/admin_logout"
-        android:layout_width="220dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/bg_button_danger_border"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
         android:text="Logout"
-        android:layout_marginTop="16dp"/>
-</LinearLayout>
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_view_logs"
+        app:layout_constraintVertical_bias="0.758" />
+
+    <Button
+        android:id="@+id/admin_view_logs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        android:fontFamily="@font/opensans"
+        android:text="View Logs"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/admin_browse_images" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

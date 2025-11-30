@@ -80,8 +80,29 @@
         <action
             android:id="@+id/action_entrantHomeFragment_to_entrant_NotificationsFragment"
             app:destination="@id/entrant_NotificationsFragment" />
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+
+        <action
+            android:id="@+id/action_entrantHomeFragment_to_scanQRFragment"
+            app:destination="@id/scanQRFragment" />
+
 
     </fragment>
+
+    <fragment
+        android:id="@+id/scanQRFragment"
+        android:name="com.example.indeedgambling.ScanQRFragment"
+        android:label="Scan QR"
+        tools:layout="@layout/fragment_scan_qr">
+
+        <action
+            android:id="@+id/action_scanQRFragment_to_eventDetailsFragment"
+            app:destination="@id/eventDetailsFragment" />
+    </fragment>
+
+
 
     <fragment
         android:id="@+id/entrant_NotificationsFragment"
@@ -96,10 +117,16 @@
         android:label="Event Details"
         tools:layout="@layout/fragment_event_details">
 
+        <!-- REQUIRED ARGUMENT -->
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+
         <action
             android:id="@+id/action_eventDetailsFragment_to_entrant_BrowseFragment"
             app:destination="@id/entrant_BrowseFragment" />
     </fragment>
+
 
 
 
@@ -158,6 +185,9 @@
         <action
             android:id="@+id/action_orgHome_to_start"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_organizerHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -228,6 +258,9 @@
         <action
             android:id="@+id/action_adminHomeFragment_to_startUpFragment"
             app:destination="@id/startUpFragment" />
+        <action
+            android:id="@+id/action_adminHomeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -236,26 +269,58 @@
         android:label="Admin Browse Events" />
 
     <fragment
+        android:id="@+id/adminEventDetailsFragment"
+        android:name="com.example.indeedgambling.Admin_EventDetailsFragment"
+        android:label="Admin Event Details">
+
+        <action
+            android:id="@+id/action_adminEventDetailsFragment_to_adminBrowseEventsFragment"
+            app:destination="@id/adminBrowseEventsFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/adminManageProfilesFragment"
         android:name="com.example.indeedgambling.Admin_ManageProfilesFragment"
-        android:label="Admin Manage Profiles" />
+        android:label="Admin Manage Profiles" >
+        <action
+            android:id="@+id/action_adminManageProfilesFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+        <action
+            android:id="@+id/action_adminManageProfilesFragment_to_profileDetailsFragment"
+            app:destination="@id/profileDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/adminReviewImagesFragment"
         android:name="com.example.indeedgambling.Admin_ReviewImagesFragment"
-        android:label="Admin Review Images">
+        android:label="Admin Review Images"
+        tools:layout="@layout/admin_browse_images_fragment">
+
         <action
-            android:id="@+id/action_adminReviewImagesFragment_to_adminLogsFragment"
-            app:destination="@id/adminLogsFragment" />
+            android:id="@+id/action_adminReviewImagesFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/adminImageDetailsFragment"
+        android:name="com.example.indeedgambling.Admin_ImageDetailsFragment"
+        android:label="Admin Image Details"
+        tools:layout="@layout/admin_image_details_fragment">
+
+        <action
+            android:id="@+id/action_adminImageDetailsFragment_to_adminReviewImagesFragment"
+            app:destination="@id/adminReviewImagesFragment" />
+    </fragment>
+
+
 
     <fragment
         android:id="@+id/adminLogsFragment"
         android:name="com.example.indeedgambling.Admin_SystemLogsFragment"
         android:label="Admin System Logs">
         <action
-            android:id="@+id/action_adminLogsFragment_to_adminManageProfilesFragment"
-            app:destination="@id/adminManageProfilesFragment" />
+            android:id="@+id/action_adminLogsFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
     </fragment>
     <fragment
         android:id="@+id/entrant_GuidelinesFragment"
@@ -264,6 +329,42 @@
         <action
             android:id="@+id/action_entrant_GuidelinesFragment_to_entrantHomeFragment"
             app:destination="@id/entrantHomeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.indeedgambling.SettingsFragment"
+        android:label="SettingsFragment">
+
+    <argument
+        android:name="profileID"
+        app:argType="string" />
+
+        <action
+            android:id="@+id/action_settingsFragment_to_organizerHomeFragment"
+            app:destination="@id/organizerHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_adminHomeFragment"
+            app:destination="@id/adminHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_entrantHomeFragment"
+            app:destination="@id/entrantHomeFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_startUpFragment"
+            app:destination="@id/startUpFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/profileDetailsFragment"
+        android:name="com.example.indeedgambling.ProfileDetailsFragment"
+        android:label="ProfileDetailsFragment" >
+        <argument
+            android:name="profileID"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_profileDetailsFragment_to_adminManageProfilesFragment"
+            app:destination="@id/adminManageProfilesFragment" />
     </fragment>
 
 </navigation>

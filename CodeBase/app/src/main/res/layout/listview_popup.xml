@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="8dp"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="#000000"
+    android:padding="18dp">
 
-    <ListView
-        android:id="@+id/popUp_Listview"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-</FrameLayout>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_admin_image_card"
+        android:padding="20dp">
+
+        <ListView
+            android:id="@+id/popUp_Listview"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:divider="#333333"
+            android:dividerHeight="1dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:clickable="false"
+            android:longClickable="false" />
+
+    </LinearLayout>
+
+</ScrollView>

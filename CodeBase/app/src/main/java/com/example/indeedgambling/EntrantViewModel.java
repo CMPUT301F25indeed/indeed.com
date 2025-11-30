@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.Map;
+
 /**
  * ViewModel for Entrant user.
  *
@@ -65,5 +67,36 @@ public class EntrantViewModel extends ViewModel {
         }
     }
 
+
+
+    public void updateSettings(Map<String, Object> updates) {
+        Entrant e = entrant.getValue();
+        if (e == null) return;
+
+        for (String key : updates.keySet()) {
+
+            if (key.equals("personName")) {
+                e.setPersonName((String) updates.get(key));
+            }
+
+            if (key.equals("email")) {
+                e.setEmail((String) updates.get(key));
+            }
+
+            if (key.equals("phone")) {
+                e.setPhone((String) updates.get(key));
+            }
+
+            if (key.equals("notificationsEnabled")) {
+                e.setNotificationsEnabled((Boolean) updates.get(key));
+            }
+
+            if (key.equals("lightModeEnabled")) {
+                e.setLightModeEnabled((Boolean) updates.get(key));
+            }
+        }
+
+        entrant.setValue(e); // notify observers
+    }
 
 }
