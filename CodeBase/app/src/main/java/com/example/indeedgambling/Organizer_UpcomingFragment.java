@@ -245,6 +245,24 @@ public class Organizer_UpcomingFragment extends Fragment {
             Date EventStartDate = new GregorianCalendar(EventStartDateInput.getYear(),EventStartDateInput.getMonth(), EventStartDateInput.getDayOfMonth(), EventStartTimeInput.getHour(), EventStartTimeInput.getMinute()).getTime();
             Date EventEndDate  = new GregorianCalendar(EventEndDateInput.getYear(),EventEndDateInput.getMonth(), EventEndDateInput.getDayOfMonth(), EventEndTimeInput.getHour(), EventEndTimeInput.getMinute()).getTime();
 
+
+            if (RequirementRadius.getText().toString().isBlank()){
+                WarningToast("A radius is required!");
+                return;
+            };
+
+
+            //String inputs
+            String EventName = NameInput.getText().toString().trim();
+            String Description = DescriptionInput.getText().toString().trim();
+            String Category = CategoryInput.getText().toString().trim();
+            String Criteria = CriteriaInput.getText().toString().trim();
+            String MaxEnt = MaxEntrantsInput.getText().toString().trim();
+            int Radius = Integer.parseInt(RequirementRadius.getText().toString().trim());
+            boolean RadiusRequirement = LocationRequirement.isChecked();
+
+
+
             //Refuse incorrect start-end date for event
             if (EventStartDate.after(EventEndDate)){
                 WarningToast("Event Start cannot be BEFORE Event End!");
@@ -257,15 +275,6 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
 
 
-
-            //String inputs
-            String EventName = NameInput.getText().toString().trim();
-            String Description = DescriptionInput.getText().toString().trim();
-            String Category = CategoryInput.getText().toString().trim();
-            String Criteria = CriteriaInput.getText().toString().trim();
-            String MaxEnt = MaxEntrantsInput.getText().toString().trim();
-            int Radius = Integer.parseInt(RequirementRadius.getText().toString().trim());
-            boolean RadiusRequirement = LocationRequirement.isChecked();
 
             Log.d("Checkbox Test", Boolean.toString(RadiusRequirement));
 
