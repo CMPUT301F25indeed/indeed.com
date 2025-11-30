@@ -64,6 +64,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
 
 
     // Tests

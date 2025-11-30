@@ -37,7 +37,7 @@ public class QRCodeGenerator {
                 "Event: %s\nID: %s\nLocation: %s\nStatus: %s",
                 event.getEventName(),
                 event.getEventId(),
-                event.getLocation(),
+                event.getLocationString(),
                 event.getStatus()
         );
     }
