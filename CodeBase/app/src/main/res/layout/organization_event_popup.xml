@@ -102,7 +102,7 @@
             android:textColor="#BBBBBB"
             android:layout_marginBottom="15dp" />
 
-        <!-- GRID BUTTONS (INCLUDING VIEW POSTER AT BOTTOM) -->
+        <!-- GRID BUTTONS -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -131,7 +131,9 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
 
+            <!-- now with ID -->
             <Button
+                android:id="@+id/Organizer_EventPopup_CancelledList"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -141,7 +143,9 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
 
+            <!-- now with ID -->
             <Button
+                android:id="@+id/Organizer_EventPopup_AcceptedList"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -185,6 +189,17 @@
                 android:textColor="@android:color/white" />
 
         </GridLayout>
+
+        <!-- End Registration button (needs ID for Java) -->
+        <Button
+            android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="End Registration Now"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
