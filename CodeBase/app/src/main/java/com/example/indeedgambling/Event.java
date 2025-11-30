@@ -641,7 +641,7 @@ public class Event implements Serializable {
 
     /** Checks if the passed coordinates are in range using Haversin formula
      * @param latitude Must be in [-90, +90] degrees
-     * @param longitude Must be in [0, 180] degrees
+     * @param longitude Must be in [-180, 180] degrees
      * @return True if coordinates in range, or if the range requirement is disabled.
      */
     public boolean coordinates_in_range(double latitude, double longitude) {
@@ -732,7 +732,7 @@ public class Event implements Serializable {
 
     /** Updates an Events coordinates in degrees to the passed location.
      * @param lat Must be in [-90, +90] degrees
-     * @param lng Must be in [0, 180] degrees
+     * @param lng Must be in [-180, 180] degrees
      */
     public void setLocation(double lat, double lng){
         //Throw error if coordinates not valid
@@ -756,20 +756,20 @@ public class Event implements Serializable {
     /** Argument validity helper
      * Throws an argument if latitude is out of range
      */
+    @com.google.firebase.firestore.Exclude
     private void checkLatitudeValid(double lat){
         if (Math.abs(lat) > 90){
             throw new IllegalArgumentException("Latitude must be between -90 and +90 degrees!");
         }
     }
 
-    /** ARgument validity helper
+    /** Argument validity helper
      * Throws an argument if longitude is out of range
-     *
      * @param lng
      */
     private void checkLongitudeValid(double lng){
-        if (lng > 180 || lng < 0){
-            throw new IllegalArgumentException("Longitude must be between 0 and 180 degrees!");
+        if (Math.abs(lng)> 180){
+            throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees!");
         }
     }
 

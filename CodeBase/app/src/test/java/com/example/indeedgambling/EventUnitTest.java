@@ -313,7 +313,7 @@ class EventUnitTest {
         assertThrows(IllegalArgumentException.class,()->e.setLocation(-91,0));
         assertThrows(IllegalArgumentException.class,()->e.setLocation(1231,0));
         assertThrows(IllegalArgumentException.class,()->e.setLocation(0,200));
-        assertThrows(IllegalArgumentException.class,()->e.setLocation(0,-1));
+        assertThrows(IllegalArgumentException.class,()->e.setLocation(0,-181));
         assertThrows(IllegalArgumentException.class,()->e.setLocation(-100,181));
 
         //Latitude Update
@@ -323,15 +323,21 @@ class EventUnitTest {
 
         //Longitude Update
         assertThrows(IllegalArgumentException.class,()->e.setLongitude(913));
-        assertThrows(IllegalArgumentException.class,()->e.setLongitude(-23));
+        assertThrows(IllegalArgumentException.class,()->e.setLongitude(-203));
         assertThrows(IllegalArgumentException.class,()->e.setLongitude(-91283));
+        //Assert that no error is thrown
+        assertAll(()->{
+            e.setLatitude(-84.07211780548096);
+            e.setLongitude(51.05296833016841);
+            e.setLocation(85,170);
+        });
 
 
         //Coordinate Range check
         assertThrows(IllegalArgumentException.class,()->e.coordinates_in_range(-91,0));
         assertThrows(IllegalArgumentException.class,()->e.coordinates_in_range(1231,0));
         assertThrows(IllegalArgumentException.class,()->e.coordinates_in_range(0,200));
-        assertThrows(IllegalArgumentException.class,()->e.coordinates_in_range(0,-1));
+        assertThrows(IllegalArgumentException.class,()->e.coordinates_in_range(0,-398723));
         assertThrows(IllegalArgumentException.class,()->e.coordinates_in_range(-100,181));
     }
 }

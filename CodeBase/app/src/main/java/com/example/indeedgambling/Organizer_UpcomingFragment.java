@@ -309,7 +309,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
             //US 02.01.04 : Optional for unlimited
             Event CreatedEvent = new Event(EventName,RegStartDate,RegEndDate,EventStartDate,EventEndDate,orgID,Description,Criteria,Category);
-            CreatedEvent.setLocation(lng,lat);
+            CreatedEvent.setLocation(lat,lng);
 
 
             CreatedEvent.setRegistrationRadiusEnabled(RadiusRequirement);

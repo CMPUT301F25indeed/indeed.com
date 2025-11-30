@@ -261,7 +261,6 @@ public class EventDetailsFragment extends Fragment {
         }
 
         entrantVM.addEventToEntrant(event.getEventId());
-        event.getWaitingList().add(entrantId);
 
         firebaseVM.joinWaitingList(event.getEventId(), entrantId, () -> {},
                 e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
