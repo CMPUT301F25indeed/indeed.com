@@ -65,19 +65,21 @@
             android:textColor="#DDDDDD"
             android:layout_marginBottom="6dp" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location: "
+            android:textSize="15sp"
+            android:textStyle="italic" />
+
         <TextView
             android:id="@+id/Organizer_EventPopup_EventLocation"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:text="Location: "
-                android:textStyle="italic"/>
-            <TextView
-                android:id="@+id/Organizer_EventPopup_EventLocation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Radius Show -->
@@ -90,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:text="Registerable Radius (meters): "
+                android:text="Registerable Radius: "
                 android:textStyle="italic"/>
             <TextView
                 android:id="@+id/Organizer_EventPopup_Radius"
@@ -135,8 +137,6 @@
             android:layout_height="wrap_content"
             android:textColor="#BBBBBB"
             android:layout_marginBottom="15dp" />
-
-
 
         <CheckBox
             android:id="@+id/Organizer_EventPopup_RadiusEnabled"
@@ -233,19 +233,16 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
 
+            <Button
+                android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="End Registration Now"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
         </GridLayout>
-
-        <!-- End Registration button (needs ID for Java) -->
-        <Button
-            android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_button_primary"
-            android:text="End Registration Now"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white" />
-
     </LinearLayout>
-
 </ScrollView>
