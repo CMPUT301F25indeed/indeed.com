@@ -1,27 +1,29 @@
 package com.example.indeedgambling;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.List;
 
-/**
- *
- */
 public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
 
     private final String entrantId;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    /**
-     *
-     */
     public EntrantHistoryAdapter(@NonNull Context context,
                                  @NonNull List<Event> events,
                                  @NonNull String entrantId) {
@@ -35,43 +37,95 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                         @Nullable View convertView,
                         @NonNull ViewGroup parent) {
 
-        View v = convertView;
-        if (v == null) {
-            v = LayoutInflater.from(getContext())
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_history, parent, false);
         }
 
-        Event e = getItem(position);
-        if (e == null) {
-            return v;
+        Event event = getItem(position);
+        if (event == null) {
+            return convertView;
         }
 
-        TextView title = v.findViewById(R.id.history_event_title);
-        TextView status = v.findViewById(R.id.history_event_status);
+        TextView titleView = convertView.findViewById(R.id.history_event_title);
+        TextView statusView = convertView.findViewById(R.id.history_event_status);
+        ImageView imageView = convertView.findViewById(R.id.history_event_image);
 
-        title.setText(e.getEventName());
+        // ----- Title -----
+        String name = event.getEventName();
+        if (name == null || name.isEmpty()) {
+            name = "Untitled event";
+        }
+        titleView.setText(name);
 
-        String which = e.whichList(entrantId);
-        String label;
-        switch (which) {
+        // ----- Status text -----
+        String listName = event.whichList(entrantId); // "waiting", "invited", "accepted", "cancelled", maybe null
+        String statusText;
+        switch (listName) {
+            case "waiting":
+                statusText = "On waitlist";
+                break;
             case "invited":
-                label = "Invited";
+                statusText = "Invited – tap to respond";
                 break;
             case "accepted":
-                label = "Accepted";
+                statusText = "Accepted";
                 break;
             case "cancelled":
-                label = "Not selected (lost lottery)";
-                break;
-            case "waitlist":
-                label = "Waitlisted";
+                statusText = "Cancelled";
                 break;
             default:
-                label = "Joined";
+                statusText = "Not active";
                 break;
         }
-        status.setText(label);
+        statusView.setText(statusText);
 
-        return v;
+        // ----- Image placeholder (rounded grey background) -----
+        imageView.setImageBitmap(null);
+        imageView.setBackgroundResource(R.drawable.bg_event_image_rounded);
+
+        String imageDocId = event.getImageUrl();
+        if (imageDocId == null || imageDocId.isEmpty()) {
+            // no poster → keep grey rounded box
+            imageView.setTag(null);
+            return convertView;
+        }
+
+        // Tag to avoid wrong image on recycled rows
+        imageView.setTag(imageDocId);
+
+        db.collection("images")
+                .document(imageDocId)
+                .get()
+                .addOnSuccessListener((DocumentSnapshot doc) -> {
+                    if (!doc.exists()) return;
+
+                    // still same row?
+                    Object tag = imageView.getTag();
+                    if (!(tag instanceof String) || !imageDocId.equals(tag)) {
+                        return;
+                    }
+
+                    String base64 = doc.getString("url");
+                    if (base64 == null || base64.isEmpty()) {
+                        return;
+                    }
+
+                    try {
+                        byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+                        Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                        if (bmp != null) {
+                            imageView.setBackground(null); // remove grey background so corners show
+                            imageView.setImageBitmap(bmp);
+                        }
+                    } catch (Exception e) {
+                        // if decode fails, just keep placeholder
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // ignore, keep grey box
+                });
+
+        return convertView;
     }
 }

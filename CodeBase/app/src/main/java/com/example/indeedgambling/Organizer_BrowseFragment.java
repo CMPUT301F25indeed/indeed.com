@@ -42,8 +42,9 @@ public class Organizer_BrowseFragment extends Fragment {
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         adapter = new EventsAdapter(event -> {
-            // later open event popup for edit/view
-        });
+            // your click code
+        }, firebaseVM);
+
 
         rv.setAdapter(adapter);
 

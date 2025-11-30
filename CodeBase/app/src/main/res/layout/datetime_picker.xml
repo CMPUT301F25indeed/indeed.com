@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="#000000"
+    android:theme="@style/DarkDateTimePickerTheme">
 
     <GridLayout
         android:layout_width="match_parent"
@@ -20,22 +22,25 @@
             android:scaleX="0.65"
             android:scaleY="0.65"
             android:layout_marginLeft="-40sp"
-            android:layout_marginRight="-40sp"/>
+            android:layout_marginRight="-40sp"
+            android:background="@android:color/transparent" />
 
         <TimePicker
             android:id="@+id/DateTimePicker_TimeDialog"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:timePickerMode="spinner"
             android:scaleX="0.65"
             android:scaleY="0.65"
-            android:timePickerMode="spinner"
-            android:layout_marginLeft="-50sp"/>
+            android:layout_marginLeft="-50sp"
+            android:background="@android:color/transparent" />
 
     </GridLayout>
 
 </LinearLayout>
 
-<!--Amrit code -->
+
+    <!--Amrit code -->
 <!--<LinearLayout-->
 <!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
 <!--    android:orientation="horizontal"-->

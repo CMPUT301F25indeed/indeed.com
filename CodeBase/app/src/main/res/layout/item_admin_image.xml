@@ -3,28 +3,36 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginTop="16dp"
-    android:layout_marginBottom="16dp"
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
     android:background="@drawable/bg_admin_image_card">
 
-    <!-- Full–width image -->
-    <ImageView
-        android:id="@+id/image_thumb"
+    <!-- Rounded image container (matching entrant/admin size) -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:cropToPadding="false" />
+        android:layout_height="180dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_event_image_rounded"
+        android:clipToOutline="true"
+        android:outlineProvider="background">
 
-    <!-- Image title -->
+        <ImageView
+            android:id="@+id/image_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true" />
+    </FrameLayout>
+
+    <!-- Title (same spacing as event cards) -->
     <TextView
         android:id="@+id/image_event_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
         android:gravity="center"
         android:textSize="18sp"
         android:textStyle="bold"

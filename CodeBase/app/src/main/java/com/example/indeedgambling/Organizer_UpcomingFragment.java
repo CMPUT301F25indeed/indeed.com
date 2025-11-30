@@ -1,13 +1,11 @@
 package com.example.indeedgambling;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-
-
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -43,22 +41,19 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 /**
  * Fragment that displays the organizer's upcoming events.
- * <p>
+ *
  * Provides functionality for:
- * <ul>
- *     <li>Displaying a list of upcoming events</li>
- *     <li>Creating new events via a popup dialog</li>
- *     <li>Viewing and updating event details (location, poster, waitlist, invited list)</li>
- *     <li>Sending notifications to event entrants</li>
- * </ul>
- * <p>
+ *  - Displaying a list of upcoming events
+ *  - Creating new events via a popup dialog
+ *  - Viewing and updating event details (location, poster, waitlist, invited list)
+ *  - Sending notifications to event entrants
+ *
  * Handles interaction with Firebase via {@link FirebaseViewModel} and
  * state management via {@link OrganizerViewModel}.
  */
-
-
 public class Organizer_UpcomingFragment extends Fragment {
 
     //Server info
@@ -66,24 +61,26 @@ public class Organizer_UpcomingFragment extends Fragment {
     private OrganizerViewModel organizerVM;
     private String orgID;
 
-    //Local storage of server info
+    // Root view + event list
+    private View view;
+    private ListView EventList;
 
-    //EventList Array
-    ArrayList<Event> EventArray = new ArrayList<>();
-    ArrayAdapter<Event> UpcomingEventsAdapter;
+    // Event list backing data + card adapter
+    private final ArrayList<Event> EventArray = new ArrayList<>();
+    private OrganizerEventCardAdapter eventAdapter;
 
-    ArrayList<Profile> WaitingListArray = new ArrayList<>();
-    ArrayAdapter<Profile> WaitingListAdapter;
+    // Local storage for lists (kept in sync by snapshot listener)
+    private final ArrayList<Profile> WaitingListArray = new ArrayList<>();
+    private ArrayAdapter<Profile> WaitingListAdapter;
 
+    private final ArrayList<Profile> invitedPeople = new ArrayList<>();
+    private ArrayAdapter<Profile> inviteListAdapter;
 
-    ArrayList<Profile> invitedPeople = new ArrayList<>();
-    ArrayAdapter<Profile> inviteListAdapter;
+    private final ArrayList<Profile> cancelledPeople = new ArrayList<>();
+    private ArrayAdapter<Profile> cancelledListAdapter;
 
-    ArrayList<Profile> cancelledPeople = new ArrayList<>();
-    ArrayAdapter<Profile> cancelledListAdapter;
-
-    ArrayList<Profile> acceptedPeople = new ArrayList<>();
-    ArrayAdapter<Profile> acceptedListAdapter;
+    private final ArrayList<Profile> acceptedPeople = new ArrayList<>();
+    private ArrayAdapter<Profile> acceptedListAdapter;
 
 
     private double lat;
@@ -100,26 +97,27 @@ public class Organizer_UpcomingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        //Views
-        View view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
+        view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
         Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
         orgID = organizerVM.getOrganizer().getValue().getProfileId();
 
-        //Displaying Organizer's events
-        //Event adapter setup
-        UpcomingEventsAdapter = new ArrayAdapter<>(requireContext(),android.R.layout.simple_list_item_1,EventArray);
+        // --- profile list adapters ---
         WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
         inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
         cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
         acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
 
+        // --- event card list ---
+        EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
+        eventAdapter = new OrganizerEventCardAdapter(
+                requireContext(),
+                EventArray,
+                Data
+        );
+        EventList.setAdapter(eventAdapter);
 
-
-
-        //Pull data
-        ListView eventList = view.findViewById(R.id.Organizer_UpcomingEventList);
-        eventList.setAdapter(UpcomingEventsAdapter);
+        // Pull data for upcoming events
         RefreshUpcomingEventList();
 
 
@@ -134,22 +132,20 @@ public class Organizer_UpcomingFragment extends Fragment {
             NavHostFragment.findNavController(this).navigate(R.id.action_organizerUpcomingFragment_to_organizerHomeFragment);
         });
 
-
-        // Show popup when clicking an event in the list
-        eventList.setOnItemClickListener((parent, itemView, position, id) -> {
+        // Popup event on click
+        EventList.setOnItemClickListener((parent, itemView, position, id) -> {
             Event clickedEvent = (Event) parent.getItemAtPosition(position);
-            showEventPopup(clickedEvent); // Back to original
+            showEventPopup(clickedEvent);
         });
 
-
-        //+New Event functionality.
+        // +New Event button functionality
         Button NewEvent = view.findViewById(R.id.Organizer_Upcoming_NewEventButton);
-        NewEvent.setOnClickListener(v -> {showNewEventPopup();});
+        NewEvent.setOnClickListener(v -> showNewEventPopup());
 
         return view;
-
     }
 
+    // ---------------- POPUPS ----------------
 
                         //---------------- POPUPS -------------//
     /**
@@ -217,12 +213,13 @@ public class Organizer_UpcomingFragment extends Fragment {
         RegStartDateInput.setMinDate(CurrentTime);
 
 
-        //New Event Making Dialog
+        //New Event Dialog
         AlertDialog NewEvent = new AlertDialog.Builder(requireContext())
                 .setTitle("New Event")
                 .setView(popupView)
-                .setPositiveButton("Confirm",null)
-                .setNegativeButton("Cancel", null).show();
+                .setPositiveButton("Confirm", null)
+                .setNegativeButton("Cancel", null)
+                .show();
 
         //Map location chooser.
         LocationSelector.setOnClickListener(v -> {
@@ -255,7 +252,7 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
             //Refuse incorrect start-end date for registration
             if (RegStartDate.after(RegEndDate)){
-                WarningToast("Registration start cannot be BEFORE Registration End!");
+                WarningToast("Registration end cannot be BEFORE Registration start!");
                 return;
             }
 
@@ -313,18 +310,15 @@ public class Organizer_UpcomingFragment extends Fragment {
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
             }
 
-
-            // Generate QR code for the new event
             Bitmap qrCodeBitmap = CreatedEvent.generateQRCode();
             if (qrCodeBitmap != null) {
                 Log.d("QR_CODE", "QR code generated for new event: " + CreatedEvent.getEventName());
             }
+
             Data.Add(CreatedEvent);
 
 
 
-
-            //Amrit
             if (selectedImageUri != null) {
                 try {
                     InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
@@ -337,6 +331,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                     } else if (bitmap.getByteCount() > 800_000) { // moderate resize
                         bitmap = Bitmap.createScaledBitmap(bitmap, 800, 800, true);
                     }
+
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
@@ -378,14 +373,10 @@ public class Organizer_UpcomingFragment extends Fragment {
             //Close the popup
             NewEvent.dismiss();
         });
-
-
     }
 
-    /** Popup to display created Event's information and do basic actions
-     *
-     */
-    private void showEventPopup(Event event){
+    /** Popup to display created Event's information and do basic actions */
+    private void showEventPopup(Event event) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View popupView = inflater.inflate(R.layout.organization_event_popup, null);
 
@@ -420,16 +411,17 @@ public class Organizer_UpcomingFragment extends Fragment {
         //Hiding the end registration button if it is not needed
         if (!event.RegistrationOpen()){
             endRegButton.setVisibility(View.GONE);
-            ((ViewGroup) endRegButton.getParent()).removeView(endRegButton);
+            ViewGroup parent = (ViewGroup) endRegButton.getParent();
+            if (parent != null) {
+                parent.removeView(endRegButton);
+            }
         }
 
                                             //--    Setting Display Texts -- //
 
-        //Description
+        // --- set text fields ---
         Description.setText(event.getDescription());
-
         Criteria.setText(event.getCriteria());
-
         Category.setText(event.getCategory());
 
         //Registration Period: Mon Nov 03 11:11:00 MST 2025 - Tues Nov 04 12:00:00 MST 2025
@@ -455,7 +447,12 @@ public class Organizer_UpcomingFragment extends Fragment {
                         .collection("events")
                         .document(event.getEventId())
                         .addSnapshotListener((docSnapshot, error) -> {
+                            if (error != null || docSnapshot == null || !docSnapshot.exists()) {
+                                return;
+                            }
+
                             Event updatedEvent = docSnapshot.toObject(Event.class);
+                            if (updatedEvent == null) return;
 
                             //Update local data
                             event.setWaitingList((ArrayList<String>) updatedEvent.getWaitingList());
@@ -487,7 +484,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                                         invitedPeople.addAll(InvitedList);
                                         inviteListAdapter.notifyDataSetChanged();
                                     },
-                                    e->{Log.d("Firestore Error",e.toString());});
+                                    e->Log.d("Firestore Error",e.toString()));
 
                             //CancelledList Data
                             Data.getProfiles(updatedEvent.getCancelledEntrants(),
@@ -497,7 +494,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                                         cancelledPeople.addAll(cancelledList);
                                         cancelledListAdapter.notifyDataSetChanged();
                                     },
-                                    e->{Log.d("Firestore Error",e.toString());});
+                                    e -> Log.d("Firestore Error", e.toString()));
 
                             //AcceptedList Data
                             Data.getProfiles(updatedEvent.getAcceptedEntrants(),
@@ -507,8 +504,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                                         acceptedPeople.addAll(acceptedList);
                                         acceptedListAdapter.notifyDataSetChanged();
                                     },
-                                    e->{Log.d("Firestore Error",e.toString());});
-
+                                    e -> Log.d("Firestore Error", e.toString()));
                         });
 
 
@@ -573,6 +569,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                 startActivityForResult(Intent.createChooser(pickIntent, "Select New Poster"), PICK_IMAGE_REQUEST);
             });
         }
+
+        // View poster button
         if (viewPosterButton != null) {
             if (event.getImageUrl() != null && !event.getImageUrl().isEmpty()) {
                 viewPosterButton.setVisibility(View.VISIBLE);
@@ -619,7 +617,7 @@ public class Organizer_UpcomingFragment extends Fragment {
             }
         }
 
-
+        // QR code
         Bitmap qrBitmap = event.generateQRCode();
         if (qrBitmap != null) {
             QRCode.setImageBitmap(qrBitmap);
@@ -629,6 +627,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         }
 
         //Notification Pop-up, closes event pop-up
+        if (notificationButton != null){
         notificationButton.setOnClickListener(v->{
             Log.d("DEBUG", "Notification button clicked!");
             //is button click working
@@ -638,9 +637,10 @@ public class Organizer_UpcomingFragment extends Fragment {
             eventDialog.dismiss();
 
             NavHostFragment.findNavController(Organizer_UpcomingFragment.this).navigate(R.id.notificationSenderFragment);
-        });
+        });}
     }
 
+    // poster update result
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -668,7 +668,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 25, baos);
                     String base64String = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
-
 
                     String oldDocId = currentEventForUpdate.getImageUrl();
 
@@ -700,7 +699,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                                 );
                     };
 
-                    // If old poster exists → delete it first
                     if (oldDocId != null && !oldDocId.isEmpty()) {
                         Data.getDb().collection("images").document(oldDocId)
                                 .delete()
@@ -713,12 +711,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                         uploadNewPoster.run();
                     }
 
-
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(requireContext(), "Image convert failed", Toast.LENGTH_SHORT).show();
                 }
-
             }
         }
     }
@@ -776,7 +772,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-    private void InviteListPopup(){
+    /** Invited entrants popup (uses local invitedPeople list) */
+    private void InviteListPopup() {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -791,7 +788,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-    private void AcceptedListPopup(){
+    /** Accepted entrants popup (uses local acceptedPeople list) */
+    private void AcceptedListPopup() {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -806,11 +804,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-    /** Registration for ending the pop-up
-     *
-     * @param event
-     */
-    private void EndRegPopup(Event event){
+    /** End registration popup */
+    private void EndRegPopup(Event event) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Are you sure you want to end the registration period?")
                 .setMessage("Doing so will close the event")
@@ -824,31 +819,21 @@ public class Organizer_UpcomingFragment extends Fragment {
                     //Close popup of event on success and update events
                     Data.updateEvent(event.getEventId(), update, ()->{
                                 WarningToast("Registration for ".concat(event.getEventName()).concat(" ended"));
-
-                                //Refresh page on success
                                 RefreshUpcomingEventList();
                             },
                             e -> Log.d("Firebase Error", "Error pushing registration changes to server:".concat(e.toString())));
-
-                    //Close event screen
                 }))
                 .setNegativeButton("Never mind",null)
                 .show();
     }
 
+    // -------------------- UPDATING EVENT LIST -------------------- //
 
-            // -------------------- UPDATING LISTVIEWS -------------//
-
-    /** Updates what events are on the array
-     *
-     * @param eventsToShow
-     */
-    private void UpdateEventList(List<Event> eventsToShow){
-        //Update the array for display without replacing the reference
+    private void UpdateEventList(List<Event> eventsToShow) {
         EventArray.clear();
         EventArray.addAll(eventsToShow);
         //Notify the adapter
-        UpcomingEventsAdapter.notifyDataSetChanged();
+        eventAdapter.notifyDataSetChanged();
         Log.d("DEBUG Updated List", "Organizer Event List update ran");
     }
 
@@ -862,7 +847,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         });}).start();
     }
 
-                // ------------- Helpers --------- //
+    // -------------------- HELPERS -------------------- //
 
     /** POPUP that invites the entrants according to the number inputted by the user.
      * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
@@ -873,7 +858,6 @@ public class Organizer_UpcomingFragment extends Fragment {
         View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
 
-        //Building integer input dialog
         new AlertDialog.Builder(requireContext())
                 .setTitle("Number of entrants to invite (Up to ".concat(Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat(")"))
                 .setView(helperView)
@@ -882,14 +866,10 @@ public class Organizer_UpcomingFragment extends Fragment {
                     int number;
                     try {
                         number = Integer.parseInt(numberInp.getText().toString().trim());
-                        //If a non-int was passed, do nothing
                     } catch (Exception e) {
                         number = 0;
-                        //throw new RuntimeException(e);
                     }
 
-
-                    //Send out invites
                     event.InviteEntrants(number);
 
                     Map<String, Object> update = new HashMap<>();
@@ -917,6 +897,7 @@ public class Organizer_UpcomingFragment extends Fragment {
     private void replaceEntrants(Event event, LayoutInflater inflater){
         View helperView = inflater.inflate(R.layout.text_input_helper,null);
         EditText numberInp = helperView.findViewById(R.id.EditText_helper);
+
         int NumCancelled = event.getCancelledEntrants().size();
         int numWaiting = event.getLostList().size() + event.getWaitingList().size();
         if (numWaiting == 0){
@@ -927,6 +908,7 @@ public class Organizer_UpcomingFragment extends Fragment {
             WarningToast("There are no Cancelled Entrants to replace!");
             return;
         }
+
         new AlertDialog.Builder(requireContext())
                 .setTitle("Number of entrants to replace (Up to ".concat(Integer.toString(Math.min(NumCancelled,numWaiting))).concat(")"))
                 .setView(helperView)
@@ -975,10 +957,5 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     private void updateCapacityDisplay(TextView Capacity, Event event){
         Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
-    }
-
-    private void updateNewEventLocation(double lat, double lng){
-        this.lat = lat;
-        this.lng = lng;
     }
 }

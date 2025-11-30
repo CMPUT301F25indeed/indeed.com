@@ -4,22 +4,51 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="25dp"
+    android:layout_marginBottom="25dp"
+    android:background="@drawable/bg_admin_image_card">
 
+    <!-- Rounded image container (slightly shorter) -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="170dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_event_image_rounded"
+        android:clipToOutline="true">
+
+        <ImageView
+            android:id="@+id/history_event_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true" />
+    </FrameLayout>
+
+    <!-- Event Title -->
     <TextView
         android:id="@+id/history_event_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Event title"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:gravity="center"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
 
+    <!-- Status -->
     <TextView
         android:id="@+id/history_event_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Status"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
+        android:textColor="#BBBBBB"
+        android:textSize="13sp"
+        android:gravity="center"
+        android:paddingTop="2dp"
+        android:paddingBottom="6dp" />
 
 </LinearLayout>
