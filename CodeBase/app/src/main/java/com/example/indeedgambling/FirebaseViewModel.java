@@ -454,6 +454,25 @@ public class FirebaseViewModel extends ViewModel {
     // -------------------------
     // Invitations / accept
     // -------------------------
+    public void getInvitationStatus(String eventId,
+                                    String entrantId,
+                                    Consumer<String> onResult,
+                                    Consumer<Exception> onErr) {
+
+        String docId = eventId + "_" + entrantId;
+
+        INVITES.document(docId).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) {
+                        onResult.accept("none");
+                        return;
+                    }
+                    String status = doc.getString("status");
+                    if (status == null) status = "none";
+                    onResult.accept(status);
+                })
+                .addOnFailureListener(onErr::accept);
+    }
 
 
     /**

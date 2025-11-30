@@ -12,16 +12,10 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
-/**
- *
- */
 public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
 
     private final String entrantId;
 
-    /**
-     *
-     */
     public EntrantHistoryAdapter(@NonNull Context context,
                                  @NonNull List<Event> events,
                                  @NonNull String entrantId) {
@@ -53,25 +47,31 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
 
         String which = e.whichList(entrantId);
         String label;
+
         switch (which) {
             case "invited":
                 label = "Invited";
                 break;
+
             case "accepted":
                 label = "Accepted";
                 break;
+
             case "cancelled":
-                label = "Not selected (lost lottery)";
+                // Declined = user pressed decline
+                label = "Declined";
                 break;
-            case "waitlist":
+
+            case "waitingList":
                 label = "Waitlisted";
                 break;
+
             default:
                 label = "Joined";
                 break;
         }
-        status.setText(label);
 
+        status.setText(label);
         return v;
     }
 }
