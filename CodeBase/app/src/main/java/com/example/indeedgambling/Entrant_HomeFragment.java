@@ -1,3 +1,12 @@
+/**
+ * Displays the Entrant home screen.
+ *
+ * Features:
+ * - Shows entrant options (Browse, History, Profile, etc.)
+ * - Displays most recent notification
+ * - Provides logout functionality that clears the saved deviceId
+ *   so auto-login does not occur next time.
+ */
 package com.example.indeedgambling;
 
 import android.os.Bundle;
@@ -16,22 +25,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
-/**
- *
- */
 public class Entrant_HomeFragment extends Fragment {
 
     private EntrantViewModel entrantVM;
     private FirebaseViewModel fvm;
 
-    /**
-     *
-     */
     public Entrant_HomeFragment() {}
 
-    /**
-     *
-     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
@@ -44,7 +44,6 @@ public class Entrant_HomeFragment extends Fragment {
         TextView greeting = view.findViewById(R.id.entrant_greeting_home);
 
         String[] optionsString = {"Browse", "History", "Profile", "Guidelines", "Notifications", "Scan QR Code"};
-
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
@@ -61,17 +60,12 @@ public class Entrant_HomeFragment extends Fragment {
         Profile e = entrantVM.getCurrentEntrant();
         greeting.setText("Hi " + e.getPersonName());
 
-        /**
-         *
-         */
         if (e.getProfileId() != null) {
             String entrantId = e.getProfileId();
 
             fvm.fetchLatestNotification(entrantId,
                     notification -> {
-                        if (notification == null) {
-                            return;
-                        }
+                        if (notification == null) return;
 
                         new AlertDialog.Builder(requireContext())
                                 .setTitle("Notification")
@@ -83,9 +77,6 @@ public class Entrant_HomeFragment extends Fragment {
                             "Failed to load latest notification", error));
         }
 
-        /**
-         *
-         */
         options.setOnItemClickListener((parent, itemView, position, id) -> {
             if (position == 0) {
                 NavHostFragment.findNavController(this)
@@ -96,11 +87,8 @@ public class Entrant_HomeFragment extends Fragment {
             } else if (position == 2) {
                 Bundle args = new Bundle();
                 args.putString("profileID", e.getProfileId());
-
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.settingsFragment, args);
-
-
             } else if (position == 3) {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.entrant_GuidelinesFragment);
@@ -113,9 +101,32 @@ public class Entrant_HomeFragment extends Fragment {
             }
         });
 
-        LogoutButton.setOnClickListener(v ->
+        LogoutButton.setOnClickListener(v -> {
+            Entrant current = entrantVM.getCurrentEntrant();
+
+            if (current != null) {
+                String profileId = current.getProfileId();
+
+                fvm.updateProfile(
+                        profileId,
+                        java.util.Collections.singletonMap("deviceId", null),
+                        () -> {
+                            entrantVM.setEntrant(null);
+                            NavHostFragment.findNavController(this)
+                                    .navigate(R.id.action_entrantHomeFragment_to_startUpFragment);
+                        },
+                        err -> {
+                            entrantVM.setEntrant(null);
+                            NavHostFragment.findNavController(this)
+                                    .navigate(R.id.action_entrantHomeFragment_to_startUpFragment);
+                        }
+                );
+            } else {
+                entrantVM.setEntrant(null);
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_entrantHomeFragment_to_startUpFragment));
+                        .navigate(R.id.action_entrantHomeFragment_to_startUpFragment);
+            }
+        });
 
         return view;
     }

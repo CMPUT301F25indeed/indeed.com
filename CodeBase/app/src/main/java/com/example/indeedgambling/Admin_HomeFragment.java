@@ -14,7 +14,8 @@ import androidx.navigation.fragment.NavHostFragment;
 public class Admin_HomeFragment extends Fragment {
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.admin_dashboard_fragment, container, false);
@@ -26,36 +27,43 @@ public class Admin_HomeFragment extends Fragment {
         Button logout = view.findViewById(R.id.admin_logout);
         Button settings = view.findViewById(R.id.admin_settings);
 
-        AdminViewModel adminVM = new ViewModelProvider(requireActivity()).get(AdminViewModel.class);
+        AdminViewModel adminVM =
+                new ViewModelProvider(requireActivity()).get(AdminViewModel.class);
+
         Profile admin = adminVM.getAdmin();
 
         manageProfiles.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.adminManageProfilesFragment));
+                        .navigate(R.id.adminManageProfilesFragment)
+        );
 
         browseEvents.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.adminBrowseEventsFragment));
+                        .navigate(R.id.adminBrowseEventsFragment)
+        );
 
         reviewImages.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.adminReviewImagesFragment));
+                        .navigate(R.id.adminReviewImagesFragment)
+        );
 
         viewLogs.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.adminLogsFragment));
-
+                        .navigate(R.id.adminLogsFragment)
+        );
 
         settings.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putString("profileID", admin.getProfileId());
+
             NavHostFragment.findNavController(this)
                     .navigate(R.id.settingsFragment, args);
         });
 
         logout.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.startUpFragment));
+                        .navigate(R.id.startUpFragment)
+        );
 
         return view;
     }

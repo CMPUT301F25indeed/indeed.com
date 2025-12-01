@@ -51,47 +51,49 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         TextView statusView = convertView.findViewById(R.id.history_event_status);
         ImageView imageView = convertView.findViewById(R.id.history_event_image);
 
-        // ----- Title -----
         String name = event.getEventName();
         if (name == null || name.isEmpty()) {
             name = "Untitled event";
         }
         titleView.setText(name);
 
-        // ----- Status text -----
-        String listName = event.whichList(entrantId); // "waiting", "invited", "accepted", "cancelled", maybe null
+        // Status
+        String listName = event.whichList(entrantId);
         String statusText;
         switch (listName) {
             case "waiting":
                 statusText = "On waitlist";
                 break;
+
             case "invited":
                 statusText = "Invited – tap to respond";
                 break;
+
             case "accepted":
                 statusText = "Accepted";
                 break;
+
             case "cancelled":
                 statusText = "Cancelled";
                 break;
+
             default:
                 statusText = "Not active";
                 break;
         }
+
         statusView.setText(statusText);
 
-        // ----- Image placeholder (rounded grey background) -----
+        // Placeholder image
         imageView.setImageBitmap(null);
         imageView.setBackgroundResource(R.drawable.bg_event_image_rounded);
 
         String imageDocId = event.getImageUrl();
         if (imageDocId == null || imageDocId.isEmpty()) {
-            // no poster → keep grey rounded box
             imageView.setTag(null);
             return convertView;
         }
 
-        // Tag to avoid wrong image on recycled rows
         imageView.setTag(imageDocId);
 
         db.collection("images")
@@ -100,7 +102,6 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                 .addOnSuccessListener((DocumentSnapshot doc) -> {
                     if (!doc.exists()) return;
 
-                    // still same row?
                     Object tag = imageView.getTag();
                     if (!(tag instanceof String) || !imageDocId.equals(tag)) {
                         return;
@@ -115,15 +116,10 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                         byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
                         Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
                         if (bmp != null) {
-                            imageView.setBackground(null); // remove grey background so corners show
+                            imageView.setBackground(null);
                             imageView.setImageBitmap(bmp);
                         }
-                    } catch (Exception e) {
-                        // if decode fails, just keep placeholder
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // ignore, keep grey box
+                    } catch (Exception ignored) {}
                 });
 
         return convertView;
