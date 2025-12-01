@@ -6,38 +6,23 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- TOP BAR -->
-    <RelativeLayout
+    <!-- Spacer to prevent sticking to status bar -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
+    <!-- TITLE BAR (no back button inside now) -->
+    <TextView
+        android:id="@+id/admin_browse_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:layout_marginTop="24dp">
-
-        <!-- PRIMARY BACK BUTTON -->
-        <Button
-            android:id="@+id/admin_browse_back"
-            android:layout_width="90dp"
-            android:layout_height="44dp"
-            android:text="Back"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/bg_button_primary"
-            android:textAllCaps="false"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true" />
-
-        <!-- TITLE -->
-        <TextView
-            android:id="@+id/admin_browse_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Browse Profiles"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
-
-    </RelativeLayout>
+        android:text="Browse Profiles"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:padding="4dp"
+        android:layout_marginBottom="4dp"/>
 
     <!-- QUOTE UNDER TITLE -->
     <TextView
@@ -48,37 +33,33 @@
         android:textSize="14sp"
         android:textColor="#BBBBBB"
         android:gravity="center"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="10dp" />
 
     <!-- DIVIDER -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="#333333" />
+        android:background="#333333"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="14dp" />
 
-    <!-- SEARCH + FILTER ROW -->
+    <!-- SEARCH & FILTER ROW -->
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
 
-        <!-- SEARCH BAR -->
         <SearchView
             android:id="@+id/admin_profiles_search"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:queryHint="Search name/email"
-            android:iconifiedByDefault="false" />
+            android:iconifiedByDefault="false"
+            android:queryHint="Search name/email" />
 
-        <!-- FILTER SPINNER -->
         <Spinner
             android:id="@+id/admin_profiles_filter"
             android:layout_width="130dp"
@@ -87,12 +68,27 @@
             android:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
     </LinearLayout>
 
-    <!-- RECYCLER -->
+    <!-- RECYCLER (scrollable area) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/admin_profiles_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="12dp"/>
+        android:divider="@android:color/transparent"
+        android:dividerHeight="20dp"
+        android:padding="12dp" />
+
+    <!-- FIXED BOTTOM BUTTON -->
+    <Button
+        android:id="@+id/admin_browse_back"
+        android:layout_width="322dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_button_primary"
+        android:text="Back to Dashboard"
+        android:textColor="#FFFFFF"
+        android:textAllCaps="false" />
 
 </LinearLayout>

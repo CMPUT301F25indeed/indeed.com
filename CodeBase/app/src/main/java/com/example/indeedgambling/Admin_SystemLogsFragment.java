@@ -50,10 +50,81 @@ public class Admin_SystemLogsFragment extends Fragment {
         adapter = new NotificationLoggedAdapter();
         recycler.setAdapter(adapter);
 
+        // ---- NEW ---- set up Remove + Item click ----
+        adapter.setOnRemoveClickListener(notification -> showDeleteConfirmation(notification));
+        adapter.setOnItemClickListener(notification -> showNotificationDetails(notification));
+
         observeNotifications();
         setupSearch();
         setupSpinner();
     }
+
+    /** Popup to confirm delete */
+    private void showDeleteConfirmation(Notification notification) {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_confirm, null);
+
+        TextView title = dialogView.findViewById(R.id.dialog_title);
+        TextView message = dialogView.findViewById(R.id.dialog_message);
+        Button cancelBtn = dialogView.findViewById(R.id.dialog_cancel);
+        Button yesBtn = dialogView.findViewById(R.id.dialog_yes);
+
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+
+        yesBtn.setOnClickListener(v -> {
+            fvm.deleteNotification(notification);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+
+    /** Popup to show detailed info */
+    private void showNotificationDetails(Notification notification) {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_notification_popup, null);
+
+        TextView eventView   = dialogView.findViewById(R.id.dialog_noti_event);
+        TextView senderView  = dialogView.findViewById(R.id.dialog_noti_sender);
+        TextView messageView = dialogView.findViewById(R.id.dialog_noti_message);
+        TextView timeView    = dialogView.findViewById(R.id.dialog_noti_time);
+        TextView typeView    = dialogView.findViewById(R.id.dialog_noti_type);
+        Button okButton      = dialogView.findViewById(R.id.dialog_noti_ok);
+
+        eventView.setText(notification.getEventName() != null ? notification.getEventName() : "N/A");
+        senderView.setText(notification.getSenderEmail() != null ? notification.getSenderEmail() : "system");
+        messageView.setText(notification.getMessage() != null ? notification.getMessage() : "");
+        timeView.setText(formatTimestamp(notification.getTimestamp()));
+        typeView.setText(notification.getType() != null ? notification.getType() : "N/A");
+
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create();
+
+        okButton.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+
+    /** Reuse the timestamp formatter from your adapter */
+    private String formatTimestamp(Date date) {
+        if (date == null) return "";
+
+        long diff = new Date().getTime() - date.getTime();
+        long mins = diff / (1000 * 60);
+        long hours = mins / 60;
+        long days = hours / 24;
+
+
+        return new java.text.SimpleDateFormat("MMM d, yyyy • h:mm a", java.util.Locale.getDefault()).format(date);
+    }
+
 
     private void setupSpinner() {
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(

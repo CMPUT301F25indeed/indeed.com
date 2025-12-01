@@ -13,15 +13,33 @@
         <!-- Profile Image -->
         <ImageView
             android:id="@+id/profile_detail_image"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
             android:layout_gravity="center"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background"
-            android:background="#222222"
+            android:background="@drawable/circle_mask"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
+            android:clipToOutline="true"
+            android:adjustViewBounds="true"
             android:padding="4dp"/>
+
+        <!-- PROFILE ID -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Profile ID:"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/profile_detail_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:paddingBottom="14dp"/>
 
         <!-- NAME -->
         <TextView
@@ -30,7 +48,7 @@
             android:text="Name:"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/profile_detail_name"
@@ -47,7 +65,7 @@
             android:text="Email:"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/profile_detail_email"
@@ -64,7 +82,7 @@
             android:text="Phone:"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/profile_detail_phone"
@@ -81,7 +99,7 @@
             android:text="Role:"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/profile_detail_role"
@@ -91,27 +109,43 @@
             android:textSize="16sp"
             android:paddingBottom="20dp"/>
 
-        <!-- Buttons -->
+        <!-- RELATED EVENTS SECTION -->
         <LinearLayout
-            android:orientation="horizontal"
+            android:id="@+id/related_events_container"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp">
+            android:visibility="visible">
 
-            <!-- Back -->
-            <Button
-                android:id="@+id/profile_detail_back"
+            <TextView
+                android:id="@+id/related_events_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Back"
-                android:textAllCaps="false"
+                android:text="Related Events:"
+                android:textStyle="bold"
                 android:textColor="#FFFFFF"
-                android:background="@drawable/bg_button_primary"
-                android:backgroundTint="@null"/>
+                android:textSize="18sp"
+                android:paddingBottom="8dp"/>
 
-
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/profile_related_events_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"/>
         </LinearLayout>
+
+        <!-- BACK BUTTON AT THE VERY BOTTOM OF THE PAGE -->
+        <Button
+            android:id="@+id/profile_detail_back"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="32dp"
+            android:text="Back"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"
+            android:padding="16dp"/>
 
     </LinearLayout>
 </ScrollView>
