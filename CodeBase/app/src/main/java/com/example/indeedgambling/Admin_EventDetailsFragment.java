@@ -144,10 +144,11 @@ public class Admin_EventDetailsFragment extends Fragment {
 
         status.setText(event.getStatus());
 
-        if (event.getWaitingList() != null) {
-            total.setText(String.valueOf(event.getWaitingList().size()));
-        } else {
-            total.setText("0");
+
+        if (event.getWaitingList() != null&&event.RegistrationOpen()) {
+            total.setText(String.valueOf(event.getWaitingList().size()+"/"+event.getMaxWaitingEntrantsString()));
+        } else if (!(event.RegistrationOpen())&&event.getLostList() != null) {
+            total.setText(String.valueOf(event.getLostList().size()+"/"+event.getMaxWaitingEntrantsString()));
         }
 
     }
