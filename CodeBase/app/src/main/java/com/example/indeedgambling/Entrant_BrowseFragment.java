@@ -1,10 +1,3 @@
-/**
- * Displays all available events for Entrants to browse.
- * Supports filtering by category and optional date/time range.
- * Integrates with Firebase to load events and applies filters through
- * fetchEventsByCategoryAndDate. Navigates to event details when an
- * event is selected.
- */
 package com.example.indeedgambling;
 
 import android.app.AlertDialog;
@@ -54,7 +47,7 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         RecyclerView recyclerView = v.findViewById(R.id.entrant_events_browse);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new EventsAdapter(this);
+        adapter = new EventsAdapter(this, firebaseVM);
         recyclerView.setAdapter(adapter);
 
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {

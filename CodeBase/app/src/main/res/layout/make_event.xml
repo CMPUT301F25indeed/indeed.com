@@ -1,126 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="16dp">
 
     <LinearLayout
-        android:padding="16dp"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_admin_image_card"
+        android:padding="20dp">
+
+        <!-- EVENT TITLE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create New Event"
+            android:textSize="20sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/ibmplexserif_semibold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- NAME -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Event Title"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans" />
 
         <EditText
             android:id="@+id/NewEventPopup_NameDialog"
             android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edittext_dark"
+            android:hint="Enter event title"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#777777"
+            android:textSize="16sp"
+            android:fontFamily="@font/opensans" />
+
+        <!-- DESCRIPTION -->
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Event Title" />
+            android:layout_marginTop="14dp"
+            android:text="Description"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans" />
 
         <EditText
             android:id="@+id/NewEventPopup_Description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Description"
             android:minLines="2"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edittext_dark"
+            android:hint="Describe your event"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#777777"
+            android:textSize="16sp"
+            android:fontFamily="@font/opensans" />
+
+        <!-- CRITERIA -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Criteria for Sign-up"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans" />
 
         <EditText
             android:id="@+id/NewEventPopup_Criteria"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Criteria for Sign-up"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edittext_dark"
+            android:hint="Who can sign up?"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#777777"
+            android:textSize="16sp"
+            android:fontFamily="@font/opensans" />
+
+        <!-- CATEGORY -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Category"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans" />
 
         <EditText
             android:id="@+id/NewEventPopup_Category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Category"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edittext_dark"
+            android:hint="Sports, Social, Academic..."
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#777777"
+            android:textSize="16sp"
+            android:fontFamily="@font/opensans" />
 
-        <EditText
+        <!-- LOCATION -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Location"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans" />
+
+        <Button
             android:id="@+id/NewEventPopup_Location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Location"
+            android:textColor="@color/white"
+            android:text="Select Location"
             android:layout_marginTop="8dp"/>
 
+        <CheckBox
+            android:id="@+id/NewEventPopup_GeoRequirement"
+            android:text="Restrict sign-up to radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/NewEventPopup_GeoRequirement_Radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Restriction Radius (meters)"
+            android:inputType="number"
+            android:textColor="@color/white"
+            android:textColorHint="@color/cardview_light_background"
+            android:layout_marginTop="8dp"/>
+
+        <!-- POSTER SECTION -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Event Poster"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:layout_marginTop="12dp" />
+            android:fontFamily="@font/opensans"
+            android:layout_marginTop="18dp" />
 
         <Button
             android:id="@+id/NewEventPopup_UploadPosterButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="46dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_button_primary"
             android:text="Upload Poster (Optional)"
             android:textAllCaps="false"
             android:textSize="16sp"
-            android:padding="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp" />
-
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/opensans" />
 
         <ImageView
             android:id="@+id/NewEventPopup_PosterPreview"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="4dp"
             android:layout_marginBottom="8dp"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
+            android:background="@drawable/bg_event_image_rounded"
+            android:clipToOutline="true"
+            android:contentDescription="Event Poster Preview"
             android:visibility="gone" />
 
-
+        <!-- REGISTRATION START -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Registration Start"
-            android:layout_marginBottom="-20sp"/>
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="4dp" />
 
         <include
             android:id="@+id/RegistrationOpen"
             layout="@layout/datetime_picker" />
 
+        <!-- REGISTRATION END -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Registration End"
-            android:layout_marginBottom="-20sp"/>
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp" />
 
         <include
             android:id="@+id/RegistrationClose"
-            layout="@layout/datetime_picker"/>
+            layout="@layout/datetime_picker" />
 
+        <!-- EVENT START -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Event Start"
-            android:layout_marginBottom="-20sp"/>
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp" />
 
         <include
             android:id="@+id/EventOpen"
             layout="@layout/datetime_picker"/>
 
+        <!-- EVENT END -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Event End"
-            android:layout_marginBottom="-20sp"/>
+            android:textColor="#CCCCCC"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp" />
 
         <include
             android:id="@+id/EventClose"
             layout="@layout/datetime_picker" />
 
+        <!-- CAPACITY -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Capacity (optional)"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="@font/opensans"
+            android:layout_marginTop="18dp" />
+
         <EditText
             android:id="@+id/NewEventPopup_MaxEntrantsDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Capacity (optional)"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edittext_dark"
+            android:hint="Enter max number of entrants"
             android:inputType="number"
-            android:layout_marginTop="10dp"/>
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#777777"
+            android:textSize="16sp"
+            android:fontFamily="@font/opensans" />
+
     </LinearLayout>
 </ScrollView>

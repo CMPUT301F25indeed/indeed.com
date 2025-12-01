@@ -11,19 +11,37 @@
     android:paddingBottom="16dp"
     android:background="#000000">
 
-    <!-- Header -->
+    <!-- HEADING -->
     <TextView
-        android:id="@+id/admin_images_header"
+        android:id="@+id/admin_images_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Browse Images"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="6dp" />
+
+    <!-- SUBTITLE / QUOTE -->
+    <TextView
+        android:id="@+id/admin_images_subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Search, review, or remove uploaded images."
-        android:textSize="16sp"
         android:textColor="#BBBBBB"
-        android:fontFamily="@font/opensans"
+        android:textSize="16sp"
         android:gravity="center"
         android:layout_marginBottom="12dp" />
 
-    <!-- Search bar -->
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#222222"
+        android:layout_marginBottom="16dp" />
+
+    <!-- SEARCH BAR -->
     <SearchView
         android:id="@+id/admin_images_search"
         android:layout_width="match_parent"
@@ -32,7 +50,7 @@
         android:background="#111111"
         android:layout_marginBottom="16dp" />
 
-    <!-- ListView with better spacing -->
+    <!-- LISTVIEW -->
     <ListView
         android:id="@+id/admin_images_list"
         android:layout_width="match_parent"
@@ -42,14 +60,14 @@
         android:dividerHeight="20dp"
         android:layout_marginTop="8dp" />
 
-    <!-- Remove Selected -->
+    <!-- REMOVE SELECTED -->
     <Button
         android:id="@+id/admin_images_remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Remove Selected"
         android:textAllCaps="false"
-        android:textColor="#D32F2F"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:fontFamily="@font/opensans"
         android:background="@drawable/bg_button_danger_border"
@@ -57,18 +75,19 @@
         app:backgroundTint="@null"
         android:layout_marginTop="16dp" />
 
-    <!-- Back button (red border) -->
+    <!-- BACK BUTTON (CENTERED) -->
     <Button
         android:id="@+id/admin_images_back"
-        android:layout_width="match_parent"
+        android:layout_width="294dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/bg_button_danger_border"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_button_primary"
         android:backgroundTint="@null"
         android:fontFamily="@font/opensans"
         android:text="Back to Dashboard"
         android:textAllCaps="false"
-        android:textColor="#D32F2F"
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:backgroundTint="@null" />
 

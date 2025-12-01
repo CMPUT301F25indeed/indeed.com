@@ -1,82 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#000000"
-    android:paddingTop="32dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp">
+    android:background="#000000">
 
-    <!-- Top: Back button + Title -->
-    <RelativeLayout
+    <!-- Spacer to prevent sticking to status bar -->
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="16dp">
+        android:layout_height="20dp" />
 
-        <Button
-            android:id="@+id/admin_browse_back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentStart="true"
-            android:text="←"
-            android:textColor="#FFFFFF"
-            android:background="@drawable/bg_button_danger_border" />
-
-        <TextView
-            android:id="@+id/admin_browse_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Browse Profiles"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/opensans"
-            android:textColor="#FFFFFF"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
-    </RelativeLayout>
-
-    <!-- Subtitle -->
+    <!-- TITLE BAR (no back button inside now) -->
     <TextView
-        android:id="@+id/admin_profiles_sub"
+        android:id="@+id/admin_browse_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search, filter, or review user profiles."
+        android:text="Browse Profiles"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:padding="4dp"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- QUOTE UNDER TITLE -->
+    <TextView
+        android:id="@+id/admin_browse_quote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Every profile tells a story."
+        android:textSize="14sp"
         android:textColor="#BBBBBB"
-        android:textSize="16sp"
-        android:layout_marginBottom="12dp"
-        android:fontFamily="@font/opensans"
-        android:gravity="center" />
+        android:gravity="center"
+        android:layout_marginBottom="10dp" />
 
-    <!-- Search bar -->
-    <SearchView
-        android:id="@+id/admin_profiles_search"
+    <!-- DIVIDER -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="14dp" />
+
+    <!-- SEARCH & FILTER ROW -->
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#111111"
-        android:queryHint="Search name or email"
-        android:layout_marginBottom="12dp" />
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
 
-    <!-- Filter Spinner (Styled) -->
-    <Spinner
-        android:id="@+id/admin_profiles_filter"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="#111111"
-        android:padding="10dp"
-        android:layout_marginBottom="16dp"
-        android:spinnerMode="dropdown" />
+        <SearchView
+            android:id="@+id/admin_profiles_search"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:iconifiedByDefault="false"
+            android:queryHint="Search name/email" />
 
-    <!-- RecyclerView of profile cards -->
+        <Spinner
+            android:id="@+id/admin_profiles_filter"
+            android:layout_width="130dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
+    </LinearLayout>
+
+    <!-- RECYCLER (scrollable area) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/admin_profiles_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp" />
+        android:divider="@android:color/transparent"
+        android:dividerHeight="20dp"
+        android:padding="12dp" />
+
+    <!-- FIXED BOTTOM BUTTON -->
+    <Button
+        android:id="@+id/admin_browse_back"
+        android:layout_width="322dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_button_primary"
+        android:text="Back to Dashboard"
+        android:textColor="#FFFFFF"
+        android:textAllCaps="false" />
 
 </LinearLayout>
