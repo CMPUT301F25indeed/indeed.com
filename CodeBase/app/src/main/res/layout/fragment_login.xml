@@ -16,7 +16,7 @@
         android:id="@+id/login_quote_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Welcome back to IndeedGambling"
+        android:text="Welcome back to inMarket"
         android:textColor="#FFFFFF"
         android:textSize="22sp"
         android:textStyle="bold"
