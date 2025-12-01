@@ -222,8 +222,7 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void clickedJoinWaitlist(View v) {
-        if (event.getWaitingList() != null &&
-                event.getWaitingList().contains(entrantId)) {
+        if (event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
             Toast.makeText(getContext(), "You already joined this waitlist!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -283,8 +282,12 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void updateTotal(View v) {
-        if (event.getWaitingList() != null) {
-            total.setText("Total: " + event.getWaitingList().size());
+        if (event.getWaitingList() != null&&event.RegistrationOpen()) {
+            total.setText("Total: " + event.getWaitingList().size()+"/"+event.getMaxWaitingEntrantsString());
+
+        } else if (!(event.RegistrationOpen())&&event.getLostList() != null) {
+            total.setText("Total: " + event.getLostList().size()+"/"+event.getMaxWaitingEntrantsString());
+
         }
     }
 
