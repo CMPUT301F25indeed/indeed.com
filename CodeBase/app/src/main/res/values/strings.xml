@@ -23,6 +23,19 @@
 8. Always verify event details, such as time and location, before attending.\n\n
 9. Participate responsibly and enjoy the community events fairly!
 </string>
+    <string name="Guidelines_for_Organizer">
+   1. Ensure all event details (name, description, location) are accurate and up to date. This information is visible to all entrants.\n\n
+   2. Set clear criteria and requirements for your events. Entrants should understand what is expected.\n\n
+   3. Monitor registration periods closely. You can manually end registration early if needed.\n\n
+   4. Use the waiting list system fairly.\n\n
+   5. Invite entrants from the waiting list when spots become available. \n\n
+   6. Track accepted, invited, and cancelled entrants through their respective lists for proper management.\n\n
+   7. Export participant lists to CSV for record-keeping and event check-in.\n\n
+   8. Send notifications to keep entrants informed about event updates or changes..\n\n
+   9. Maintain professionalism and fairness.\n\n
+   10. Verify all event logistics (time, location, capacity) before the event date to ensure smooth execution.
+    </string>
+
     <string-array name="profile_filters">
         <item>All</item>
         <item>Entrant</item>
