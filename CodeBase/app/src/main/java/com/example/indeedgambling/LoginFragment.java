@@ -1,15 +1,14 @@
 /**
- * Handles manual user login through email and password.
+ * Handles manual login for Entrants, Organizers, and Admins.
  *
- * This fragment authenticates Entrant, Organizer, and Admin profiles
- * using Firestore credential matching. After authentication:
- *
- * - Entrants: deviceId is stored for future auto-login.
- * - Organizer/Admin: deviceId is not saved; they must always login manually.
+ * Responsibilities:
+ * - Authenticates user credentials against Firestore.
+ * - Determines user role and loads the correct ViewModel.
+ * - For Entrants only, saves deviceId for future auto-login.
  *
  * Notes:
- * - Passwords are stored as SHA-256 hashes.
- * - Only Entrants receive device-based persistent login.
+ * - Passwords are stored as SHA-256 hashes and matched directly.
+ * - Organizer and Admin login does not use persistent device tracking.
  */
 package com.example.indeedgambling;
 
@@ -38,6 +37,9 @@ public class LoginFragment extends Fragment {
     private OrganizerViewModel organizerVM;
     private AdminViewModel adminVM;
 
+    /**
+     * Inflates the login layout, initializes ViewModels, and sets button listeners.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
@@ -59,6 +61,12 @@ public class LoginFragment extends Fragment {
 
         FirebaseFirestore db = vm.getDb();
 
+        /**
+         * Handles login button click:
+         * - Validates input
+         * - Matches email + hashed password in Firestore
+         * - Routes user based on role
+         */
         loginBtn.setOnClickListener(v -> {
 
             String e = email.getText().toString().trim();

@@ -22,6 +22,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Admin screen for browsing, searching, filtering, and deleting user profiles.
+ * Displays all profiles (Entrants, Organizers, Admins) in a RecyclerView with:
+ * - Live search by name/email
+ * - Role filtering via Spinner
+ * - Tap to view profile details
+ * - Long-press/delete button with role-specific cleanup logic
+ * Deletion is destructive and role-aware:
+ * - Entrants: removed from all event waitlists/registrations
+ * - Organizers: all their events are deleted first
+ * - Admins: direct delete (use with caution)
+ */
 public class Admin_ManageProfilesFragment extends Fragment {
 
     private SearchView searchView;
@@ -34,6 +46,18 @@ public class Admin_ManageProfilesFragment extends Fragment {
     private List<Profile> fullList = new ArrayList<>();
     private List<Profile> filteredList = new ArrayList<>();
 
+
+    /**
+     * Sets up fragment.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to. The fragment should not add the view itself.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from
+     *                           a previous saved state as given here.
+     * @return The View for the fragment's UI.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -95,7 +119,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
             }
         });
 
-        // Open profile details on click (if your adapter supports it)
+        // Open profile details on click
         adapter.setOnItemClickListener(profile -> {
             Bundle args = new Bundle();
             args.putString("profileID", profile.getProfileId());
@@ -115,7 +139,6 @@ public class Admin_ManageProfilesFragment extends Fragment {
             Button cancelBtn = dialogView.findViewById(R.id.dialog_cancel);
             Button yesBtn = dialogView.findViewById(R.id.dialog_yes);
 
-            // Set dynamic message
             message.setText("Are you sure you want to delete " + profile.getEmail() + "?");
 
             androidx.appcompat.app.AlertDialog dialog =
@@ -127,7 +150,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
 
             yesBtn.setOnClickListener(v -> {
 
-                // ENTRANT CLEANUP
+                // entrant related data removed
                 if (profile.getRole().equalsIgnoreCase("entrant")) {
                     fvm.deleteProfileAndCleanOpenEvents(
                             profile,
@@ -138,7 +161,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
                     return;
                 }
 
-                // ORGANIZER CLEANUP
+                // organizer related data removed
                 if (profile.getRole().equalsIgnoreCase("organizer")) {
                     fvm.deleteAllOrganizerEvents(
                             profile.getProfileId(),
@@ -152,7 +175,7 @@ public class Admin_ManageProfilesFragment extends Fragment {
                     return;
                 }
 
-                // DEFAULT delete
+                // delete doc
                 fvm.deleteProfile(profile.getProfileId());
                 dialog.dismiss();
             });
@@ -176,6 +199,10 @@ public class Admin_ManageProfilesFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Applies both search query and role filter to the full profile list.
+     * Updates the adapter with the filtered results.
+     */
     private void applyFilters() {
         String search = searchView.getQuery().toString().toLowerCase().trim();
         String selected = filterSpinner.getSelectedItem().toString();

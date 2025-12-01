@@ -27,6 +27,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Admin screen for reviewing all uploaded event posters.
+ * Shows a searchable list of every image in the {@code images} collection with:
+ * - Event name (resolved from live event data)
+ * - Thumbnail preview (decoded from Base64)
+ * - Live search by event name or uploader ID
+ * - Tap -> full image details + delete option
+ * Images are loaded once on fragment creation. Event names are kept in sync via
+ * {@link FirebaseViewModel} so deleted/renamed events still show correct titles.
+ */
 public class Admin_ReviewImagesFragment extends Fragment {
 
     private ListView listView;
@@ -50,6 +60,17 @@ public class Admin_ReviewImagesFragment extends Fragment {
         String eventName;
     }
 
+    /**
+     * Sets up fragment.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to. The fragment should not add the view itself.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from
+     *                           a previous saved state as given here.
+     * @return The View for the fragment's UI.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
@@ -178,7 +199,10 @@ public class Admin_ReviewImagesFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    /** Adapter using item_admin_image.xml and loading actual image (base64) */
+    /**
+     * Custom ArrayAdapter that renders each image row with thumbnail and event title.
+     * Decodes Base64 image data directly for display.
+     */
     private class ImageCardAdapter extends ArrayAdapter<ImageRow> {
 
         ImageCardAdapter(List<ImageRow> items) {

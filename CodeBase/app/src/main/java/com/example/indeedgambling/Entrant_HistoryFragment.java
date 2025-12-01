@@ -16,6 +16,20 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import java.util.List;
 
+/**
+ * Displays the event history for an Entrant.
+ *
+ * This fragment shows all events in which the user has participated
+ * or been invited, based on Firestore data retrieved through
+ * FirebaseViewModel. Entrants can review their status in each event
+ * and respond to pending invitations.
+ *
+ * Features:
+ * - Loads entrant-specific event history using profileId
+ * - Shows invitation status (waiting, invited, accepted, cancelled)
+ * - Allows accepting or declining event invitations
+ * - Automatically refreshes the history list
+ */
 public class Entrant_HistoryFragment extends Fragment {
 
     private FirebaseViewModel firebaseVM;
@@ -24,11 +38,16 @@ public class Entrant_HistoryFragment extends Fragment {
     private EntrantHistoryAdapter adapter;
     private String currentEntrantId;
 
+    /**
+     * Creates the history screen layout, loads the entrant profile,
+     * and initializes event history retrieval and list interaction.
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(
+            LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState
+    ) {
         View view = inflater.inflate(R.layout.entrant_history_fragment, container, false);
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
@@ -37,15 +56,14 @@ public class Entrant_HistoryFragment extends Fragment {
         Button home = view.findViewById(R.id.entrant_home_button_history);
         listView = view.findViewById(R.id.entrant_activity_history);
 
-
         home.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_entrant_HistoryFragment_to_entrantHomeFragment)
         );
 
-
         Profile entrant = entrantVM.getCurrentEntrant();
         if (entrant != null && entrant.getProfileId() != null) {
+
             currentEntrantId = entrant.getProfileId();
 
             firebaseVM.fetchEntrantHistory(
@@ -55,7 +73,6 @@ public class Entrant_HistoryFragment extends Fragment {
             );
         }
 
-      
         listView.setOnItemClickListener((parent, itemView, position, id) -> {
 
             if (adapter == null || currentEntrantId == null) return;
@@ -63,7 +80,6 @@ public class Entrant_HistoryFragment extends Fragment {
             Event event = adapter.getItem(position);
             if (event == null) return;
 
-            // Only invited events can be accepted/declined
             String listName = event.whichList(currentEntrantId);
             if (!"invited".equals(listName)) return;
 
@@ -73,10 +89,25 @@ public class Entrant_HistoryFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (currentEntrantId != null) {
+            firebaseVM.fetchEntrantHistory(
+                    currentEntrantId,
+                    events -> updateHistory(events, currentEntrantId),
+                    e -> Log.e("Entrant_HistoryFragment", "Failed to refresh history", e)
+            );
+        }
+    }
+
+
     /**
-     * Update list of history items.
+     * Updates the list of history items displayed to the user.
      */
     private void updateHistory(List<Event> events, String entrantId) {
+        Log.d("HISTORY_DEBUG", "Events received: " + (events == null ? "null" : events.size()));
         if (adapter == null) {
             adapter = new EntrantHistoryAdapter(requireContext(), events, entrantId);
             listView.setAdapter(adapter);
@@ -88,7 +119,8 @@ public class Entrant_HistoryFragment extends Fragment {
     }
 
     /**
-     * Accept / Decline dialog
+     * Opens a dialog allowing the user to accept or decline
+     * an event invitation sent by the organizer.
      */
     private void showAcceptDialog(Event event) {
 
@@ -107,7 +139,6 @@ public class Entrant_HistoryFragment extends Fragment {
                                 Toast.makeText(requireContext(),
                                         "Invitation accepted",
                                         Toast.LENGTH_SHORT).show();
-
 
                                 firebaseVM.fetchEntrantHistory(
                                         currentEntrantId,
@@ -136,7 +167,6 @@ public class Entrant_HistoryFragment extends Fragment {
                                 Toast.makeText(requireContext(),
                                         "Invitation declined",
                                         Toast.LENGTH_SHORT).show();
-
 
                                 firebaseVM.fetchEntrantHistory(
                                         currentEntrantId,

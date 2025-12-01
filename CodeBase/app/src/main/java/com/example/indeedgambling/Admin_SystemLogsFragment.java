@@ -14,6 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Admin-only screen for viewing, searching, filtering, and deleting system-wide notifications.
+ * Shows all {@link Notification} objects stored in Firestore with:
+ * - Live search by message content
+ * - Filter by sender: All / individual user emails / System
+ * - Tap item → detailed popup with event, sender, timestamp, and type
+ * - Delete button → confirmation dialog + permanent removal
+ * The sender filter dynamically updates when new notifications are loaded.
+ */
 public class Admin_SystemLogsFragment extends Fragment {
 
     private FirebaseViewModel fvm;
@@ -28,6 +37,10 @@ public class Admin_SystemLogsFragment extends Fragment {
     private List<String> senderEmailList = new ArrayList<>();
     private String selectedEmailOrSystem = null; // null = All senders
 
+
+    /**
+     * Inflates the fragment layout.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.admin_view_logs_fragment, container, false);
@@ -59,7 +72,10 @@ public class Admin_SystemLogsFragment extends Fragment {
         setupSpinner();
     }
 
-    /** Popup to confirm delete */
+    /**
+     * Shows a confirmation dialog before permanently deleting a notification from Firestore.
+     * @param notification the notification to be deleted
+     */
     private void showDeleteConfirmation(Notification notification) {
         View dialogView = LayoutInflater.from(requireContext())
                 .inflate(R.layout.dialog_confirm, null);
@@ -84,7 +100,10 @@ public class Admin_SystemLogsFragment extends Fragment {
     }
 
 
-    /** Popup to show detailed info */
+    /**
+     * Displays a read-only popup with full details of a notification.
+     * @param notification the notification to display
+     */
     private void showNotificationDetails(Notification notification) {
         View dialogView = LayoutInflater.from(requireContext())
                 .inflate(R.layout.dialog_notification_popup, null);
@@ -112,7 +131,11 @@ public class Admin_SystemLogsFragment extends Fragment {
     }
 
 
-    /** Reuse the timestamp formatter from your adapter */
+    /**
+     * Formats a notification timestamp into a human-readable string.
+     * @param date the timestamp to format, may be null
+     * @return formatted date string or empty string if date is null
+     */
     private String formatTimestamp(Date date) {
         if (date == null) return "";
 
@@ -126,6 +149,10 @@ public class Admin_SystemLogsFragment extends Fragment {
     }
 
 
+    /**
+     * Configures the sender filter spinner and handles selection changes.
+     * Spinner options are dynamically rebuilt whenever the notification list changes.
+     */
     private void setupSpinner() {
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
                 requireContext(),
@@ -156,6 +183,9 @@ public class Admin_SystemLogsFragment extends Fragment {
         });
     }
 
+    /**
+     * Enables live search filtering by message content.
+     */
     private void setupSearch() {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override public boolean onQueryTextSubmit(String query) { return true; }
@@ -166,6 +196,10 @@ public class Admin_SystemLogsFragment extends Fragment {
         });
     }
 
+    /**
+     * Starts observing the full list of notifications via LiveData.
+     * Triggers filter and spinner rebuild on every update.
+     */
     private void observeNotifications() {
         fvm.getAllNotificationsLive().observe(getViewLifecycleOwner(), list -> {
 
@@ -177,6 +211,10 @@ public class Admin_SystemLogsFragment extends Fragment {
         });
     }
 
+    /**
+     * Extracts unique sender emails from the current notification list.
+     * Used to populate the sender filter spinner.
+     */
     private void buildSenderEmailList() {
         // extract unique senderEmails from notifications
         senderEmailList = fullList.stream()
@@ -188,6 +226,13 @@ public class Admin_SystemLogsFragment extends Fragment {
         updateSpinner();
     }
 
+    /**
+     * Rebuilds the spinner dropdown with:
+     * - "All senders"
+     * - Unique user emails
+     * - "System"
+     * Preserves current selection when possible.
+     */
     private void updateSpinner() {
         List<String> entries = new ArrayList<>();
         entries.add("All senders");
@@ -211,6 +256,10 @@ public class Admin_SystemLogsFragment extends Fragment {
         }
     }
 
+    /**
+     * Applies both the search query and sender filter to {@link #fullList}
+     * and updates the adapter with the filtered result.
+     */
     private void applyFilters() {
         filteredList.clear();
 

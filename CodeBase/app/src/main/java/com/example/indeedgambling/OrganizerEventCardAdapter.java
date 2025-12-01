@@ -1,3 +1,16 @@
+/**
+ * Adapter for displaying organizer-created events as card items.
+ *
+ * This adapter populates a ListView with card-style event previews
+ * containing:
+ * - Poster image (loaded from Firestore Base64)
+ * - Event title
+ *
+ * Features:
+ * - ViewHolder pattern used for efficient row recycling
+ * - Prevents image flicker by binding imageDocId to each row
+ * - Loads event poster asynchronously from Firestore /images collection
+ */
 package com.example.indeedgambling;
 
 import android.content.Context;
@@ -23,6 +36,13 @@ public class OrganizerEventCardAdapter extends ArrayAdapter<Event> {
     private final LayoutInflater inflater;
     private final FirebaseViewModel firebaseVM;
 
+    /**
+     * Creates a new adapter for event cards displayed to an organizer.
+     *
+     * @param context  Activity or fragment context
+     * @param events   List of event objects to render
+     * @param firebaseVM ViewModel used for Firestore image retrieval
+     */
     public OrganizerEventCardAdapter(@NonNull Context context,
                                      @NonNull List<Event> events,
                                      @NonNull FirebaseViewModel firebaseVM) {
@@ -31,12 +51,19 @@ public class OrganizerEventCardAdapter extends ArrayAdapter<Event> {
         this.firebaseVM = firebaseVM;
     }
 
+    /**
+     * ViewHolder pattern to reduce repeated layout inflations and
+     * maintain correct poster-image binding during list recycling.
+     */
     static class ViewHolder {
         ImageView poster;
         TextView title;
-        String boundImageDocId; // to avoid wrong image when reused
+        String boundImageDocId;
     }
 
+    /**
+     * Populates or recycles the event card layout for a single row.
+     */
     @NonNull
     @Override
     public View getView(int position,
@@ -60,26 +87,22 @@ public class OrganizerEventCardAdapter extends ArrayAdapter<Event> {
             return convertView;
         }
 
-        // Title
-        String name = event.getEventName();
-        holder.title.setText(name != null ? name : "Untitled event");
+        holder.title.setText(event.getEventName() != null
+                ? event.getEventName()
+                : "Untitled event");
 
-        // Reset poster to placeholder while loading
         holder.poster.setImageResource(android.R.drawable.ic_menu_report_image);
         holder.boundImageDocId = event.getImageUrl();
 
         String imageDocId = event.getImageUrl();
         if (imageDocId == null || imageDocId.isEmpty()) {
-            // no poster, keep placeholder
             return convertView;
         }
 
-        // Fetch Base64 poster from /images doc and decode
         firebaseVM.getDb().collection("images")
                 .document(imageDocId)
                 .get()
                 .addOnSuccessListener(doc -> {
-                    // make sure this row is still bound to same image id
                     if (!imageDocId.equals(holder.boundImageDocId)) return;
 
                     if (doc == null || !doc.exists()) {
@@ -101,9 +124,9 @@ public class OrganizerEventCardAdapter extends ArrayAdapter<Event> {
                         holder.poster.setImageResource(android.R.drawable.ic_menu_report_image);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    holder.poster.setImageResource(android.R.drawable.ic_menu_report_image);
-                });
+                .addOnFailureListener(e ->
+                        holder.poster.setImageResource(android.R.drawable.ic_menu_report_image)
+                );
 
         return convertView;
     }

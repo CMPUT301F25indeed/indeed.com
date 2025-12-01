@@ -1,3 +1,16 @@
+/**
+ * Adapter for displaying logged notifications in the admin view.
+ *
+ * This RecyclerView adapter supports:
+ * - Binding notification data (timestamp, sender, message, event name)
+ * - Handling item click actions through OnItemClickListener
+ * - Handling removal actions through OnRemoveClickListener
+ *
+ * Notes:
+ * - Notifications are shown newest → oldest based on the provided list
+ * - Timestamp is displayed in a human-readable format
+ * - Uses item_noti_admin_view.xml for layout
+ */
 package com.example.indeedgambling;
 
 import android.annotation.SuppressLint;
@@ -22,29 +35,45 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
     private OnItemClickListener itemClickListener;
     private OnRemoveClickListener removeClickListener;
 
-    /** Click for item (optional) */
+    /**
+     * Listener for entire item clicks.
+     */
     public interface OnItemClickListener {
         void onItemClick(Notification n);
     }
 
-    /** Click for Remove button */
+    /**
+     * Listener for remove button clicks.
+     */
     public interface OnRemoveClickListener {
         void onRemoveClick(Notification n);
     }
 
+    /**
+     * Assigns a listener for item clicks.
+     */
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.itemClickListener = listener;
     }
 
+    /**
+     * Assigns a listener for remove button clicks.
+     */
     public void setOnRemoveClickListener(OnRemoveClickListener listener) {
         this.removeClickListener = listener;
     }
 
+    /**
+     * Updates the list of notifications displayed by the adapter.
+     */
     public void setNotifications(List<Notification> list) {
         this.notifications = list != null ? list : new ArrayList<>();
         notifyDataSetChanged();
     }
 
+    /**
+     * Inflates the notification row layout and returns a ViewHolder.
+     */
     @NonNull
     @Override
     public NotiViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,38 +82,42 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
         return new NotiViewHolder(v);
     }
 
+    /**
+     * Binds notification data to the ViewHolder for each row.
+     */
     @Override
     public void onBindViewHolder(@NonNull NotiViewHolder holder, int position) {
         Notification n = notifications.get(position);
 
-        // Combined header: "time | email"
         String time = formatTimestamp(n.getTimestamp());
-        String email = "system".equals(n.getSenderId()) ? "system" :
-                (n.getSenderEmail() != null ? n.getSenderEmail() : "Unknown Sender");
+        String email = "system".equals(n.getSenderId())
+                ? "system"
+                : (n.getSenderEmail() != null ? n.getSenderEmail() : "Unknown Sender");
+
         holder.header.setText(time + "  |  " + email);
-
-        // Message
         holder.message.setText(n.getMessage());
-
-        // Event name
         holder.eventName.setText(n.getEventName() != null ? n.getEventName() : "N/A");
 
-        // Item click
         holder.itemView.setOnClickListener(v -> {
             if (itemClickListener != null) itemClickListener.onItemClick(n);
         });
 
-        // Remove button click
         holder.removeBtn.setOnClickListener(v -> {
             if (removeClickListener != null) removeClickListener.onRemoveClick(n);
         });
     }
 
+    /**
+     * Returns number of notifications shown.
+     */
     @Override
     public int getItemCount() {
         return notifications.size();
     }
 
+    /**
+     * Holds references to views inside each notification row.
+     */
     static class NotiViewHolder extends RecyclerView.ViewHolder {
         TextView header, message, eventName;
         Button removeBtn;
@@ -98,6 +131,9 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
         }
     }
 
+    /**
+     * Formats timestamps into relative or full date formats.
+     */
     @SuppressLint("SimpleDateFormat")
     private String formatTimestamp(Date date) {
         if (date == null) return "";
@@ -107,13 +143,11 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
         long hours = mins / 60;
         long days = hours / 24;
 
-        if (mins < 60)
-            return mins + " min ago";
-        if (hours < 24)
-            return hours + " hours ago";
-        if (days < 7)
-            return days + " days ago";
+        if (mins < 60) return mins + " min ago";
+        if (hours < 24) return hours + " hours ago";
+        if (days < 7) return days + " days ago";
 
-        return new SimpleDateFormat("MMM d, yyyy • h:mm a", Locale.getDefault()).format(date);
+        return new SimpleDateFormat("MMM d, yyyy • h:mm a", Locale.getDefault())
+                .format(date);
     }
 }
