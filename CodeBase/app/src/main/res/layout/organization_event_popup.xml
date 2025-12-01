@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
@@ -232,17 +231,42 @@
                 android:text="Send Notifications"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
-
             <Button
-                android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
+                android:id="@+id/btnExport"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 android:background="@drawable/bg_button_primary"
-                android:text="End Registration Now"
+                android:text="Export Final List"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
+            <Button
+                android:id="@+id/btnViewMap"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="View Waitlist Entrants Map"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"/>
+
+
         </GridLayout>
+
+        <!-- End Registration button (needs ID for Java) -->
+        <Button
+            android:id="@+id/Organizer_EventPopup_EndRegistrationNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="End Registration Now"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white" />
+
+
+
     </LinearLayout>
 </ScrollView>

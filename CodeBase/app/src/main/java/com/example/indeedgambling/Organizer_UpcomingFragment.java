@@ -412,6 +412,8 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
+        Button mapButton = popupView.findViewById(R.id.btnViewMap); // Add this button to your XML
+        Button exportFinalBtn = popupView.findViewById(R.id.btnExport);
         CheckBox locationRequirement = popupView.findViewById(R.id.Organizer_EventPopup_RadiusEnabled);
 
         locationRequirement.setChecked(event.isRegistrationRadiusEnabled());
@@ -635,6 +637,36 @@ public class Organizer_UpcomingFragment extends Fragment {
             Toast.makeText(requireContext(), "Failed to generate QR code", Toast.LENGTH_SHORT).show();
         }
 
+        if (CancelledListButton != null) {
+            CancelledListButton.setOnClickListener(v -> CancelledListPopup(event));
+        }
+
+        if (AcceptedListButton != null) {
+            AcceptedListButton.setOnClickListener(v -> AcceptedListPopup());
+        }
+
+        if (endRegButton != null) {
+            endRegButton.setOnClickListener(v -> EndRegPopup(event));
+        }
+        if (mapButton != null){
+            mapButton.setOnClickListener(v -> showEntrantMap(event));
+        }
+        if (exportFinalBtn != null){
+            exportFinalBtn.setOnClickListener(v -> exportAcceptedEntrantsList(event));
+        }
+
+
+
+        // Notification button
+        if (notificationButton != null) {
+            notificationButton.setOnClickListener(v -> {
+                Log.d("DEBUG", "Notification button clicked!");
+                organizerVM.setSelectedEvent(event);
+                eventDialog.dismiss();
+                NavHostFragment.findNavController(Organizer_UpcomingFragment.this)
+                        .navigate(R.id.notificationSenderFragment);
+            });
+        }
         //Notification Pop-up, closes event pop-up
         if (notificationButton != null){
         notificationButton.setOnClickListener(v->{
@@ -857,6 +889,103 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
     // -------------------- HELPERS -------------------- //
+    /*add javadocs*/
+    private void showEntrantMap(Event event) {
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View mapView = inflater.inflate(R.layout.organizer_event_map_popup, null);
+
+        org.osmdroid.views.MapView mapViewWidget = mapView.findViewById(R.id.mapView);
+        TextView mapInfoText = mapView.findViewById(R.id.mapInfoText);
+
+        // get all entrants
+        ArrayList<String> allEntrants = new ArrayList<>();
+        allEntrants.addAll(event.getWaitingList());
+        allEntrants.addAll(event.getInvitedList());
+        allEntrants.addAll(event.getAcceptedEntrants());
+
+        if (allEntrants.isEmpty()) {
+            WarningToast("No entrants to show on map");
+            return;
+        }
+
+        // OSMdroid setup - no API
+        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+        mapViewWidget.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+
+        org.osmdroid.util.GeoPoint startPoint = new org.osmdroid.util.GeoPoint(51.0447, -114.0719);
+        mapViewWidget.getController().setZoom(10.0);
+        mapViewWidget.getController().setCenter(startPoint);
+
+        Data.getProfiles(allEntrants,
+                (profiles) -> {
+                    // Add markers
+                    for (Profile profile : profiles) {
+                        double lat = 51.0447 + (Math.random() * 0.02 - 0.01);
+                        double lon = -114.0719 + (Math.random() * 0.02 - 0.01);
+
+                        org.osmdroid.views.overlay.Marker marker = new org.osmdroid.views.overlay.Marker(mapViewWidget);
+                        marker.setPosition(new org.osmdroid.util.GeoPoint(lat, lon));
+                        marker.setTitle(profile.getPersonName());
+                        marker.setSnippet("Joined: " + event.getEventName());
+                        mapViewWidget.getOverlays().add(marker);
+                    }
+
+                    mapInfoText.setText("Showing " + profiles.size() + " entrants");
+                    mapViewWidget.invalidate();
+                },
+                e -> mapInfoText.setText("Error loading entrant data")
+        );
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Entrant Locations - " + event.getEventName())
+                .setView(mapView)
+                .setPositiveButton("Close", null)
+                .show();
+    }
+    private void exportAcceptedEntrantsList(Event event) {
+        // Show loading dialog
+        AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Exporting CSV")
+                .setMessage("Preparing accepted entrants list...")
+                .setCancelable(false)
+                .show();
+
+        // ONLY accepted entrants
+        ArrayList<String> acceptedEntrants = new ArrayList<>();
+
+        if (event.getAcceptedEntrants() != null) {
+            acceptedEntrants.addAll(event.getAcceptedEntrants());
+        }
+
+        if (acceptedEntrants.isEmpty()) {
+            loadingDialog.dismiss();
+            WarningToast("No accepted entrants to export!");
+            return;
+        }
+
+        Data.getProfiles(acceptedEntrants,
+                (profiles) -> {
+                    loadingDialog.dismiss();
+
+                    boolean success = CSVExporter.exportAcceptedEntrants(
+                            requireContext(), event, profiles);
+
+                    if (success) {
+                        Toast.makeText(requireContext(),
+                                "Accepted entrants list exported to Downloads folder!",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to export CSV. Check storage permissions.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                },
+                e -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(requireContext(), "Error fetching accepted entrants data", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
 
     /** POPUP that invites the entrants according to the number inputted by the user.
      * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
