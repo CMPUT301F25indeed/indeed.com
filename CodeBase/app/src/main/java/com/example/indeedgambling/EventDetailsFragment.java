@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -31,6 +32,16 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+/**
+ * Displays full details for a selected event.
+ *
+ * Features:
+ * - Shows event name, description, category, dates, registration period, status, and poster
+ * - Handles entrant actions: join waitlist, leave waitlist, accept invite, reject invite
+ * - Supports both normal navigation and QR scan mode
+ * - Updates entrant location on load when permission is available
+ * - Dynamically updates UI based on entrant’s relation to the event
+ */
 public class EventDetailsFragment extends Fragment {
 
     private FirebaseViewModel firebaseVM;
@@ -47,6 +58,10 @@ public class EventDetailsFragment extends Fragment {
     private FusedLocationProviderClient fusedLocationClient;
     private String scannedEventId = null;
 
+    /**
+     * Inflates the layout and initializes UI components and ViewModels.
+     * Loads event data either through QR scan or normal navigation.
+     */
     @Nullable
     @Override
     public View onCreateView(
@@ -80,6 +95,8 @@ public class EventDetailsFragment extends Fragment {
 
         backBtn.setOnClickListener(v1 -> requireActivity().onBackPressed());
 
+
+
         if (scannedEventId != null && !scannedEventId.isEmpty()) {
             firebaseVM.getEventById(
                     scannedEventId,
@@ -102,6 +119,9 @@ public class EventDetailsFragment extends Fragment {
         return v;
     }
 
+    /**
+     * Applies button visibility and behavior depending on the entrant’s relation to the event.
+     */
     private void applyEntrantButtonLogic(View v) {
 
         entrantRelation = event.whichList(entrantId);
@@ -152,6 +172,9 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Hides all interaction buttons for QR-scan mode.
+     */
     private void disableAllEntrantActions() {
         yesBtn.setVisibility(View.GONE);
         noBtn.setVisibility(View.GONE);
@@ -163,12 +186,14 @@ public class EventDetailsFragment extends Fragment {
         tryAgainBtn.setEnabled(false);
     }
 
+    /**
+     * Loads name, description, poster, category, timings, and status into UI.
+     */
     private void loadEventDetails(View v) {
 
         name.setText(event.getEventName());
         desc.setText(event.getDescription());
 
-        // ---- Load Poster ----
         if (posterView != null) {
             posterView.setImageBitmap(null);
             posterView.setBackgroundColor(0xFFEEEEEE);
@@ -221,6 +246,9 @@ public class EventDetailsFragment extends Fragment {
         updateTotal(v);
     }
 
+    /**
+     * Handles joining the waitlist.
+     */
     private void clickedJoinWaitlist(View v) {
         if (event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
             Toast.makeText(getContext(), "You already joined this waitlist!", Toast.LENGTH_SHORT).show();
@@ -245,6 +273,9 @@ public class EventDetailsFragment extends Fragment {
         updateTotal(v);
     }
 
+    /**
+     * Handles removing an entrant from the waitlist.
+     */
     private void clickedLeaveWaitlist(View v) {
         if (event.getWaitingList() == null ||
                 !event.getWaitingList().contains(entrantId)) {
@@ -267,30 +298,44 @@ public class EventDetailsFragment extends Fragment {
         updateTotal(v);
     }
 
+    /**
+     * Handles accepting an invitation.
+     */
     private void clickedAcceptInvite(View v) {
         firebaseVM.signUpForEvent(event.getEventId(), entrantId,
                 () -> Toast.makeText(getContext(), "Signed up!", Toast.LENGTH_SHORT).show(),
                 e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Handles rejecting an invitation.
+     */
     private void clickedRejectInvite(View v) {
         Toast.makeText(getContext(), "Rejected invite.", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Placeholder for retrying after cancellation.
+     */
     private void clickedTryAgain(View v) {
         Toast.makeText(getContext(), "Trying again...", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Updates the event counter text based on registration status.
+     */
     private void updateTotal(View v) {
-        if (event.getWaitingList() != null&&event.RegistrationOpen()) {
-            total.setText("Total: " + event.getWaitingList().size()+"/"+event.getMaxWaitingEntrantsString());
+        if (event.getWaitingList() != null && event.RegistrationOpen()) {
+            total.setText("Total: " + event.getWaitingList().size() + "/" + event.getMaxWaitingEntrantsString());
 
-        } else if (!(event.RegistrationOpen())&&event.getLostList() != null) {
-            total.setText("Total: " + event.getLostList().size()+"/"+event.getMaxWaitingEntrantsString());
-
+        } else if (!event.RegistrationOpen() && event.getLostList() != null) {
+            total.setText("Total: " + event.getLostList().size() + "/" + event.getMaxWaitingEntrantsString());
         }
     }
 
+    /**
+     * Updates the waitlist badge and button state depending on entrant position.
+     */
     private void updateWaitlistStatus() {
         if (event.getWaitingList() != null &&
                 event.getWaitingList().contains(entrantId)) {
@@ -307,6 +352,9 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Attempts to retrieve and update entrant location, requesting permission if needed.
+     */
     private void updateUserLocation() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -331,7 +379,7 @@ public class EventDetailsFragment extends Fragment {
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     Entrant entrant = entrantVM.getCurrentEntrant();
-                    if (entrant == null) return;
+                    if (entrant == null || location == null) return;
 
                     entrant.setLocation(location);
                     firebaseVM.upsertEntrant(
@@ -345,6 +393,9 @@ public class EventDetailsFragment extends Fragment {
                 );
     }
 
+    /**
+     * Handles permission callback for location access.
+     */
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
