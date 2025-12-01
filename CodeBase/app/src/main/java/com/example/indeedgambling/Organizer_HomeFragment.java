@@ -10,8 +10,44 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
+/**
+ * Main home screen fragment for event organizers.
+ *
+ * <p>This fragment serves as the central navigation hub for organizers,
+ * providing access to all major organizer features and functionalities.
+ *
+ * <p>Features accessible from this screen:
+ * <ul>
+ *   <li>Browse events created by organizers</li>
+ *   <li>View and manage upcoming events</li>
+ *   <li>Access event history</li>
+ *   <li>View organizer guidelines</li>
+ *   <li>Access profile settings</li>
+ *   <li>Logout from the application</li>
+ * </ul>
+ *
+ * @see Organizer_BrowseFragment
+ * @see Organizer_UpcomingFragment
+ * @see Organizer_HistoryFragment
+ * @see Organizer_GuidelinesFragment
+ * @see SettingsFragment
+ */
 
 public class Organizer_HomeFragment extends Fragment {
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * <p>Inflates the organizer home layout and initializes all navigation
+     * buttons to their respective destination fragments.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate
+     *                 any views in the fragment
+     * @param container If non-null, this is the parent view that the fragment's
+     *                  UI should be attached to
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     *                           from a previous saved state
+     * @return The View for the fragment's UI, or null
+     */
 
     View view;
 

@@ -15,6 +15,25 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+/**
+ * RecyclerView adapter for displaying notification logs in the application.
+ *
+ * <p>This adapter displays notification items with their timestamp, sender information,
+ * message content, and associated event name. It provides functionality for
+ * item click handling and removal of notifications.
+ *
+ * <p>Each notification item displays:
+ * <ul>
+ *   <li>Formatted timestamp (relative or absolute)</li>
+ *   <li>Sender email or system identifier</li>
+ *   <li>Notification message content</li>
+ *   <li>Associated event name</li>
+ *   <li>Remove button for notification deletion</li>
+ * </ul>
+ *
+ * @see Notification
+ * @see RecyclerView.Adapter
+ */
 
 public class NotificationLoggedAdapter extends RecyclerView.Adapter<NotificationLoggedAdapter.NotiViewHolder> {
 
@@ -52,6 +71,12 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
                 .inflate(R.layout.item_noti_admin_view, parent, false);
         return new NotiViewHolder(v);
     }
+    /**
+     * Called by RecyclerView to display the data at the specified position.
+     *
+     * @param holder The ViewHolder which should be updated to represent the notification
+     * @param position The position of the notification within the adapter's data set
+     */
 
     @Override
     public void onBindViewHolder(@NonNull NotiViewHolder holder, int position) {
@@ -79,6 +104,7 @@ public class NotificationLoggedAdapter extends RecyclerView.Adapter<Notification
             if (removeClickListener != null) removeClickListener.onRemoveClick(n);
         });
     }
+
 
     @Override
     public int getItemCount() {
