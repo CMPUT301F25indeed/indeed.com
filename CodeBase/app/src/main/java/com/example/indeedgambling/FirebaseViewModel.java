@@ -1123,6 +1123,13 @@ public class FirebaseViewModel extends ViewModel {
         PROFILES.document(profileId).get()
                 .addOnSuccessListener(snapshot -> {
 
+                    // --- NEW: get profileImageUrl from latest snapshot ---
+                    final String[] profileImageDocId = new String[1];         // NEW
+                    if (snapshot.exists()) {                                  // NEW
+                        profileImageDocId[0] = snapshot.getString("profileImageUrl"); // NEW
+                    }                                                         // NEW
+                    // -----------------------------------------------------
+
                     // read waitlistedEvents from profile doc (may be null)
                     List<String> waitlistedEvents = new ArrayList<>();
                     if (snapshot.exists()) {
@@ -1143,8 +1150,10 @@ public class FirebaseViewModel extends ViewModel {
                             EVENTS.whereArrayContains("acceptedEntrants", profileId).get();
                     Task<QuerySnapshot> cancelledTask =
                             EVENTS.whereArrayContains("cancelledEntrants", profileId).get();
+                    Task<QuerySnapshot> lostTask =                        // NEW
+                            EVENTS.whereArrayContains("lostList", profileId).get(); // NEW
 
-                    Tasks.whenAllComplete(invitedTask, acceptedTask, cancelledTask)
+                    Tasks.whenAllComplete(invitedTask, acceptedTask, cancelledTask, lostTask) // NEW (added lostTask)
                             .addOnSuccessListener(tasks -> {
 
                                 // collect eventIds for each list type (to avoid duplicates)
@@ -1152,6 +1161,7 @@ public class FirebaseViewModel extends ViewModel {
                                 Set<String> invitedEventIds = new HashSet<>();
                                 Set<String> acceptedEventIds = new HashSet<>();
                                 Set<String> cancelledEventIds = new HashSet<>();
+                                Set<String> lostEventIds = new HashSet<>();         // NEW
 
                                 // from profile.waitlistedEvents
                                 for (String evId : waitlistedEvents) {
@@ -1181,6 +1191,13 @@ public class FirebaseViewModel extends ViewModel {
                                     }
                                 }
 
+                                // NEW: from query: lostList contains profileId
+                                if (lostTask.isSuccessful() && lostTask.getResult() != null) {     // NEW
+                                    for (DocumentSnapshot doc : lostTask.getResult().getDocuments()) { // NEW
+                                        lostEventIds.add(doc.getId());                               // NEW
+                                    }                                                                 // NEW
+                                }                                                                     // NEW
+
                                 WriteBatch batch = db.batch();
 
                                 // clean waitlist
@@ -1207,11 +1224,29 @@ public class FirebaseViewModel extends ViewModel {
                                     batch.update(eventRef, "cancelledEntrants", FieldValue.arrayRemove(profileId));
                                 }
 
+                                // NEW: clean lostList
+                                for (String eventId : lostEventIds) {                                // NEW
+                                    DocumentReference eventRef = EVENTS.document(eventId);           // NEW
+                                    batch.update(eventRef, "lostList", FieldValue.arrayRemove(profileId)); // NEW
+                                }                                                                     // NEW
+
                                 // After cleaning events, delete the profile itself
                                 batch.commit()
                                         .addOnSuccessListener(v ->
                                                 PROFILES.document(profileId).delete()
-                                                        .addOnSuccessListener(x -> onOk.run())
+                                                        .addOnSuccessListener(x -> {
+                                                            // NEW: also delete the profile image doc, if any
+                                                            String imgId = profileImageDocId[0];    // NEW
+                                                            if (imgId != null && !imgId.isEmpty()) { // NEW
+                                                                db.collection("images")              // NEW
+                                                                        .document(imgId)             // NEW
+                                                                        .delete()                    // NEW
+                                                                        .addOnSuccessListener(u -> onOk.run()) // NEW
+                                                                        .addOnFailureListener(onErr::accept);  // NEW
+                                                            } else {                                // NEW
+                                                                onOk.run();                         // NEW
+                                                            }                                      // NEW
+                                                        })
                                                         .addOnFailureListener(onErr::accept)
                                         )
                                         .addOnFailureListener(onErr::accept);
