@@ -152,6 +152,17 @@
             android:background="@drawable/bg_button_primary"
             android:textColor="#FFFFFF"
             android:fontFamily="@font/opensans" />
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="10dp"
+            android:text="Back"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:background="@drawable/bg_button_primary"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/opensans" />
 
     </LinearLayout>
 </ScrollView>

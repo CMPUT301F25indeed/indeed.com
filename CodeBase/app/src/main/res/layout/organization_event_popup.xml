@@ -250,6 +250,27 @@
                 android:text="End Registration Now"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
+            <Button
+                android:id="@+id/btnExport"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="Export All Entrants"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+            <Button
+                android:id="@+id/btnViewMap"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="View Waitlist Map"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"/>
+
         </GridLayout>
     </LinearLayout>
 </ScrollView>

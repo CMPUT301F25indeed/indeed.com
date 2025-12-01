@@ -17,21 +17,42 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RecyclerView adapter for displaying events in the Entrant browsing screen.
+ *
+ * Responsibilities:
+ * - Displays event name, description/location, and poster image
+ * - Loads event images asynchronously from Firestore
+ * - Handles item click events through the OnEventClick interface
+ * - Uses a placeholder background while images are loading or missing
+ */
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolder> {
 
     private final List<Event> list = new ArrayList<>();
     private final OnEventClick listener;
     private final FirebaseViewModel firebaseVM;
 
+    /**
+     * Listener interface for handling event item clicks.
+     */
     public interface OnEventClick {
         void clicked(Event e);
     }
 
+    /**
+     * Creates a new EventsAdapter.
+     *
+     * @param listener Callback for item clicks
+     * @param firebaseVM Reference to FirebaseViewModel for image loading
+     */
     public EventsAdapter(OnEventClick listener, FirebaseViewModel firebaseVM) {
         this.listener = listener;
         this.firebaseVM = firebaseVM;
     }
 
+    /**
+     * Replaces the current event list with a new one.
+     */
     public void setData(List<Event> events) {
         list.clear();
         if (events != null) {
@@ -40,6 +61,9 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolde
         notifyDataSetChanged();
     }
 
+    /**
+     * Inflates the event item layout.
+     */
     @NonNull
     @Override
     public EventHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -48,26 +72,26 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolde
         return new EventHolder(v);
     }
 
+    /**
+     * Binds event data to an item view, including name, description, and poster image.
+     */
     @Override
     public void onBindViewHolder(@NonNull EventHolder holder, int position) {
         Event e = list.get(position);
 
         holder.title.setText(e.getEventName());
-        holder.desc.setText(e.getLocationString());   // or description, your choice
+        holder.desc.setText(e.getLocationString());
 
         holder.itemView.setOnClickListener(v -> listener.clicked(e));
 
-        // ---------- image logic ----------
         String imageDocId = e.getImageUrl();
 
         if (imageDocId == null || imageDocId.isEmpty()) {
-            // no image → just grey box
             holder.image.setImageDrawable(null);
             holder.image.setBackgroundResource(R.drawable.bg_event_image_placeholder);
             return;
         }
 
-        // keep grey background behind real image
         holder.image.setBackgroundResource(R.drawable.bg_event_image_placeholder);
 
         firebaseVM.getDb().collection("images")
@@ -75,12 +99,14 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolde
                 .get()
                 .addOnSuccessListener(doc -> applyImageFromDoc(doc, holder.image))
                 .addOnFailureListener(err -> {
-                    // on error, fallback to plain grey
                     holder.image.setImageDrawable(null);
                     holder.image.setBackgroundResource(R.drawable.bg_event_image_placeholder);
                 });
     }
 
+    /**
+     * Loads and applies the poster image from a Firestore document.
+     */
     private void applyImageFromDoc(DocumentSnapshot doc, ImageView imageView) {
         if (doc == null || !doc.exists()) {
             imageView.setImageDrawable(null);
@@ -105,11 +131,17 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolde
         }
     }
 
+    /**
+     * Returns number of events in the list.
+     */
     @Override
     public int getItemCount() {
         return list.size();
     }
 
+    /**
+     * ViewHolder that stores references to UI components for each event item.
+     */
     static class EventHolder extends RecyclerView.ViewHolder {
         TextView title, desc;
         ImageView image;
@@ -120,7 +152,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventHolde
             desc  = itemView.findViewById(R.id.event_desc);
             image = itemView.findViewById(R.id.event_image);
 
-            // make sure text is centered
             title.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             desc.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         }

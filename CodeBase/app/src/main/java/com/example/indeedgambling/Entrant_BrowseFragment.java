@@ -28,11 +28,27 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Allows an Entrant to browse events available in the system.
+ *
+ * Displays a scrollable list of events, loaded from Firestore via
+ * FirebaseViewModel. Provides category and date range filtering,
+ * and allows navigation to full event details.
+ *
+ * Features:
+ * - Live event list updates through LiveData
+ * - Custom filter dialog for category and time filtering
+ * - Navigation to EventDetailsFragment on event selection
+ */
 public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.OnEventClick {
 
     private FirebaseViewModel firebaseVM;
     private EventsAdapter adapter;
 
+    /**
+     * Creates and initializes the browse screen layout.
+     * Sets up the event list, adapters, and filter/home button actions.
+     */
     @Nullable
     @Override
     public View onCreateView(
@@ -77,6 +93,10 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         return v;
     }
 
+    /**
+     * Handles navigation when an event item is clicked.
+     * Opens the EventDetailsFragment for the selected event.
+     */
     @Override
     public void clicked(Event e) {
         Bundle bundle = new Bundle();
@@ -85,8 +105,13 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
                 .navigate(R.id.action_entrant_BrowseFragment_to_eventDetailsFragment, bundle);
     }
 
+    /**
+     * Opens a dialog allowing Entrants to filter events by category
+     * and optional start/end datetime ranges.
+     */
     private void showFilterDialog() {
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_filter_events, null);
+        View dialogView = LayoutInflater.from(getContext())
+                .inflate(R.layout.dialog_filter_events, null);
 
         Spinner categorySpinner = dialogView.findViewById(R.id.spinner_category);
         EditText startDateEdit = dialogView.findViewById(R.id.edit_start_date);
@@ -174,8 +199,14 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         dialog.show();
     }
 
+    /**
+     * Opens a combined date and time picker dialog.
+     * Result is formatted and placed into the target EditText.
+     */
     private void showCustomDateTimeDialog(EditText target) {
-        View pickerView = LayoutInflater.from(getContext()).inflate(R.layout.datetime_picker, null);
+        View pickerView = LayoutInflater.from(getContext())
+                .inflate(R.layout.datetime_picker, null);
+
         DatePicker datePicker = pickerView.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker timePicker = pickerView.findViewById(R.id.DateTimePicker_TimeDialog);
 

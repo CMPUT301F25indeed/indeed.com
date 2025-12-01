@@ -11,8 +11,30 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+/**
+ * Main dashboard screen for administrators after login.
+ * Provides quick access to all admin features:
+ * - Browse and manage user profiles
+ * - View and remove events
+ * - Review uploaded event posters
+ * - View system logs
+ * - Access personal settings
+ * - Logout
+ */
 public class Admin_HomeFragment extends Fragment {
 
+
+    /**
+     * Sets up fragment.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to. The fragment should not add the view itself.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from
+     *                           a previous saved state as given here.
+     * @return The View for the fragment's UI.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,

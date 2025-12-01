@@ -21,7 +21,18 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Displays all notifications received by an Entrant.
  *
+ * This fragment retrieves real-time notification updates from Firestore
+ * and renders them in a scrollable list. Each notification item shows:
+ * - The message text
+ * - The notification type (Info, Alert, Update, etc.)
+ * - The formatted timestamp
+ *
+ * Features:
+ * - Dynamically updates when new notifications arrive
+ * - Provides a back-navigation button to return to the Entrant home screen
+ * - Uses ArrayAdapter to render each notification with custom layout
  */
 public class Entrant_NotificationsFragment extends Fragment {
 
@@ -30,11 +41,16 @@ public class Entrant_NotificationsFragment extends Fragment {
     private ListView listView;
     private ArrayAdapter<Notification> adapter;
 
+    /**
+     * Creates the notification screen, loads the user's notifications,
+     * and initializes the list adapter.
+     */
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState
+    ) {
         View view = inflater.inflate(R.layout.entrant_notifications_fragment, container, false);
 
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
@@ -44,7 +60,8 @@ public class Entrant_NotificationsFragment extends Fragment {
         Button home = view.findViewById(R.id.entrant_notifications_home_button);
 
         home.setOnClickListener(v ->
-                NavHostFragment.findNavController(this).popBackStack());
+                NavHostFragment.findNavController(this).popBackStack()
+        );
 
         Entrant entrant = entrantVM.getCurrentEntrant();
         if (entrant != null && entrant.getProfileId() != null) {
@@ -52,9 +69,11 @@ public class Entrant_NotificationsFragment extends Fragment {
 
             firebaseVM.observeNotificationsForUser(entrantId)
                     .observe(getViewLifecycleOwner(), notifications -> {
+
                         if (notifications == null) {
                             notifications = new ArrayList<>();
                         }
+
                         updateList(notifications);
                     });
         }
@@ -63,20 +82,28 @@ public class Entrant_NotificationsFragment extends Fragment {
     }
 
     /**
+     * Updates the ListView by creating or refreshing the ArrayAdapter
+     * that displays notification message, type, and formatted time.
      *
+     * @param notifications List of notifications for the Entrant
      */
     private void updateList(List<Notification> notifications) {
+
         if (adapter == null) {
-            adapter = new ArrayAdapter<Notification>(requireContext(),
+
+            adapter = new ArrayAdapter<Notification>(
+                    requireContext(),
                     R.layout.item_notification,
                     R.id.notification_message,
-                    notifications) {
-
+                    notifications
+            ) {
                 @NonNull
                 @Override
-                public View getView(int position,
-                                    @Nullable View convertView,
-                                    @NonNull ViewGroup parent) {
+                public View getView(
+                        int position,
+                        @Nullable View convertView,
+                        @NonNull ViewGroup parent
+                ) {
                     View v = convertView;
                     if (v == null) {
                         v = LayoutInflater.from(getContext())
@@ -84,9 +111,7 @@ public class Entrant_NotificationsFragment extends Fragment {
                     }
 
                     Notification n = getItem(position);
-                    if (n == null) {
-                        return v;
-                    }
+                    if (n == null) return v;
 
                     TextView message = v.findViewById(R.id.notification_message);
                     TextView meta = v.findViewById(R.id.notification_meta);
@@ -94,17 +119,20 @@ public class Entrant_NotificationsFragment extends Fragment {
                     message.setText(n.getMessage());
 
                     String type = n.getType() != null ? n.getType() : "Info";
+
                     Date ts = n.getTimestamp();
-                    String time = ts != null
+                    String formattedTime = ts != null
                             ? DateFormat.format("MMM d, h:mm a", ts).toString()
                             : "";
 
-                    meta.setText(type + " • " + time);
+                    meta.setText(type + " • " + formattedTime);
 
                     return v;
                 }
             };
+
             listView.setAdapter(adapter);
+
         } else {
             adapter.clear();
             adapter.addAll(notifications);

@@ -22,24 +22,40 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
+/**
+ * Adapter for displaying an Entrant's event history.
+ *
+ * Each list item shows:
+ * - Event title
+ * - Status relative to the entrant (waiting, invited, accepted, cancelled)
+ * - Event image loaded asynchronously from Firestore
+ *
+ * Features:
+ * - Supports tag-matching to avoid image flicker or mismatch when views are reused
+ * - Gracefully handles missing images or missing event fields
+ * - Uses item_history.xml as the row layout
+ */
 public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
 
     private final String entrantId;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public EntrantHistoryAdapter(@NonNull Context context,
-                                 @NonNull List<Event> events,
-                                 @NonNull String entrantId) {
+    public EntrantHistoryAdapter(
+            @NonNull Context context,
+            @NonNull List<Event> events,
+            @NonNull String entrantId
+    ) {
         super(context, 0, events);
         this.entrantId = entrantId;
     }
 
     @NonNull
     @Override
-    public View getView(int position,
-                        @Nullable View convertView,
-                        @NonNull ViewGroup parent) {
-
+    public View getView(
+            int position,
+            @Nullable View convertView,
+            @NonNull ViewGroup parent
+    ) {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_history, parent, false);
@@ -55,14 +71,17 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         ImageView imageView = convertView.findViewById(R.id.history_event_image);
         TextView viewDetails = convertView.findViewById(R.id.history_view_details);
 
+ 
         String name = event.getEventName();
         if (name == null || name.isEmpty()) {
             name = "Untitled event";
         }
         titleView.setText(name);
 
+
         String listName = event.whichList(entrantId);
         String statusText;
+
         switch (listName) {
             case "waiting":
                 statusText = "On waitlist";
@@ -80,8 +99,8 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                 statusText = "Not active";
                 break;
         }
-
         statusView.setText(statusText);
+
 
         viewDetails.setText("View Details");
 
@@ -92,8 +111,10 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
             navController.navigate(R.id.eventDetailsFragment, bundle);
         });
 
+
         imageView.setImageBitmap(null);
         imageView.setBackgroundResource(R.drawable.bg_event_image_rounded);
+
 
         String imageDocId = event.getImageUrl();
         if (imageDocId == null || imageDocId.isEmpty()) {
@@ -110,18 +131,15 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                     if (!doc.exists()) return;
 
                     Object tag = imageView.getTag();
-                    if (!(tag instanceof String) || !imageDocId.equals(tag)) {
-                        return;
-                    }
+                    if (!(tag instanceof String) || !imageDocId.equals(tag)) return;
 
                     String base64 = doc.getString("url");
-                    if (base64 == null || base64.isEmpty()) {
-                        return;
-                    }
+                    if (base64 == null || base64.isEmpty()) return;
 
                     try {
                         byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
                         Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+
                         if (bmp != null) {
                             imageView.setBackground(null);
                             imageView.setImageBitmap(bmp);

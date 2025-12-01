@@ -3,13 +3,17 @@ package com.example.indeedgambling;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,12 +31,16 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -45,6 +53,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import firebase.com.protolitewrapper.BuildConfig;
 
 /**
  * Fragment that displays the organizer's upcoming events.
@@ -64,6 +74,8 @@ public class Organizer_UpcomingFragment extends Fragment {
     private FirebaseViewModel Data;
     private OrganizerViewModel organizerVM;
     private String orgID;
+    private FusedLocationProviderClient fusedLocationClient;
+    private GeoPoint LatestLocation = new GeoPoint(53.51,-113);
 
     // Root view + event list
     private View view;
@@ -92,23 +104,34 @@ public class Organizer_UpcomingFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 999;
     private Uri selectedImageUri;
     private Event currentEventForUpdate;
-    private Uri selectedPosterUri;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // --- osmdroid config ---
+        Configuration.getInstance().load(
+                requireContext(),
+                PreferenceManager.getDefaultSharedPreferences(requireContext())
+        );
+        Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
+
+
+
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        updateUserLocation();
+
         Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
         orgID = organizerVM.getOrganizer().getValue().getProfileId();
 
         // --- profile list adapters ---
-        WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
-        inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
-        cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
-        acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
+        WaitingListAdapter = new ProfileCardAdapter(requireContext(),Data, WaitingListArray);
+        inviteListAdapter = new ProfileCardAdapter(requireContext(), Data, invitedPeople);
+        cancelledListAdapter = new ProfileCardAdapter(requireContext(), Data, cancelledPeople);
+        acceptedListAdapter = new ProfileCardAdapter(requireContext(), Data, acceptedPeople);
 
         // --- event card list ---
         EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
@@ -224,8 +247,10 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Map location chooser.
         //Set to user location. Nicety, not needed.
+        LocationSelector.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+        updateUserLocation();
         LocationSelector.getController().setZoom(15.0);
-        LocationSelector.getController().setCenter(new GeoPoint(51.05, -114.07)); // Default example
+        LocationSelector.getController().setCenter(LatestLocation);
 
         Marker marker = new Marker(LocationSelector);
         marker.setTitle("Selected Location");
@@ -434,6 +459,8 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
+        Button mapButton = popupView.findViewById(R.id.btnViewMap);
+        Button exportFinalBtn = popupView.findViewById(R.id.btnExport);
         CheckBox locationRequirement = popupView.findViewById(R.id.Organizer_EventPopup_RadiusEnabled);
 
         locationRequirement.setChecked(event.isregistrationRadiusEnabled());
@@ -576,14 +603,17 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Accepted List Pop-up
         AcceptedListButton.setOnClickListener(v -> {
-            AcceptedListPopup();
+            AcceptedListPopup(event);
         });
-
+        //Waitlist Geolocation Map Pop-up
+        if (mapButton != null){
+            mapButton.setOnClickListener(v -> showEntrantMap(event));
+        }
+        //Export ALL Entrants button
+        if (exportFinalBtn != null){
+            exportFinalBtn.setOnClickListener(v -> exportAllEnrolledEntrants(event));
+        }
         //End Registration Now pop-up
-        endRegButton.setOnClickListener(v -> {
-            //Are you sure? popup
-            EndRegPopup(event);
-        });
 
         //Prompt setting a radius if there was not one before.
         locationRequirement.setOnClickListener(v -> {
@@ -830,8 +860,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Waitlist")
                 .setView(waitlistView)
-                .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+                .setNegativeButton("Close", null).show();
     }
 
     /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
@@ -868,12 +897,11 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Invited Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
     }
 
     /** Accepted entrants popup (uses local acceptedPeople list) */
-    private void AcceptedListPopup() {
+    private void AcceptedListPopup(Event event) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -884,7 +912,9 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .setPositiveButton("Export to CSV", (dialog, which) -> {
+                    exportAcceptedEntrantsList(event);
+                })
                 .show();
     }
 
@@ -932,6 +962,179 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
     // -------------------- HELPERS -------------------- //
+    private void showEntrantMap(Event event) {
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View mapView = inflater.inflate(R.layout.organizer_event_map_popup, null);
+
+
+        org.osmdroid.views.MapView mapViewWidget = mapView.findViewById(R.id.mapView);
+        TextView mapInfoText = mapView.findViewById(R.id.mapInfoText);
+
+
+        // get all entrants
+        ArrayList<String> allEntrants = new ArrayList<>();
+        allEntrants.addAll(event.getWaitingList());
+        allEntrants.addAll(event.getInvitedList());
+        allEntrants.addAll(event.getAcceptedEntrants());
+
+
+        if (allEntrants.isEmpty()) {
+            WarningToast("No entrants to show on map");
+            return;
+        }
+
+
+        // OSMdroid setup - no API
+        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+        mapViewWidget.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+
+
+        org.osmdroid.util.GeoPoint startPoint = new org.osmdroid.util.GeoPoint(51.0447, -114.0719);
+        mapViewWidget.getController().setZoom(10.0);
+        mapViewWidget.getController().setCenter(startPoint);
+
+
+        Data.getProfiles(allEntrants,
+                (profiles) -> {
+                    // Add markers
+                    for (Profile profile : profiles) {
+                        double lat = 51.0447 + (Math.random() * 0.02 - 0.01);
+                        double lon = -114.0719 + (Math.random() * 0.02 - 0.01);
+
+
+                        org.osmdroid.views.overlay.Marker marker = new org.osmdroid.views.overlay.Marker(mapViewWidget);
+                        marker.setPosition(new org.osmdroid.util.GeoPoint(lat, lon));
+                        marker.setTitle(profile.getPersonName());
+                        marker.setSnippet("Joined: " + event.getEventName());
+                        mapViewWidget.getOverlays().add(marker);
+                    }
+
+
+                    mapInfoText.setText("Showing " + profiles.size() + " entrants");
+                    mapViewWidget.invalidate();
+                },
+                e -> mapInfoText.setText("Error loading entrant data")
+        );
+
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Entrant Locations - " + event.getEventName())
+                .setView(mapView)
+                .setPositiveButton("Close", null)
+                .show();
+    }
+    private void exportAllEnrolledEntrants(Event event) {
+        // Show loading dialog
+        AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Exporting CSV")
+                .setMessage("Preparing all enrolled entrants list...")
+                .setCancelable(false)
+                .show();
+
+
+        // Get ALL enrolled entrants - waitlist + invited + accepted
+        ArrayList<String> allEnrolledEntrants = new ArrayList<>();
+
+
+        if (event.getWaitingList() != null) {
+            allEnrolledEntrants.addAll(event.getWaitingList());
+        }
+        if (event.getInvitedList() != null) {
+            allEnrolledEntrants.addAll(event.getInvitedList());
+        }
+        if (event.getAcceptedEntrants() != null) {
+            allEnrolledEntrants.addAll(event.getAcceptedEntrants());
+        }
+
+
+        if (allEnrolledEntrants.isEmpty()) {
+            loadingDialog.dismiss();
+            WarningToast("No enrolled entrants to export!");
+            return;
+        }
+
+
+        Data.getProfiles(allEnrolledEntrants,
+                (profiles) -> {
+                    loadingDialog.dismiss();
+
+
+                    boolean success = CSVExporter.exportAllEnrolledEntrants(
+                            requireContext(), event, profiles);
+
+
+                    if (success) {
+                        Toast.makeText(requireContext(),
+                                "All enrolled entrants list exported to Downloads folder!",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to export CSV. Check storage permissions.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                },
+                e -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(requireContext(), "Error fetching enrolled entrants data", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+    /**
+     * Exports ONLY accepted entrants to a CSV file
+     * Shows loading dialog and handles empty list cases
+     *
+     * @param event The event to export accepted entrants from
+     */
+    private void exportAcceptedEntrantsList(Event event) {
+        AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Exporting CSV")
+                .setMessage("Preparing accepted entrants list...")
+                .setCancelable(false)
+                .show();
+
+
+        // just accepted entrants
+        ArrayList<String> acceptedEntrants = new ArrayList<>();
+
+
+        if (event.getAcceptedEntrants() != null) {
+            acceptedEntrants.addAll(event.getAcceptedEntrants());
+        }
+
+
+        if (acceptedEntrants.isEmpty()) {
+            loadingDialog.dismiss();
+            WarningToast("No accepted entrants to export!");
+            return;
+        }
+
+
+        Data.getProfiles(acceptedEntrants,
+                (profiles) -> {
+                    loadingDialog.dismiss();
+
+
+                    boolean success = CSVExporter.exportAcceptedEntrants(
+                            requireContext(), event, profiles);
+
+
+                    if (success) {
+                        Toast.makeText(requireContext(),
+                                "Accepted entrants list exported to Downloads folder!",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to export CSV.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                },
+                e -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(requireContext(), "Error fetching accepted entrants data", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+
 
     /** POPUP that invites the entrants according to the number inputted by the user.
      * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.
@@ -1042,4 +1245,40 @@ public class Organizer_UpcomingFragment extends Fragment {
     private void updateCapacityDisplay(TextView Capacity, Event event){
         Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
     }
+
+    /** Used to set a relevant centre point on the map popup
+     *
+     */
+    private void updateUserLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    new String[]{
+                            "android.permission.ACCESS_COARSE_LOCATION",
+                            "android.permission.ACCESS_FINE_LOCATION"
+                    },
+                    101
+            );
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this::updateCurrentLocation)
+                .addOnFailureListener(e ->
+                        Log.d("Firebase Location Issue", "UpcomingEvent: New Event: " + e)
+                );
+    }
+    private void updateCurrentLocation(Location loc){
+        LatestLocation.setLatitude(loc.getLatitude());
+        LatestLocation.setLongitude(loc.getLongitude());
+    }
+
 }
