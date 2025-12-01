@@ -94,9 +94,12 @@ public class NotificationSenderFragment extends Fragment {
     private void setupEventInfo(Event event) {
         StringBuilder sb = new StringBuilder();
         sb.append("Event: ").append(event.getEventName());
-        if (event.getLocation() != null && !event.getLocation().isEmpty()) {
-            sb.append("\nLocation: ").append(event.getLocation());
+
+        String locationString = event.getLocationString();
+        if (locationString != null && !locationString.isEmpty()) {
+            sb.append("\nLocation: ").append(locationString);
         }
+
         sb.append("\nID: ").append(event.getEventId());
         eventInfo.setText(sb.toString());
     }

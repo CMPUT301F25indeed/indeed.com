@@ -19,4 +19,10 @@
 
     <style name="Theme.IndeedGambling" parent="Base.Theme.IndeedGambling" />
 
+    <!-- Splash screen theme (simple) -->
+    <style name="Theme.Indeed.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
 </resources>
+

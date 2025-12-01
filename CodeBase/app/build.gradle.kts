@@ -64,20 +64,15 @@ dependencies {
     implementation("com.google.zxing:core:3.5.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
 
 
     // Tests
     testImplementation(libs.junit)
 
-    /*implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-auth")*/
-
-
-
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    androidTestImplementation("org.hamcrest:hamcrest:2.2")
+    //androidTestImplementation("org.hamcrest:hamcrest:3.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.0.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.0.1")
 }

@@ -18,6 +18,7 @@ package com.example.indeedgambling;
  */
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,14 +56,12 @@ public class EventDetailsFragment extends Fragment {
     private String entrantId;
     private String entrantRelation;
 
+    private ImageView posterView;
     private TextView name, desc, waitlistStatus, total;
     private Button yesBtn, noBtn, backBtn, tryAgainBtn;
-    private ImageView posterView;
 
-    private String scannedEventId = null;
-
-    // Location client (Mir branch)
     private FusedLocationProviderClient fusedLocationClient;
+    private String scannedEventId = null;
 
     @Nullable
     @Override
@@ -82,8 +81,6 @@ public class EventDetailsFragment extends Fragment {
         } else {
             entrantId = null;
         }
-
-
 
         // Setup fused location client + attempt to update user location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
@@ -134,11 +131,13 @@ public class EventDetailsFragment extends Fragment {
     // Entrant button logic
     // ---------------------------------------------------------------------
     private void applyEntrantButtonLogic(View v) {
-        if (event == null) return;
 
         entrantRelation = event.whichList(entrantId);
+        if (entrantRelation == null) {
+            entrantRelation = "none";
+        }
 
-        if (entrantRelation.equals("none") || entrantRelation.equals("waitlist")) {
+        if (entrantRelation.equals("none") || entrantRelation.equals("waitlist") || entrantRelation.equals("waiting")) {
             yesBtn.setText("Join\n Waitlist");
             noBtn.setText("Leave\n Waitlist");
             yesBtn.setVisibility(View.VISIBLE);
@@ -200,14 +199,12 @@ public class EventDetailsFragment extends Fragment {
     // Load event details + poster
     // ---------------------------------------------------------------------
     private void loadEventDetails(View v) {
-        if (event == null) return;
 
         name.setText(event.getEventName());
         desc.setText(event.getDescription());
 
         // Poster logic
         if (posterView != null) {
-            // grey placeholder first
             posterView.setImageBitmap(null);
             posterView.setBackgroundColor(0xFFEEEEEE);
         }
@@ -218,23 +215,16 @@ public class EventDetailsFragment extends Fragment {
                     .document(imageId)
                     .get()
                     .addOnSuccessListener((DocumentSnapshot doc) -> {
-                        if (doc != null && doc.exists()) {
+                        if (doc.exists()) {
                             String base64 = doc.getString("url");
-                            if (!TextUtils.isEmpty(base64)) {
-                                try {
-                                    byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
-                                    Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-                                    posterView.setBackgroundColor(0x00000000);
-                                    posterView.setImageBitmap(bmp);
-                                } catch (Exception e) {
-                                    Log.e("EventDetails", "Poster decode failed", e);
-                                }
-                            }
+                            try {
+                                byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
+                                Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                                posterView.setBackgroundColor(0x00000000);
+                                posterView.setImageBitmap(bmp);
+                            } catch (Exception e) {}
                         }
-                    })
-                    .addOnFailureListener(e ->
-                            Log.e("EventDetails", "Poster load failed", e)
-                    );
+                    });
         }
 
         TextView loc       = v.findViewById(R.id.event_location);
@@ -246,7 +236,7 @@ public class EventDetailsFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
         if (event.getLocation() != null)
-            loc.setText("Location: " + event.getLocation());
+            loc.setText("Location: " + event.getLocationString());
 
         if (event.getCategory() != null)
             category.setText("Category: " + event.getCategory());
@@ -270,18 +260,12 @@ public class EventDetailsFragment extends Fragment {
     // Entrant actions
     // ---------------------------------------------------------------------
     private void clickedJoinWaitlist(View v) {
-        if (entrantId == null) {
-            Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (event.getWaitingList() != null &&
-                event.getWaitingList().contains(entrantId)) {
+        if (event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
             Toast.makeText(getContext(), "You already joined this waitlist!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Use Mir's logic: tryaddtoWaitingList returns false when full
+        // Use logic where tryaddtoWaitingList returns false when full
         if (!event.tryaddtoWaitingList(entrantId)) {
             // Just in case, ensure id is not in waiting list
             if (event.getWaitingList() != null) {
@@ -291,19 +275,15 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-
-
+        // Track event in entrant profile as well
         firebaseVM.joinWaitingList(
                 event.getEventId(),
                 entrantId,
                 () -> {},
                 e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
         );
-
-        firebaseVM.upsertEntrant(
-                entrantVM.getCurrentEntrant(),
-                () -> {},
-                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
+        firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(), () -> {}, err ->
+                Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
         );
 
         Toast.makeText(getContext(), "Joined waitlist!", Toast.LENGTH_SHORT).show();
@@ -311,30 +291,20 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void clickedLeaveWaitlist(View v) {
-        if (entrantId == null) {
-            Toast.makeText(getContext(), "Please log in first.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         if (event.getWaitingList() == null ||
                 !event.getWaitingList().contains(entrantId)) {
-            Toast.makeText(getContext(), "You’re not on the waitlist!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "You're not on the waitlist!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         event.getWaitingList().remove(entrantId);
 
-        firebaseVM.leaveWaitingList(
-                event.getEventId(),
-                entrantId,
-                () -> {},
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        firebaseVM.leaveWaitingList(event.getEventId(), entrantId, () -> {}, e ->
+                Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
         );
 
-        firebaseVM.upsertEntrant(
-                entrantVM.getCurrentEntrant(),
-                () -> {},
-                err -> Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
+        firebaseVM.upsertEntrant(entrantVM.getCurrentEntrant(), () -> {}, err ->
+                Toast.makeText(getContext(), err.getMessage(), Toast.LENGTH_SHORT).show()
         );
 
         Toast.makeText(getContext(), "Removed from waitlist.", Toast.LENGTH_SHORT).show();
@@ -342,12 +312,9 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void clickedAcceptInvite(View v) {
-        firebaseVM.signUpForEvent(
-                event.getEventId(),
-                entrantId,
-                () -> Toast.makeText(getContext(), "Signed up successfully!", Toast.LENGTH_SHORT).show(),
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-        );
+        firebaseVM.signUpForEvent(event.getEventId(), entrantId,
+                () -> Toast.makeText(getContext(), "Signed up!", Toast.LENGTH_SHORT).show(),
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void clickedRejectInvite(View v) {
@@ -359,17 +326,16 @@ public class EventDetailsFragment extends Fragment {
     }
 
     private void updateTotal(View v) {
-        if (event.getWaitingList() != null) {
-            int totalEntrant = event.getWaitingList().size();
-            total.setText("Total: " + totalEntrant);
+        if (event.getWaitingList() != null && event.RegistrationOpen()) {
+            total.setText("Total: " + event.getWaitingList().size() + "/" + event.getMaxWaitingEntrantsString());
+
+        } else if (!event.RegistrationOpen() && event.getLostList() != null) {
+            total.setText("Total: " + event.getLostList().size() + "/" + event.getMaxWaitingEntrantsString());
         }
     }
 
     private void updateWaitlistStatus() {
-        if (event == null) return;
-
-        if (entrantId != null &&
-                event.getWaitingList() != null &&
+        if (event.getWaitingList() != null &&
                 event.getWaitingList().contains(entrantId)) {
 
             waitlistStatus.setVisibility(View.VISIBLE);
@@ -385,7 +351,7 @@ public class EventDetailsFragment extends Fragment {
     }
 
     // ---------------------------------------------------------------------
-    // Location (from Mir branch)
+    // Location
     // ---------------------------------------------------------------------
     private void updateUserLocation() {
         if (ActivityCompat.checkSelfPermission(
@@ -433,14 +399,10 @@ public class EventDetailsFragment extends Fragment {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == 101) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                updateUserLocation();
-            } else {
-                Toast.makeText(getContext(), "Location permission denied", Toast.LENGTH_SHORT).show();
-            }
+        if (requestCode == 101 &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            updateUserLocation();
         }
     }
 }

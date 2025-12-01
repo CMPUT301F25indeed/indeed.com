@@ -1,11 +1,9 @@
 package com.example.indeedgambling;
 
-
-
-
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -15,51 +13,36 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.HashSet;
-import java.util.Set;
-
-
-import androidx.annotation.Nullable;
-
-import android.app.Application;
-import android.util.Log;
-import android.widget.TextView;
-
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-
-import com.google.firebase.firestore.*;
-import com.google.firebase.storage.StorageReference;
-
-import java.util.ArrayList;
-import java.util.Objects;
 
 /**
- *
+ * Central ViewModel for Firebase access: profiles, events, notifications, images, logs.
  */
 public class FirebaseViewModel extends ViewModel {
 
-    private final com.google.firebase.storage.FirebaseStorage storage = com.google.firebase.storage.FirebaseStorage.getInstance();
+    // Storage
+    private final com.google.firebase.storage.FirebaseStorage storage =
+            com.google.firebase.storage.FirebaseStorage.getInstance();
     private final com.google.firebase.storage.StorageReference storageRef = storage.getReference();
 
-
-    // ---- Firestore ----
+    // Firestore
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final CollectionReference PROFILES = db.collection("profiles");
     private final CollectionReference EVENTS = db.collection("events");
@@ -71,12 +54,15 @@ public class FirebaseViewModel extends ViewModel {
     private final MutableLiveData<List<Profile>> profilesLive = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<Event>> eventsLive = new MutableLiveData<>(new ArrayList<>());
 
-    private com.google.firebase.firestore.ListenerRegistration profilesReg;
-    private com.google.firebase.firestore.ListenerRegistration eventsReg;
+    private ListenerRegistration profilesReg;
+    private ListenerRegistration eventsReg;
 
-    /**
-     *
-     */
+    // Local cache for some team code
+    private final MutableLiveData<ArrayList<Event>> Events = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<ArrayList<Profile>> Profiles = new MutableLiveData<>(new ArrayList<>());
+
+    private MutableLiveData<List<Notification>> allNotifications = new MutableLiveData<>(new ArrayList<>());
+
     public FirebaseViewModel() {
         attachRealtimeListeners();
     }
@@ -92,9 +78,6 @@ public class FirebaseViewModel extends ViewModel {
         super.onCleared();
     }
 
-    /**
-     *
-     */
     private void attachRealtimeListeners() {
         profilesReg = PROFILES.addSnapshotListener((snap, err) -> {
             if (err != null || snap == null) {
@@ -113,33 +96,18 @@ public class FirebaseViewModel extends ViewModel {
         });
     }
 
-    /**
-     * @return LiveData list of profiles updated in real time
-     */
     public LiveData<List<Profile>> getProfilesLive() {
         return profilesLive;
     }
 
-    /**
-     * @return LiveData list of events updated in real time
-     */
     public LiveData<List<Event>> getEventsLive() {
         return eventsLive;
     }
 
     // -------------------------
-    // Profile CRUD
+    // Profile / Entrant
     // -------------------------
-    /**
-     * Finds a user profile in Firestore by matching the stored deviceId.
-     *
-     * Supports device-based automatic login by checking whether this device
-     * is linked to any existing profile.
-     *
-     * Returns:
-     * - Matching Profile object if found
-     * - null if no linked deviceId exists
-     */
+
     public void findProfileByDeviceId(String deviceId,
                                       Consumer<Profile> onResult,
                                       Consumer<Exception> onError) {
@@ -157,14 +125,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onError::accept);
     }
 
-
-    /**
-     * Creates or updates a profile in Firestore.
-     *
-     * @param p     Profile object
-     * @param onOk  callback if success
-     * @param onErr callback if failure
-     */
     public void upsertProfile(Profile p, Runnable onOk, Consumer<Exception> onErr) {
         if (p.getProfileId() == null || p.getProfileId().isEmpty()) {
             onErr.accept(new IllegalArgumentException("profileId is required"));
@@ -175,13 +135,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Checks if a given email already exists in the Profiles collection.
-     *
-     * @param email    The email to check.
-     * @param onResult Callback invoked with true if the email exists, false otherwise.
-     * @param onErr    Callback invoked if an error occurs while querying Firestore.
-     */
     public void checkEmailExists(String email, Consumer<Boolean> onResult, Consumer<Exception> onErr) {
         PROFILES.whereEqualTo("email", email)
                 .get()
@@ -192,13 +145,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Creates or updates an entrant in Firestore.
-     *
-     * @param e     entrant object
-     * @param onOk  callback if success
-     * @param onErr callback if failure
-     */
     public void upsertEntrant(Entrant e, Runnable onOk, Consumer<Exception> onErr) {
         if (e.getProfileId() == null || e.getProfileId().isEmpty()) {
             onErr.accept(new IllegalArgumentException("profileId is required"));
@@ -209,24 +155,10 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Updates specific fields of a profile in Firestore.
-     *
-     * @param profileId ID of profile
-     * @param updates   fields to update
-     */
-    /**
-     * Updates fields of a profile document in Firestore.
-     *
-     * @param profileId ID of the profile to update
-     * @param updates   Key–value pairs to update in Firestore
-     * @param onSuccess Callback executed on success
-     * @param onError   Callback executed on failure
-     */
     public void updateProfile(String profileId,
                               Map<String, Object> updates,
                               Runnable onSuccess,
-                              java.util.function.Consumer<Exception> onError) {
+                              Consumer<Exception> onError) {
 
         if (profileId == null || updates == null) {
             if (onError != null) {
@@ -250,10 +182,6 @@ public class FirebaseViewModel extends ViewModel {
                 });
     }
 
-
-    /**
-     * Loads a profile based on email+password hash
-     */
     public void loadProfileByLogin(String userName, String password,
                                    Consumer<DocumentSnapshot> onDoc, Consumer<Exception> onErr) {
         String id = HashUtil.generateId(userName, password);
@@ -266,9 +194,6 @@ public class FirebaseViewModel extends ViewModel {
     // Events
     // -------------------------
 
-    /**
-     * Creates a new event in Firestore.
-     */
     public void createEvent(Event e, Runnable onOk, Consumer<Exception> onErr) {
         if (e.getEventId() == null || e.getEventId().isEmpty()) {
             e.setEventId(UUID.randomUUID().toString());
@@ -288,9 +213,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Fetches an event from Firestore by its unique event ID.
-     */
     public void getEventById(String eventId, Consumer<Event> onSuccess, Consumer<Exception> onError) {
         EVENTS.document(eventId)
                 .get()
@@ -305,18 +227,12 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onError::accept);
     }
 
-    /**
-     * Update event details
-     */
     public void updateEvent(String eventId, Map<String, Object> updates, Runnable onOk, Consumer<Exception> onErr) {
         EVENTS.document(eventId).update(updates)
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Fetch open events where registration is still active
-     */
     public void fetchOpenEvents(Consumer<List<Event>> onResult, Consumer<Exception> onErr) {
         Date now = new Date();
         EVENTS.whereGreaterThan("registrationStart", now)
@@ -342,13 +258,7 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    // -------------------------
     // Entrant history
-    // -------------------------
-
-    /**
-     *
-     */
     public void fetchEntrantHistory(String entrantId,
                                     Consumer<List<Event>> onResult,
                                     Consumer<Exception> onErr) {
@@ -386,17 +296,7 @@ public class FirebaseViewModel extends ViewModel {
     // Waiting List
     // -------------------------
 
-    /**
-     * Attempts to add the entrant to the waitinglist for the event.
-     * Does not add the entrant if there is not room.
-     *
-     * @param eventId   Event to attempt to add to
-     * @param entrantId Entrant to try to add
-     * @param onOk      What to be done on success
-     * @param onErr     What to be done on failure
-     */
     public void joinWaitingList(String eventId, String entrantId, Runnable onOk, Consumer<Exception> onErr) {
-        //Does not allow signup if past set limit: US: 02.03.01
         EVENTS.document(eventId).get().addOnSuccessListener(e -> {
             Event event = e.toObject(Event.class);
             if (event == null) {
@@ -423,18 +323,7 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Returns the waitlist for the event matching the eventID
-     *
-     * @param eventID  EventID to find waitlist of
-     * @param onResult code to be run after success with the Profile Data.
-     * @param onErr    action on failure to find data
-     */
     public void getEventWaitlist(String eventID, Consumer<List<Profile>> onResult, Consumer<Exception> onErr) {
-        //Get the Profile IDs from the events waitlist
-        // Get the names from the profiles with those ids
-
-        //Gets matching event
         EVENTS.document(eventID).get().addOnSuccessListener(e -> {
             Event event = e.toObject(Event.class);
             if (event == null) {
@@ -454,40 +343,20 @@ public class FirebaseViewModel extends ViewModel {
         }).addOnFailureListener(onErr::accept);
     }
 
-    /** Gets the profile objects for all the passed IDs
-     *
-     * @param ProfileIDs IDs of the profiles we want
-     * @param onResult What to do on successful retrieval
-     * @param onErr What to do on a failed query
-     */
-    public void getProfiles(List<String> ProfileIDs, Consumer<List<Profile>> onResult, Consumer<Exception> onErr){
-        if (ProfileIDs.isEmpty()){
+    public void getProfiles(List<String> ProfileIDs, Consumer<List<Profile>> onResult, Consumer<Exception> onErr) {
+        if (ProfileIDs.isEmpty()) {
             onResult.accept(new ArrayList<>());
             return;
         }
 
-        //Create phoney thing to return.
-        new Thread(()->{PROFILES.whereIn("profileId",ProfileIDs)
+        new Thread(() -> PROFILES.whereIn("profileId", ProfileIDs)
                 .orderBy("personName")
                 .get()
-                .addOnSuccessListener(p->{
-                    onResult.accept(p.toObjects(Profile.class));
-                })
-                .addOnFailureListener(onErr::accept);}).start();
+                .addOnSuccessListener(p -> onResult.accept(p.toObjects(Profile.class)))
+                .addOnFailureListener(onErr::accept)).start();
     }
 
-    /**
-     * Returns the Entrant objects of the invitedList from the ID for the event.
-     *
-     * @param eventID  Event whose invitedList is being used
-     * @param onResult Action to take on success
-     * @param onErr    Action to take on failure
-     */
     public void getEventInvitedList(String eventID, Consumer<List<Profile>> onResult, Consumer<Exception> onErr) {
-        //Get the Profile IDs from the events waitlist
-        // Get the names from the profiles with those ids
-
-        //Gets matching event
         EVENTS.document(eventID).get().addOnSuccessListener(e -> {
             Event event = e.toObject(Event.class);
             if (event == null) {
@@ -508,8 +377,9 @@ public class FirebaseViewModel extends ViewModel {
     }
 
     // -------------------------
-    // Invitations / accept
+    // Invitations
     // -------------------------
+
     public void getInvitationStatus(String eventId,
                                     String entrantId,
                                     Consumer<String> onResult,
@@ -530,10 +400,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-
-    /**
-     * Create or update invitation for entrant
-     */
     public void upsertInvitation(Invitation inv, Runnable onOk, Consumer<Exception> onErr) {
         String docId = inv.getEventId() + "_" + inv.getEntrantId();
         INVITES.document(docId).set(inv)
@@ -541,9 +407,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Update invitation (accept/decline etc)
-     */
     public void updateInvitationStatus(String eventId, String entrantId, String status,
                                        boolean responded, Date updatedAt,
                                        Runnable onOk, Consumer<Exception> onErr) {
@@ -557,11 +420,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Entrant accepts invitation.
-     * Moves id from invitedList to acceptedEntrants,
-     * updates Invitation doc, and sends a lottery-win notification.
-     */
     public void acceptInvitation(String eventId,
                                  String entrantId,
                                  Runnable onOk,
@@ -616,13 +474,9 @@ public class FirebaseViewModel extends ViewModel {
             DocumentReference eventRef = EVENTS.document(eventId);
             DocumentReference inviteRef = INVITES.document(eventId + "_" + entrantId);
 
-            // Remove from invited list
             batch.update(eventRef, "invitedList", FieldValue.arrayRemove(entrantId));
-
-            // Add to cancelled list
             batch.update(eventRef, "cancelledEntrants", FieldValue.arrayUnion(entrantId));
 
-            // Update the invitation document
             Map<String, Object> inviteUpdates = new HashMap<>();
             inviteUpdates.put("status", "declined");
             inviteUpdates.put("responded", true);
@@ -636,14 +490,10 @@ public class FirebaseViewModel extends ViewModel {
         }).addOnFailureListener(onErr::accept);
     }
 
-
     // -------------------------
     // Notifications
     // -------------------------
 
-    /**
-     * Sends an in-app notification to user
-     */
     public void sendNotification(Notification n, Runnable onOk, Consumer<Exception> onErr) {
         String docId = UUID.randomUUID().toString();
         Map<String, Object> map = new HashMap<>();
@@ -653,13 +503,18 @@ public class FirebaseViewModel extends ViewModel {
         map.put("type", n.getType());
         map.put("message", n.getMessage());
         map.put("timestamp", n.getTimestamp() != null ? n.getTimestamp() : new Date());
+
+        // Extra fields so UI can show event name and sender email
+        map.put("eventName", n.getEventName());
+        map.put("senderEmail", n.getSenderEmail());
+
         NOTIFS.document(docId).set(map)
                 .addOnSuccessListener(v -> onOk.run())
                 .addOnFailureListener(onErr::accept);
     }
 
     /**
-     * Helper used for US 01.04.01 and 01.04.02 (and now organizer stories).
+     * Helper used for US 01.04.01 and 01.04.02 and organizer stories.
      */
     public void sendLotteryResultNotification(String eventId,
                                               String entrantId,
@@ -679,6 +534,8 @@ public class FirebaseViewModel extends ViewModel {
                     n.setReceiverId(entrantId);
                     n.setEventId(eventId);
                     n.setType(isWinner ? "LOTTERY_WIN" : "LOTTERY_LOSS");
+                    n.setEventName(name);
+
                     String msg = isWinner
                             ? "You were selected for: " + name
                             : "You were not selected for: " + name;
@@ -690,10 +547,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * US 02.05.01
-     * Notify all invited entrants (invitedList) that they won the lottery.
-     */
     public void notifyInvitedEntrantsLotteryWin(String eventId,
                                                 Runnable onOk,
                                                 Consumer<Exception> onErr) {
@@ -732,11 +585,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * US 02.06.03
-     * Fetches Profile objects for all entrants who enrolled in the event
-     * (whose IDs are in acceptedEntrants).
-     */
     public void getEventAcceptedEntrants(String eventId,
                                          Consumer<List<Profile>> onResult,
                                          Consumer<Exception> onErr) {
@@ -765,11 +613,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * US 02.06.04
-     * Cancels all invited entrants who did not sign up (non-responders),
-     * and sends them LOTTERY_LOSS notifications.
-     */
     public void cancelNonRespondingInvitedEntrants(String eventId,
                                                    Runnable onOk,
                                                    Consumer<Exception> onErr) {
@@ -834,9 +677,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     *
-     */
     public void notifyWaitingList(String eventId, String message, Runnable onOk, Consumer<Exception> onErr) {
         EVENTS.document(eventId).get().addOnSuccessListener(documentSnapshot -> {
             Event event = documentSnapshot.toObject(Event.class);
@@ -863,14 +703,11 @@ public class FirebaseViewModel extends ViewModel {
                     );
                 }
             } else {
-                onOk.run(); // No waiting list entrants is not an error
+                onOk.run();
             }
         }).addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * US 02.07.02 - Notify all selected entrants
-     */
     public void notifySelectedEntrants(String eventId, String message, Runnable onOk, Consumer<Exception> onErr) {
         EVENTS.document(eventId).get().addOnSuccessListener(documentSnapshot -> {
             Event event = documentSnapshot.toObject(Event.class);
@@ -897,16 +734,16 @@ public class FirebaseViewModel extends ViewModel {
                     );
                 }
             } else {
-                onOk.run(); // No selected entrants is not an error
+                onOk.run();
             }
         }).addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * US 02.07.03 - Notify all cancelled entrants
-     */
-    public void notifyCancelledEntrants(String eventId, List<String> cancelledEntrantIds, String message,
-                                        Runnable onOk, Consumer<Exception> onErr) {
+    public void notifyCancelledEntrants(String eventId,
+                                        List<String> cancelledEntrantIds,
+                                        String message,
+                                        Runnable onOk,
+                                        Consumer<Exception> onErr) {
         if (cancelledEntrantIds == null || cancelledEntrantIds.isEmpty()) {
             onOk.run();
             return;
@@ -935,13 +772,9 @@ public class FirebaseViewModel extends ViewModel {
         }
     }
 
-    /**
-     * Live notifications for a given user id.
-     */
     public LiveData<List<Notification>> observeNotificationsForUser(String userId) {
         MutableLiveData<List<Notification>> live = new MutableLiveData<>(new ArrayList<>());
 
-        // Get ALL notifications ordered by timestamp, filter by receiverId on client
         NOTIFS
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snap, err) -> {
@@ -956,7 +789,6 @@ public class FirebaseViewModel extends ViewModel {
 
                         n.setId(d.getId());
 
-                        // Only keep notifications for this userId
                         if (userId.equals(n.getReceiverId())) {
                             list.add(n);
                         }
@@ -972,11 +804,6 @@ public class FirebaseViewModel extends ViewModel {
         NOTIFS.document(id).delete();
     }
 
-
-
-    /**
-     * Fetch latest (most recent) notification for popup.
-     */
     public void fetchLatestNotification(String userId,
                                         Consumer<Notification> onResult,
                                         Consumer<Exception> onErr) {
@@ -998,13 +825,32 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
+    public LiveData<List<Notification>> getAllNotificationsLive() {
+
+        NOTIFS.orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snap, err) -> {
+
+                    if (err != null || snap == null) {
+                        allNotifications.postValue(new ArrayList<>());
+                        return;
+                    }
+
+                    List<Notification> list = new ArrayList<>();
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        Notification n = d.toObject(Notification.class);
+                        if (n != null) list.add(n);
+                    }
+
+                    allNotifications.postValue(list);
+                });
+
+        return allNotifications;
+    }
+
     // -------------------------
     // Images
     // -------------------------
 
-    /**
-     * Stores metadata for uploaded image
-     */
     public void saveImageMeta(ImageUpload img, Runnable onOk, Consumer<Exception> onErr) {
         String docId = UUID.randomUUID().toString();
         IMAGES.document(docId).set(img)
@@ -1012,14 +858,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    // -------------------------
-// Images (admin helpers)
-// -------------------------
-
-    /**
-     * Small wrapper that keeps both the Firestore doc id and the ImageUpload data.
-     * Used by the admin "review images" screen.
-     */
     public static class ImageDoc {
         private final String docId;
         private final ImageUpload data;
@@ -1029,13 +867,15 @@ public class FirebaseViewModel extends ViewModel {
             this.data = data;
         }
 
-        public String getDocId() { return docId; }
-        public ImageUpload getData() { return data; }
+        public String getDocId() {
+            return docId;
+        }
+
+        public ImageUpload getData() {
+            return data;
+        }
     }
 
-    /**
-     * Fetch all image metadata documents.
-     */
     public void fetchAllImages(Consumer<List<ImageDoc>> onResult,
                                Consumer<Exception> onErr) {
         IMAGES.get()
@@ -1052,10 +892,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Delete an image metadata doc and also clear the poster URL
-     * on the related event (if eventId is not null).
-     */
     public void deleteImageAndClearEventPoster(String imageDocId,
                                                @Nullable String eventId,
                                                Runnable onOk,
@@ -1063,10 +899,8 @@ public class FirebaseViewModel extends ViewModel {
 
         WriteBatch batch = db.batch();
 
-        // delete image metadata
         batch.delete(IMAGES.document(imageDocId));
 
-        // optionally clear event imageUrl
         if (eventId != null && !eventId.isEmpty()) {
             DocumentReference eventRef = EVENTS.document(eventId);
             Map<String, Object> u = new HashMap<>();
@@ -1079,16 +913,10 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-
-
-
     // -------------------------
     // Logs
     // -------------------------
 
-    /**
-     * Saves logs of system actions (admin viewable)
-     */
     public void writeLog(LogEntry log, Runnable onOk, Consumer<Exception> onErr) {
         String docId = UUID.randomUUID().toString();
         LOGS.document(docId).set(log)
@@ -1100,41 +928,20 @@ public class FirebaseViewModel extends ViewModel {
     // Helpers / local cache
     // -------------------------
 
-    /**
-     * @return hashed profile ID generated from email + password
-     */
     public String makeProfileId(String userName, String password) {
         return HashUtil.generateId(userName, password);
     }
 
-    /**
-     * Checks if a doc exists in a Firestore collection
-     */
     public void containsById(String collection, String id, Consumer<Boolean> onResult, Consumer<Exception> onErr) {
         db.collection(collection).document(id).get()
                 .addOnSuccessListener(doc -> onResult.accept(doc.exists()))
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * @return Firebase DB instance
-     */
     public FirebaseFirestore getDb() {
         return db;
     }
 
-
-    // ======================= LOCAL CACHE SECTION (TEAM CODE BELOW) =======================
-
-    /**
-     * Adds an object (Event or Profile) both locally and to Firestore
-     */
-    private final MutableLiveData<ArrayList<Event>> Events = new MutableLiveData<>(new ArrayList<>());
-    private final MutableLiveData<ArrayList<Profile>> Profiles = new MutableLiveData<>(new ArrayList<>());
-
-    /**
-     * Adds event or profile to local cache and Firestore
-     */
     public void Add(Object item) {
         if (item instanceof Event) {
             Event e = (Event) item;
@@ -1170,9 +977,6 @@ public class FirebaseViewModel extends ViewModel {
         }
     }
 
-    /**
-     * Checks if an Event or Profile exists in the local cache
-     */
     public Boolean Contains(Object item) {
         if (item instanceof Event) {
             ArrayList<Event> list = Events.getValue();
@@ -1184,9 +988,6 @@ public class FirebaseViewModel extends ViewModel {
         return false;
     }
 
-    /**
-     * Returns the locally cached events, sorted by registration end date
-     */
     public ArrayList<Event> getEvents() {
         ArrayList<Event> list = Events.getValue();
         if (list == null) {
@@ -1196,9 +997,6 @@ public class FirebaseViewModel extends ViewModel {
         return list;
     }
 
-    /**
-     *
-     */
     public void signUpForEvent(String eventId, String entrantId, Runnable onSuccess, Consumer<Exception> onFailure) {
         db.collection("events").document(eventId)
                 .update("acceptedEntrants", FieldValue.arrayUnion(entrantId))
@@ -1206,7 +1004,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onFailure::accept);
     }
 
-    // Simpler local filtering version (no Firestore index needed)
     public void fetchEventsByCategoryAndDate(String category, Date start, Date end,
                                              Consumer<List<Event>> onResult,
                                              Consumer<Exception> onErr) {
@@ -1227,16 +1024,14 @@ public class FirebaseViewModel extends ViewModel {
                         Date endTime = e.getEventEnd();
                         boolean valid = true;
 
-                        // Only show OPEN events
                         if (e.getStatus() == null || !e.getStatus().equalsIgnoreCase("Open")) {
                             valid = false;
                         }
 
-                        // Date range filters
                         if (start != null && startTime != null && startTime.before(start)) {
                             valid = false;
                         }
-                        if (end != null && endTime != null && endTime.after(end)){
+                        if (end != null && endTime != null && endTime.after(end)) {
                             valid = false;
                         }
 
@@ -1250,7 +1045,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    //  Fetch all unique categories from "events" collection
     public void fetchAllCategories(Consumer<List<String>> onResult, Consumer<Exception> onErr) {
         EVENTS.get()
                 .addOnSuccessListener(q -> {
@@ -1267,11 +1061,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-    /**
-     * Deletes entrant profile and removes all references from events.
-     * Works even if profile data in memory is outdated.
-     * US 01.02.04
-     */
     public void deleteProfileAndCleanOpenEvents(Profile profile, Runnable onOk, Consumer<Exception> onErr) {
         String profileId = profile.getProfileId();
         if (profileId == null || profileId.isEmpty()) {
@@ -1279,11 +1068,14 @@ public class FirebaseViewModel extends ViewModel {
             return;
         }
 
-        // Get latest profile from Firestore (to read waitlistedEvents field)
         PROFILES.document(profileId).get()
                 .addOnSuccessListener(snapshot -> {
 
-                    // read waitlistedEvents from profile doc (may be null)
+                    final String[] profileImageDocId = new String[1];
+                    if (snapshot.exists()) {
+                        profileImageDocId[0] = snapshot.getString("profileImageUrl");
+                    }
+
                     List<String> waitlistedEvents = new ArrayList<>();
                     if (snapshot.exists()) {
                         Object raw = snapshot.get("waitlistedEvents");
@@ -1296,82 +1088,96 @@ public class FirebaseViewModel extends ViewModel {
                         }
                     }
 
-                    // Query events where this profile is invited / accepted / cancelled
                     Task<QuerySnapshot> invitedTask =
                             EVENTS.whereArrayContains("invitedList", profileId).get();
                     Task<QuerySnapshot> acceptedTask =
                             EVENTS.whereArrayContains("acceptedEntrants", profileId).get();
                     Task<QuerySnapshot> cancelledTask =
                             EVENTS.whereArrayContains("cancelledEntrants", profileId).get();
+                    Task<QuerySnapshot> lostTask =
+                            EVENTS.whereArrayContains("lostList", profileId).get();
 
-                    Tasks.whenAllComplete(invitedTask, acceptedTask, cancelledTask)
+                    Tasks.whenAllComplete(invitedTask, acceptedTask, cancelledTask, lostTask)
                             .addOnSuccessListener(tasks -> {
 
-                                // collect eventIds for each list type (to avoid duplicates)
                                 Set<String> waitlistEventIds = new HashSet<>();
                                 Set<String> invitedEventIds = new HashSet<>();
                                 Set<String> acceptedEventIds = new HashSet<>();
                                 Set<String> cancelledEventIds = new HashSet<>();
+                                Set<String> lostEventIds = new HashSet<>();
 
-                                // from profile.waitlistedEvents
                                 for (String evId : waitlistedEvents) {
                                     if (evId != null && !evId.isEmpty()) {
                                         waitlistEventIds.add(evId);
                                     }
                                 }
 
-                                // from query: invitedList contains profileId
                                 if (invitedTask.isSuccessful() && invitedTask.getResult() != null) {
                                     for (DocumentSnapshot doc : invitedTask.getResult().getDocuments()) {
                                         invitedEventIds.add(doc.getId());
                                     }
                                 }
 
-                                // from query: acceptedEntrants contains profileId
                                 if (acceptedTask.isSuccessful() && acceptedTask.getResult() != null) {
                                     for (DocumentSnapshot doc : acceptedTask.getResult().getDocuments()) {
                                         acceptedEventIds.add(doc.getId());
                                     }
                                 }
 
-                                // from query: cancelledEntrants contains profileId
                                 if (cancelledTask.isSuccessful() && cancelledTask.getResult() != null) {
                                     for (DocumentSnapshot doc : cancelledTask.getResult().getDocuments()) {
                                         cancelledEventIds.add(doc.getId());
                                     }
                                 }
 
+                                if (lostTask.isSuccessful() && lostTask.getResult() != null) {
+                                    for (DocumentSnapshot doc : lostTask.getResult().getDocuments()) {
+                                        lostEventIds.add(doc.getId());
+                                    }
+                                }
+
                                 WriteBatch batch = db.batch();
 
-                                // clean waitlist
                                 for (String eventId : waitlistEventIds) {
                                     DocumentReference eventRef = EVENTS.document(eventId);
                                     batch.update(eventRef, "waitingList", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // clean invited
                                 for (String eventId : invitedEventIds) {
                                     DocumentReference eventRef = EVENTS.document(eventId);
                                     batch.update(eventRef, "invitedList", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // clean accepted
                                 for (String eventId : acceptedEventIds) {
                                     DocumentReference eventRef = EVENTS.document(eventId);
                                     batch.update(eventRef, "acceptedEntrants", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // clean cancelled
                                 for (String eventId : cancelledEventIds) {
                                     DocumentReference eventRef = EVENTS.document(eventId);
                                     batch.update(eventRef, "cancelledEntrants", FieldValue.arrayRemove(profileId));
                                 }
 
-                                // After cleaning events, delete the profile itself
+                                for (String eventId : lostEventIds) {
+                                    DocumentReference eventRef = EVENTS.document(eventId);
+                                    batch.update(eventRef, "lostList", FieldValue.arrayRemove(profileId));
+                                }
+
                                 batch.commit()
                                         .addOnSuccessListener(v ->
                                                 PROFILES.document(profileId).delete()
-                                                        .addOnSuccessListener(x -> onOk.run())
+                                                        .addOnSuccessListener(x -> {
+                                                            String imgId = profileImageDocId[0];
+                                                            if (imgId != null && !imgId.isEmpty()) {
+                                                                db.collection("images")
+                                                                        .document(imgId)
+                                                                        .delete()
+                                                                        .addOnSuccessListener(u -> onOk.run())
+                                                                        .addOnFailureListener(onErr::accept);
+                                                            } else {
+                                                                onOk.run();
+                                                            }
+                                                        })
                                                         .addOnFailureListener(onErr::accept)
                                         )
                                         .addOnFailureListener(onErr::accept);
@@ -1382,15 +1188,6 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnFailureListener(onErr::accept);
     }
 
-
-    /**
-     * Retrieves a Profile document from Firestore given its profile ID.
-     * @param profileId  The unique ID of the profile document to fetch.
-     * @param onSuccess  Callback executed when the profile is successfully retrieved.
-     *                   Receives the corresponding Profile object.
-     * @param onError    Callback executed when an error occurs, such as when the
-     *                   document is missing or the Firestore request fails.
-     */
     public void getProfileById(String profileId,
                                Consumer<Profile> onSuccess,
                                Consumer<Exception> onError) {
@@ -1417,7 +1214,7 @@ public class FirebaseViewModel extends ViewModel {
                     if (doc.exists()) {
                         data.setValue(doc.toObject(Profile.class));
                     } else {
-                        data.setValue(null); // no profile found
+                        data.setValue(null);
                     }
                 })
                 .addOnFailureListener(e -> data.setValue(null));
@@ -1425,39 +1222,12 @@ public class FirebaseViewModel extends ViewModel {
         return data;
     }
 
-    private MutableLiveData<List<Notification>> allNotifications = new MutableLiveData<>(new ArrayList<>());
-
-    public LiveData<List<Notification>> getAllNotificationsLive() {
-
-        NOTIFS.orderBy("timestamp", Query.Direction.DESCENDING)
-                .addSnapshotListener((snap, err) -> {
-
-                    if (err != null || snap == null) {
-                        allNotifications.postValue(new ArrayList<>());
-                        return;
-                    }
-
-                    List<Notification> list = new ArrayList<>();
-                    for (DocumentSnapshot d : snap.getDocuments()) {
-                        Notification n = d.toObject(Notification.class);
-                        if (n != null) list.add(n);
-                    }
-
-                    allNotifications.postValue(list);
-                });
-
-        return allNotifications;
-    }
-
-
-
-
     public void uploadProfilePicture(String profileId, Uri imageUri,
                                      Consumer<String> onSuccess,
                                      Consumer<Exception> onError) {
 
         String fileName = "profile_pictures/" + profileId + "_" + UUID.randomUUID() + ".jpg";
-        StorageReference ref = storageRef.child(fileName);
+        com.google.firebase.storage.StorageReference ref = storageRef.child(fileName);
 
         ref.putFile(imageUri)
                 .addOnSuccessListener(task ->
@@ -1479,119 +1249,102 @@ public class FirebaseViewModel extends ViewModel {
                 .addOnSuccessListener(v -> onOk.run());
     }
 
-        // -------------------------
-// Admin - delete event + cleanup
-// -------------------------
+    // -------------------------
+    // Admin - delete event + cleanup
+    // -------------------------
 
-        /**
-         * Admin-only: deletes an event and cleans related data:
-         * - removes eventId from entrants' arrays (waitlistedEvents, allEvents, eventsJoined)
-         * - deletes invitations for this event
-         * - deletes notifications for this event
-         * - deletes image metadata for this event
-         * - deletes the event document itself
-         */
-        public void adminDeleteEventAndCleanup(
-                String eventId,
-                Runnable onOk,
-                Consumer < Exception > onErr){
-            if (eventId == null || eventId.isEmpty()) {
-                onErr.accept(new IllegalArgumentException("eventId is required"));
-                return;
-            }
-
-            EVENTS.document(eventId)
-                    .get()
-                    .addOnSuccessListener(doc -> {
-                        Event event = doc.toObject(Event.class);
-                        if (event == null) {
-                            onErr.accept(new Exception("Event not found"));
-                            return;
-                        }
-
-                        // collect all entrant/profile IDs involved
-                        List<String> allIds = new ArrayList<>();
-
-                        if (event.getWaitingList() != null) {
-                            allIds.addAll(event.getWaitingList());
-                        }
-                        if (event.getInvitedList() != null) {
-                            allIds.addAll(event.getInvitedList());
-                        }
-                        if (event.getAcceptedEntrants() != null) {
-                            allIds.addAll(event.getAcceptedEntrants());
-                        }
-                        if (event.getCancelledEntrants() != null) {
-                            allIds.addAll(event.getCancelledEntrants());
-                        }
-
-                        // remove duplicates
-                        List<String> uniqueIds = new ArrayList<>();
-                        for (String id : allIds) {
-                            if (id != null && !uniqueIds.contains(id)) {
-                                uniqueIds.add(id);
-                            }
-                        }
-
-                        // load notifications + images for this event
-                        Task<QuerySnapshot> notifTask =
-                                NOTIFS.whereEqualTo("eventId", eventId).get();
-                        Task<QuerySnapshot> imageTask =
-                                IMAGES.whereEqualTo("eventId", eventId).get();
-
-                        Tasks.whenAllComplete(notifTask, imageTask)
-                                .addOnSuccessListener(tasks -> {
-
-                                    WriteBatch batch = db.batch();
-
-                                    // delete event doc
-                                    DocumentReference eventRef = EVENTS.document(eventId);
-                                    batch.delete(eventRef);
-
-                                    // clean entrant profile arrays
-                                    for (String profileId : uniqueIds) {
-                                        DocumentReference profRef = PROFILES.document(profileId);
-                                        batch.update(profRef, "waitlistedEvents",
-                                                FieldValue.arrayRemove(eventId));
-                                        batch.update(profRef, "allEvents",
-                                                FieldValue.arrayRemove(eventId));
-                                        batch.update(profRef, "eventsJoined",
-                                                FieldValue.arrayRemove(eventId));
-                                    }
-
-                                    // delete invitations (eventId_entrantId)
-                                    for (String profileId : uniqueIds) {
-                                        if (profileId == null) continue;
-                                        String invId = eventId + "_" + profileId;
-                                        DocumentReference invRef = INVITES.document(invId);
-                                        batch.delete(invRef);
-                                    }
-
-                                    // delete notifications for this event
-                                    if (notifTask.isSuccessful() && notifTask.getResult() != null) {
-                                        for (DocumentSnapshot nDoc : notifTask.getResult().getDocuments()) {
-                                            batch.delete(nDoc.getReference());
-                                        }
-                                    }
-
-                                    // delete image metadata for this event
-                                    if (imageTask.isSuccessful() && imageTask.getResult() != null) {
-                                        for (DocumentSnapshot iDoc : imageTask.getResult().getDocuments()) {
-                                            batch.delete(iDoc.getReference());
-                                        }
-                                    }
-
-                                    batch.commit()
-                                            .addOnSuccessListener(v -> onOk.run())
-                                            .addOnFailureListener(onErr::accept);
-
-                                })
-                                .addOnFailureListener(onErr::accept);
-
-                    })
-                    .addOnFailureListener(onErr::accept);
+    public void adminDeleteEventAndCleanup(
+            String eventId,
+            Runnable onOk,
+            Consumer<Exception> onErr) {
+        if (eventId == null || eventId.isEmpty()) {
+            onErr.accept(new IllegalArgumentException("eventId is required"));
+            return;
         }
 
+        EVENTS.document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Event event = doc.toObject(Event.class);
+                    if (event == null) {
+                        onErr.accept(new Exception("Event not found"));
+                        return;
+                    }
+
+                    List<String> allIds = new ArrayList<>();
+
+                    if (event.getWaitingList() != null) {
+                        allIds.addAll(event.getWaitingList());
+                    }
+                    if (event.getInvitedList() != null) {
+                        allIds.addAll(event.getInvitedList());
+                    }
+                    if (event.getAcceptedEntrants() != null) {
+                        allIds.addAll(event.getAcceptedEntrants());
+                    }
+                    if (event.getCancelledEntrants() != null) {
+                        allIds.addAll(event.getCancelledEntrants());
+                    }
+
+                    List<String> uniqueIds = new ArrayList<>();
+                    for (String id : allIds) {
+                        if (id != null && !uniqueIds.contains(id)) {
+                            uniqueIds.add(id);
+                        }
+                    }
+
+                    Task<QuerySnapshot> notifTask =
+                            NOTIFS.whereEqualTo("eventId", eventId).get();
+                    Task<QuerySnapshot> imageTask =
+                            IMAGES.whereEqualTo("eventId", eventId).get();
+
+                    Tasks.whenAllComplete(notifTask, imageTask)
+                            .addOnSuccessListener(tasks -> {
+
+                                WriteBatch batch = db.batch();
+
+                                DocumentReference eventRef = EVENTS.document(eventId);
+                                batch.delete(eventRef);
+
+                                for (String profileId : uniqueIds) {
+                                    DocumentReference profRef = PROFILES.document(profileId);
+                                    batch.update(profRef, "waitlistedEvents",
+                                            FieldValue.arrayRemove(eventId));
+                                    batch.update(profRef, "allEvents",
+                                            FieldValue.arrayRemove(eventId));
+                                    batch.update(profRef, "eventsJoined",
+                                            FieldValue.arrayRemove(eventId));
+                                }
+
+                                for (String profileId : uniqueIds) {
+                                    if (profileId == null) continue;
+                                    String invId = eventId + "_" + profileId;
+                                    DocumentReference invRef = INVITES.document(invId);
+                                    batch.delete(invRef);
+                                }
+
+                                if (notifTask.isSuccessful() && notifTask.getResult() != null) {
+                                    for (DocumentSnapshot nDoc : notifTask.getResult().getDocuments()) {
+                                        batch.delete(nDoc.getReference());
+                                    }
+                                }
+
+                                if (imageTask.isSuccessful() && imageTask.getResult() != null) {
+                                    for (DocumentSnapshot iDoc : imageTask.getResult().getDocuments()) {
+                                        batch.delete(iDoc.getReference());
+                                    }
+                                }
+
+                                batch.commit()
+                                        .addOnSuccessListener(v -> onOk.run())
+                                        .addOnFailureListener(onErr::accept);
+
+                            })
+                            .addOnFailureListener(onErr::accept);
+
+                })
+                .addOnFailureListener(onErr::accept);
+    }
 
     public void deleteProfile(String profileID) {
         PROFILES.document(profileID).delete();
@@ -1610,7 +1363,6 @@ public class FirebaseViewModel extends ViewModel {
                 .get()
                 .addOnSuccessListener(query -> {
 
-                    // No events to delete
                     if (query.isEmpty()) {
                         onOk.run();
                         return;
@@ -1631,69 +1383,14 @@ public class FirebaseViewModel extends ViewModel {
                                         onOk.run();
                                     }
                                 },
-                                e -> onErr.accept(e)
+                                onErr
                         );
                     }
                 })
                 .addOnFailureListener(onErr::accept);
     }
 
-
-    /**
-     * Deletes a notification if all its fields match exactly.
-     * Null values are considered equal to nulls in Firestore document.
-     *
-     * @param n Notification to delete
-     */
-//    public void deleteNotification(Notification n) {
-//        if (n == null) return;
-//
-//        NOTIFS.get()
-//                .addOnSuccessListener(querySnapshot -> {
-//                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-//                        boolean match = matchesNotification(doc, n);
-//                        if (match) {
-//                            NOTIFS.document(doc.getId())
-//                                    .delete()
-//                                    .addOnSuccessListener(v -> {
-//                                        // Optional: log or notify deletion success
-//                                    })
-//                                    .addOnFailureListener(e -> {
-//                                        // Optional: log or handle failure
-//                                    });
-//                            break; // delete only the first matching document
-//                        }
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    // Optional: handle query failure
-//                });
-//    }
-
-//    /**
-//     * Compares a Firestore document to a Notification object, field by field.
-//     * Nulls are treated as equal.
-//     */
-//    private boolean matchesNotification(DocumentSnapshot doc, Notification n) {
-//        return equalsNullable(doc.getString("senderId"), n.getSenderId())
-//                && equalsNullable(doc.getString("receiverId"), n.getReceiverId())
-//                && equalsNullable(doc.getString("eventId"), n.getEventId())
-//                && equalsNullable(doc.getString("type"), n.getType())
-//                && equalsNullable(doc.getString("message"), n.getMessage())
-//                && equalsNullable(doc.getDate("timestamp"), n.getTimestamp())
-//                && equalsNullable(doc.getString("senderEmail"), n.getSenderEmail())
-//                && equalsNullable(doc.getString("eventName"), n.getEventName());
-//    }
-//
-
-
-    /** Helper for null-safe comparison */
     private <T> boolean equalsNullable(T a, T b) {
         return (a == null && b == null) || (a != null && a.equals(b));
     }
-
-
-
 }
-
-
