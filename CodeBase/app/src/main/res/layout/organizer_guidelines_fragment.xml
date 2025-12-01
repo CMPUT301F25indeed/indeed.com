@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="24dp">
+
+    <!-- Scrollable content -->
+    <ScrollView
+        android:id="@+id/guidelines_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/guidelines_home_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Main Title -->
+            <TextView
+                android:id="@+id/guidelines_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Organizer Guidelines"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:fontFamily="@font/ibmplexserif_semibold"
+                android:layout_marginTop="24dp"/>
+
+            <!-- Subtitle -->
+            <TextView
+                android:id="@+id/guidelines_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="For Event Organizers"
+                android:textColor="#BBBBBB"
+                android:textSize="15sp"
+                android:gravity="center"
+                android:fontFamily="@font/opensans"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#444444"
+                android:layout_marginBottom="20dp"/>
+
+            <!-- Body text -->
+            <TextView
+                android:id="@+id/guidelines_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#DDDDDD"
+                android:lineSpacingExtra="6dp"
+                android:fontFamily="@font/opensans"
+                android:text="@string/Guidelines_for_Organizer"
+                android:layout_marginBottom="32dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Home Button -->
+    <Button
+        android:id="@+id/guidelines_home_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="24dp"
+        android:text="Home"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@font/opensans"
+        android:background="@drawable/bg_button_primary"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
