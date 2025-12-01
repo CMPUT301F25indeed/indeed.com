@@ -78,6 +78,54 @@ public class CSVExporter {
         }
     }
     /**
+     * Exports ONLY accepted entrants to CSV
+     * For organizers who want just the final attending list
+     *
+     * @param context  Android context for file operations
+     * @param event    The event to export entrants from
+     * @param entrants List of accepted entrants only
+     * @return true if successful, false if failed
+     */
+    public static boolean exportAcceptedEntrants(Context context, Event event, List<Profile> entrants) {
+        try {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String fileName = "Accepted_Entrants_" + sanitizeFileName(event.getEventName()) + "_" + timeStamp + ".csv";
+
+            File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File file = new File(downloadsDir, fileName);
+
+            FileWriter writer = new FileWriter(file);
+
+            // write csv header
+            writer.append("Event:,").append(escapeCsv(event.getEventName())).append("\n");
+            writer.append("Export Date:,").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date())).append("\n");
+            writer.append("Total Accepted Entrants:,").append(String.valueOf(entrants.size())).append("\n\n");
+
+            // write data header
+            writer.append("Name,Email,Phone Number,Registration Date\n");
+
+            // write entrant data
+            for (Profile entrant : entrants) {
+                writer.append(escapeCsv(entrant.getPersonName())).append(",");
+                writer.append(escapeCsv(entrant.getEmail())).append(",");
+                writer.append(escapeCsv(entrant.getPhone())).append(",");
+                writer.append(escapeCsv(getRegistrationDate(event, entrant))).append("\n");
+            }
+
+            writer.flush();
+            writer.close();
+
+            Log.d("CSV_EXPORT", "Accepted entrants CSV exported to: " + file.getAbsolutePath());
+            return true;
+
+        } catch (IOException e) {
+            Log.e("CSV_EXPORT", "Error exporting CSV: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Makes a filename safe by removing bad characters
      * Replaces spaces and special chars with underscores
      */

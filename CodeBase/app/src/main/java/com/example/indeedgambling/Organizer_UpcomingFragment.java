@@ -1,5 +1,7 @@
 package com.example.indeedgambling;
 
+import static android.app.ProgressDialog.show;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -540,7 +542,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Accepted List Pop-up
         AcceptedListButton.setOnClickListener(v -> {
-            AcceptedListPopup();
+            AcceptedListPopup(event);
         });
 
         //End Registration Now pop-up
@@ -642,7 +644,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         }
 
         if (AcceptedListButton != null) {
-            AcceptedListButton.setOnClickListener(v -> AcceptedListPopup());
+            AcceptedListButton.setOnClickListener(v -> AcceptedListPopup(event));
         }
 
         if (endRegButton != null) {
@@ -827,8 +829,11 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
 
-    /** Accepted entrants popup (uses local acceptedPeople list) */
-    private void AcceptedListPopup() {
+    /**
+     * Accepted entrants popup (uses local acceptedPeople list)
+     * @param event The event to export data from
+     */
+    private void AcceptedListPopup(Event event) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -839,6 +844,9 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
+                .setPositiveButton("Export to CSV", (dialog, which) -> {
+                    exportAcceptedEntrantsList(event);
+                })
                 .show();
     }
 
@@ -986,6 +994,55 @@ public class Organizer_UpcomingFragment extends Fragment {
                 e -> {
                     loadingDialog.dismiss();
                     Toast.makeText(requireContext(), "Error fetching enrolled entrants data", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+    /**
+     * Exports ONLY accepted entrants to a CSV file
+     * Shows loading dialog and handles empty list cases
+     *
+     * @param event The event to export accepted entrants from
+     */
+    private void exportAcceptedEntrantsList(Event event) {
+        AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Exporting CSV")
+                .setMessage("Preparing accepted entrants list...")
+                .setCancelable(false)
+                .show();
+
+        // just accepted entrants
+        ArrayList<String> acceptedEntrants = new ArrayList<>();
+
+        if (event.getAcceptedEntrants() != null) {
+            acceptedEntrants.addAll(event.getAcceptedEntrants());
+        }
+
+        if (acceptedEntrants.isEmpty()) {
+            loadingDialog.dismiss();
+            WarningToast("No accepted entrants to export!");
+            return;
+        }
+
+        Data.getProfiles(acceptedEntrants,
+                (profiles) -> {
+                    loadingDialog.dismiss();
+
+                    boolean success = CSVExporter.exportAcceptedEntrants(
+                            requireContext(), event, profiles);
+
+                    if (success) {
+                        Toast.makeText(requireContext(),
+                                "Accepted entrants list exported to Downloads folder!",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to export CSV.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                },
+                e -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(requireContext(), "Error fetching accepted entrants data", Toast.LENGTH_SHORT).show();
                 }
         );
     }

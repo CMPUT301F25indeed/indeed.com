@@ -238,7 +238,7 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 android:background="@drawable/bg_button_primary"
-                android:text="Export Final List"
+                android:text="Export All Entrants"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white" />
             <Button
@@ -248,7 +248,7 @@
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 android:background="@drawable/bg_button_primary"
-                android:text="View Waitlist Entrants Map"
+                android:text="View Waitlist Map"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"/>
 
