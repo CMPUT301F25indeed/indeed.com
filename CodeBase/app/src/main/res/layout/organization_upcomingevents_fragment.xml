@@ -21,39 +21,20 @@
         android:fontFamily="@font/ibmplexserif_semibold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/ButtonColumn" />
-
-    <!-- RIGHT VERTICAL BUTTON COLUMN -->
-    <LinearLayout
-        android:id="@+id/ButtonColumn"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:layout_marginTop="40dp"
-        android:layout_marginStart="12dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toStartOf="@id/Organizer_Upcoming_NewEventButton" />
 
         <Button
             android:id="@+id/Organizer_Upcoming_NewEventButton"
-            android:layout_width="match_parent"
+            android:layout_marginTop="40dp"
+            android:layout_width="0dp"
             android:layout_height="37dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/bg_button_primary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:text="+ New Event"
             android:textAllCaps="false"
             android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/Organizer_Upcoming_EventDraftButton"
-            android:layout_width="wrap_content"
-            android:layout_height="37dp"
-            android:background="@drawable/bg_button_primary"
-            android:text="Event Drafts"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF" />
-    </LinearLayout>
 
     <!-- DIVIDER -->
 <View
