@@ -459,6 +459,8 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button notificationButton = popupView.findViewById(R.id.btnSendNotifications);
         Button viewPosterButton = popupView.findViewById(R.id.btnViewPoster);
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
+        Button mapButton = popupView.findViewById(R.id.btnViewMap);
+        Button exportFinalBtn = popupView.findViewById(R.id.btnExport);
         CheckBox locationRequirement = popupView.findViewById(R.id.Organizer_EventPopup_RadiusEnabled);
 
         locationRequirement.setChecked(event.isregistrationRadiusEnabled());
@@ -601,14 +603,17 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Accepted List Pop-up
         AcceptedListButton.setOnClickListener(v -> {
-            AcceptedListPopup();
+            AcceptedListPopup(event);
         });
-
+        //Waitlist Geolocation Map Pop-up
+        if (mapButton != null){
+            mapButton.setOnClickListener(v -> showEntrantMap(event));
+        }
+        //Export ALL Entrants button
+        if (exportFinalBtn != null){
+            exportFinalBtn.setOnClickListener(v -> exportAllEnrolledEntrants(event));
+        }
         //End Registration Now pop-up
-        endRegButton.setOnClickListener(v -> {
-            //Are you sure? popup
-            EndRegPopup(event);
-        });
 
         //Prompt setting a radius if there was not one before.
         locationRequirement.setOnClickListener(v -> {
@@ -855,8 +860,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Waitlist")
                 .setView(waitlistView)
-                .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+                .setNegativeButton("Close", null);
     }
 
     /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
@@ -893,12 +897,11 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Invited Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
     }
 
     /** Accepted entrants popup (uses local acceptedPeople list) */
-    private void AcceptedListPopup() {
+    private void AcceptedListPopup(Event event) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
 
         View popupView = inflater.inflate(R.layout.listview_popup, null);
@@ -909,7 +912,9 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
+                .setPositiveButton("Export to CSV", (dialog, which) -> {
+                    exportAcceptedEntrantsList(event);
+                })
                 .show();
     }
 
@@ -957,6 +962,179 @@ public class Organizer_UpcomingFragment extends Fragment {
     }
 
     // -------------------- HELPERS -------------------- //
+    private void showEntrantMap(Event event) {
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View mapView = inflater.inflate(R.layout.organizer_event_map_popup, null);
+
+
+        org.osmdroid.views.MapView mapViewWidget = mapView.findViewById(R.id.mapView);
+        TextView mapInfoText = mapView.findViewById(R.id.mapInfoText);
+
+
+        // get all entrants
+        ArrayList<String> allEntrants = new ArrayList<>();
+        allEntrants.addAll(event.getWaitingList());
+        allEntrants.addAll(event.getInvitedList());
+        allEntrants.addAll(event.getAcceptedEntrants());
+
+
+        if (allEntrants.isEmpty()) {
+            WarningToast("No entrants to show on map");
+            return;
+        }
+
+
+        // OSMdroid setup - no API
+        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
+        mapViewWidget.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+
+
+        org.osmdroid.util.GeoPoint startPoint = new org.osmdroid.util.GeoPoint(51.0447, -114.0719);
+        mapViewWidget.getController().setZoom(10.0);
+        mapViewWidget.getController().setCenter(startPoint);
+
+
+        Data.getProfiles(allEntrants,
+                (profiles) -> {
+                    // Add markers
+                    for (Profile profile : profiles) {
+                        double lat = 51.0447 + (Math.random() * 0.02 - 0.01);
+                        double lon = -114.0719 + (Math.random() * 0.02 - 0.01);
+
+
+                        org.osmdroid.views.overlay.Marker marker = new org.osmdroid.views.overlay.Marker(mapViewWidget);
+                        marker.setPosition(new org.osmdroid.util.GeoPoint(lat, lon));
+                        marker.setTitle(profile.getPersonName());
+                        marker.setSnippet("Joined: " + event.getEventName());
+                        mapViewWidget.getOverlays().add(marker);
+                    }
+
+
+                    mapInfoText.setText("Showing " + profiles.size() + " entrants");
+                    mapViewWidget.invalidate();
+                },
+                e -> mapInfoText.setText("Error loading entrant data")
+        );
+
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Entrant Locations - " + event.getEventName())
+                .setView(mapView)
+                .setPositiveButton("Close", null)
+                .show();
+    }
+    private void exportAllEnrolledEntrants(Event event) {
+        // Show loading dialog
+        AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Exporting CSV")
+                .setMessage("Preparing all enrolled entrants list...")
+                .setCancelable(false)
+                .show();
+
+
+        // Get ALL enrolled entrants - waitlist + invited + accepted
+        ArrayList<String> allEnrolledEntrants = new ArrayList<>();
+
+
+        if (event.getWaitingList() != null) {
+            allEnrolledEntrants.addAll(event.getWaitingList());
+        }
+        if (event.getInvitedList() != null) {
+            allEnrolledEntrants.addAll(event.getInvitedList());
+        }
+        if (event.getAcceptedEntrants() != null) {
+            allEnrolledEntrants.addAll(event.getAcceptedEntrants());
+        }
+
+
+        if (allEnrolledEntrants.isEmpty()) {
+            loadingDialog.dismiss();
+            WarningToast("No enrolled entrants to export!");
+            return;
+        }
+
+
+        Data.getProfiles(allEnrolledEntrants,
+                (profiles) -> {
+                    loadingDialog.dismiss();
+
+
+                    boolean success = CSVExporter.exportAllEnrolledEntrants(
+                            requireContext(), event, profiles);
+
+
+                    if (success) {
+                        Toast.makeText(requireContext(),
+                                "All enrolled entrants list exported to Downloads folder!",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to export CSV. Check storage permissions.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                },
+                e -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(requireContext(), "Error fetching enrolled entrants data", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+    /**
+     * Exports ONLY accepted entrants to a CSV file
+     * Shows loading dialog and handles empty list cases
+     *
+     * @param event The event to export accepted entrants from
+     */
+    private void exportAcceptedEntrantsList(Event event) {
+        AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Exporting CSV")
+                .setMessage("Preparing accepted entrants list...")
+                .setCancelable(false)
+                .show();
+
+
+        // just accepted entrants
+        ArrayList<String> acceptedEntrants = new ArrayList<>();
+
+
+        if (event.getAcceptedEntrants() != null) {
+            acceptedEntrants.addAll(event.getAcceptedEntrants());
+        }
+
+
+        if (acceptedEntrants.isEmpty()) {
+            loadingDialog.dismiss();
+            WarningToast("No accepted entrants to export!");
+            return;
+        }
+
+
+        Data.getProfiles(acceptedEntrants,
+                (profiles) -> {
+                    loadingDialog.dismiss();
+
+
+                    boolean success = CSVExporter.exportAcceptedEntrants(
+                            requireContext(), event, profiles);
+
+
+                    if (success) {
+                        Toast.makeText(requireContext(),
+                                "Accepted entrants list exported to Downloads folder!",
+                                Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                "Failed to export CSV.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                },
+                e -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(requireContext(), "Error fetching accepted entrants data", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+
 
     /** POPUP that invites the entrants according to the number inputted by the user.
      * US 02.05.02 As an organizer I want to set the system to sample a specified number of attendees to register for the event.

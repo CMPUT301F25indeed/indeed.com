@@ -52,14 +52,14 @@ public class Organizer_BrowseFragment extends Fragment {
             adapter.setData(events);
         });
 
-        SearchView search = v.findViewById(R.id.org_searchView);
-        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override public boolean onQueryTextSubmit(String q) { return false; }
-            @Override public boolean onQueryTextChange(String q) {
-                // TODO: implement search filter later
-                return true;
-            }
-        });
+//        SearchView search = v.findViewById(R.id.org_searchView);
+//        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override public boolean onQueryTextSubmit(String q) { return false; }
+//            @Override public boolean onQueryTextChange(String q) {
+//                // TODO: implement search filter later
+//                return true;
+//            }
+//        });
 
         return v;
     }

@@ -53,7 +53,12 @@ public class Organizer_HomeFragment extends Fragment {
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_orgHome_to_history)
         );
-
+        //Guidelines Button
+        Button btnGuidelines = view.findViewById(R.id.btnOrganizerGuidelines);
+        btnGuidelines.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_organizerHomeFragment_to_organizerGuidelinesFragment);
+        });
         // Profile button
         Button ProfileButton = view.findViewById(R.id.Organizer_HomeProfileButton);
         ProfileButton.setOnClickListener(v -> {

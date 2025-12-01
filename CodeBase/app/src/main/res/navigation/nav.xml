@@ -188,6 +188,9 @@
         <action
             android:id="@+id/action_organizerHomeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_organizerHomeFragment_to_organizerGuidelinesFragment"
+            app:destination="@id/organizer_GuidelinesFragment" />
     </fragment>
 
     <fragment
@@ -207,6 +210,15 @@
             android:id="@+id/action_organizerUpcomingFragment_to_organizerHomeFragment"
             app:destination="@id/organizerHomeFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/organizer_GuidelinesFragment"
+        android:name="com.example.indeedgambling.Organizer_GuidelinesFragment"
+        android:label="Organizer Guidelines" >
+        <action
+            android:id="@+id/action_organizer_GuidelinesFragment_to_organizerHomeFragment"
+            app:destination="@id/organizerHomeFragment" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/organizerHistoryFragment"
