@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Android Unit Tests (No Wrapper)
     runs-on: ubuntu-latest
 
     steps:
