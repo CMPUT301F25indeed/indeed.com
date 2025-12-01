@@ -51,8 +51,19 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
         recyclerView.setAdapter(adapter);
 
         firebaseVM.getEventsLive().observe(getViewLifecycleOwner(), events -> {
-            if (events != null) adapter.setData(events);
+            if (events == null) return;
+
+            List<Event> openEvents = new ArrayList<>();
+
+            for (Event e : events) {
+                if (e != null && "Open".equalsIgnoreCase(e.getStatus())) {
+                    openEvents.add(e);
+                }
+            }
+
+            adapter.setData(openEvents);
         });
+
 
         Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
         homeBtn.setOnClickListener(view ->

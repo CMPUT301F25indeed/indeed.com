@@ -73,10 +73,25 @@ public class Entrant_HistoryFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (currentEntrantId != null) {
+            firebaseVM.fetchEntrantHistory(
+                    currentEntrantId,
+                    events -> updateHistory(events, currentEntrantId),
+                    e -> Log.e("Entrant_HistoryFragment", "Failed to refresh history", e)
+            );
+        }
+    }
+
+
     /**
      * Update list of history items.
      */
     private void updateHistory(List<Event> events, String entrantId) {
+        Log.d("HISTORY_DEBUG", "Events received: " + (events == null ? "null" : events.size()));
         if (adapter == null) {
             adapter = new EntrantHistoryAdapter(requireContext(), events, entrantId);
             listView.setAdapter(adapter);

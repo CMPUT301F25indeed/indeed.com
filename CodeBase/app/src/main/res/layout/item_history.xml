@@ -51,4 +51,14 @@
         android:paddingTop="2dp"
         android:paddingBottom="6dp" />
 
+    <TextView
+        android:id="@+id/history_view_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="View Details"
+        android:textColor="#FF5555"
+        android:textStyle="bold" />
+
+
 </LinearLayout>

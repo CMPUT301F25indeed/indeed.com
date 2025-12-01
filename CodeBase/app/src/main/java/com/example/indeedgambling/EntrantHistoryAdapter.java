@@ -3,6 +3,7 @@ package com.example.indeedgambling;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -50,6 +53,7 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         TextView titleView = convertView.findViewById(R.id.history_event_title);
         TextView statusView = convertView.findViewById(R.id.history_event_status);
         ImageView imageView = convertView.findViewById(R.id.history_event_image);
+        TextView viewDetails = convertView.findViewById(R.id.history_view_details);
 
         String name = event.getEventName();
         if (name == null || name.isEmpty()) {
@@ -57,26 +61,21 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         }
         titleView.setText(name);
 
-        // Status
         String listName = event.whichList(entrantId);
         String statusText;
         switch (listName) {
             case "waiting":
                 statusText = "On waitlist";
                 break;
-
             case "invited":
                 statusText = "Invited – tap to respond";
                 break;
-
             case "accepted":
                 statusText = "Accepted";
                 break;
-
             case "cancelled":
                 statusText = "Cancelled";
                 break;
-
             default:
                 statusText = "Not active";
                 break;
@@ -84,7 +83,15 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
 
         statusView.setText(statusText);
 
-        // Placeholder image
+        viewDetails.setText("View Details");
+
+        viewDetails.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("event", event);
+            navController.navigate(R.id.eventDetailsFragment, bundle);
+        });
+
         imageView.setImageBitmap(null);
         imageView.setBackgroundResource(R.drawable.bg_event_image_rounded);
 

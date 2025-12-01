@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -79,6 +80,8 @@ public class EventDetailsFragment extends Fragment {
         posterView     = v.findViewById(R.id.event_poster);
 
         backBtn.setOnClickListener(v1 -> requireActivity().onBackPressed());
+
+
 
         if (scannedEventId != null && !scannedEventId.isEmpty()) {
             firebaseVM.getEventById(
