@@ -652,7 +652,7 @@ public class Organizer_UpcomingFragment extends Fragment {
             mapButton.setOnClickListener(v -> showEntrantMap(event));
         }
         if (exportFinalBtn != null){
-            exportFinalBtn.setOnClickListener(v -> exportAcceptedEntrantsList(event));
+            exportFinalBtn.setOnClickListener(v -> exportAllEnrolledEntrants(event));
         }
 
 
@@ -787,8 +787,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Waitlist")
                 .setView(waitlistView)
-                .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", ((dialog, which) -> {})).show();
+                .setNegativeButton("Close", null);
     }
 
     /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
@@ -825,7 +824,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Invited Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
     }
 
@@ -841,7 +839,6 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setTitle("Accepted Entrants")
                 .setView(popupView)
                 .setNegativeButton("Close", null)
-                .setPositiveButton("Export to CSV", (dialog, which) -> {})
                 .show();
     }
 
@@ -890,7 +887,6 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     // -------------------- HELPERS -------------------- //
     /*add javadocs*/
-    //US 02.02.02
     private void showEntrantMap(Event event) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View mapView = inflater.inflate(R.layout.organizer_event_map_popup, null);
@@ -919,6 +915,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         Data.getProfiles(allEntrants,
                 (profiles) -> {
+                    // Add markers
                     for (Profile profile : profiles) {
                         double lat = 51.0447 + (Math.random() * 0.02 - 0.01);
                         double lon = -114.0719 + (Math.random() * 0.02 - 0.01);
@@ -942,46 +939,53 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .setPositiveButton("Close", null)
                 .show();
     }
-    private void exportAcceptedEntrantsList(Event event) {
+    private void exportAllEnrolledEntrants(Event event) {
+        // Show loading dialog
         AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Exporting CSV")
-                .setMessage("Preparing accepted entrants list...")
+                .setMessage("Preparing all enrolled entrants list...")
                 .setCancelable(false)
                 .show();
 
-        // ONLY  entrants who've accepted
-        ArrayList<String> acceptedEntrants = new ArrayList<>();
+        // Get ALL enrolled entrants - waitlist + invited + accepted
+        ArrayList<String> allEnrolledEntrants = new ArrayList<>();
 
+        if (event.getWaitingList() != null) {
+            allEnrolledEntrants.addAll(event.getWaitingList());
+        }
+        if (event.getInvitedList() != null) {
+            allEnrolledEntrants.addAll(event.getInvitedList());
+        }
         if (event.getAcceptedEntrants() != null) {
-            acceptedEntrants.addAll(event.getAcceptedEntrants());
+            allEnrolledEntrants.addAll(event.getAcceptedEntrants());
         }
 
-        if (acceptedEntrants.isEmpty()) {
+        if (allEnrolledEntrants.isEmpty()) {
             loadingDialog.dismiss();
-            WarningToast("No accepted entrants to export!");
+            WarningToast("No enrolled entrants to export!");
             return;
         }
 
-        Data.getProfiles(acceptedEntrants,
+        Data.getProfiles(allEnrolledEntrants,
                 (profiles) -> {
                     loadingDialog.dismiss();
 
-                    boolean success = CSVExporter.exportAcceptedEntrants(
+                    boolean success = CSVExporter.exportAllEnrolledEntrants(
                             requireContext(), event, profiles);
 
                     if (success) {
                         Toast.makeText(requireContext(),
-                                "Accepted entrants list exported to Downloads folder!",
+                                "All enrolled entrants list exported to Downloads folder!",
                                 Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(requireContext(),
-                                "Failed to export CSV.",
+                                "Failed to export CSV. Check storage permissions.",
                                 Toast.LENGTH_SHORT).show();
                     }
                 },
                 e -> {
                     loadingDialog.dismiss();
-                    Toast.makeText(requireContext(), "Error fetching accepted entrants data", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Error fetching enrolled entrants data", Toast.LENGTH_SHORT).show();
                 }
         );
     }

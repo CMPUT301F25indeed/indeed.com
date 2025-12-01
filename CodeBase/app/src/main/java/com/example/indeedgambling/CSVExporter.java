@@ -28,30 +28,33 @@ public class CSVExporter {
      */
 
 
-    public static boolean exportAcceptedEntrants(Context context, Event event, List<Profile> entrants) {
+    public static boolean exportAllEnrolledEntrants(Context context, Event event, List<Profile> entrants) {
         try {
             // create filename with event name + time
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-            String fileName = "Final_Entrants_" + sanitizeFileName(event.getEventName()) + "_" + timeStamp + ".csv";
-
+            String fileName = "All_Enrolled_Entrants_" + sanitizeFileName(event.getEventName()) + "_" + timeStamp + ".csv";
 
             // get directory
             File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             File file = new File(downloadsDir, fileName);
 
-
             FileWriter writer = new FileWriter(file);
 
+            // writing csv header
+            // calculate totals for each list
+            int totalAccepted = event.getAcceptedEntrants() != null ? event.getAcceptedEntrants().size() : 0;
+            int totalWaitlisted = event.getWaitingList() != null ? event.getWaitingList().size() : 0;
+            int totalInvited = event.getInvitedList() != null ? event.getInvitedList().size() : 0;
 
-            // write csv header
+            // write csv header with quantity breakdowns
             writer.append("Event:,").append(escapeCsv(event.getEventName())).append("\n");
             writer.append("Export Date:,").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date())).append("\n");
-            writer.append("Total Entrants:,").append(String.valueOf(entrants.size())).append("\n\n");
-
-
+            writer.append("Total Enrolled Entrants:,").append(String.valueOf(entrants.size())).append("\n");
+            writer.append("Total Accepted Entrants:,").append(String.valueOf(totalAccepted)).append("\n");
+            writer.append("Total Waitlisted Entrants:,").append(String.valueOf(totalWaitlisted)).append("\n");
+            writer.append("Total Invited Entrants:,").append(String.valueOf(totalInvited)).append("\n\n");
             // write data header
-            writer.append("Name,Email,Phone Number, Status,Registration Date\n");
-
+            writer.append("Name,Email,Phone Number,Status,Registration Date\n");
 
             // write entrant data
             for (Profile entrant : entrants) {
@@ -62,14 +65,11 @@ public class CSVExporter {
                 writer.append(escapeCsv(getRegistrationDate(event, entrant))).append("\n");
             }
 
-
             writer.flush();
             writer.close();
 
-
-            Log.d("CSV_EXPORT", "Final entrants CSV exported to: " + file.getAbsolutePath());
+            Log.d("CSV_EXPORT", "All enrolled entrants CSV exported to: " + file.getAbsolutePath());
             return true;
-
 
         } catch (IOException e) {
             Log.e("CSV_EXPORT", "Error exporting CSV: " + e.getMessage());
@@ -106,7 +106,10 @@ public class CSVExporter {
      */
 
     private static String getEntrantStatus(Event event, Profile entrant) {
-        return "Accepted";
+        if (event.getAcceptedEntrants().contains(entrant.getProfileId())) return "Accepted";
+        if (event.getInvitedList().contains(entrant.getProfileId())) return "Invited";
+        if (event.getWaitingList().contains(entrant.getProfileId())) return "Waiting";
+        return "Unknown";
     }
 
 
