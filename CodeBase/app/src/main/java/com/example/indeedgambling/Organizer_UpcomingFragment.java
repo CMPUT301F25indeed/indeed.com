@@ -890,6 +890,7 @@ public class Organizer_UpcomingFragment extends Fragment {
 
     // -------------------- HELPERS -------------------- //
     /*add javadocs*/
+    //US 02.02.02
     private void showEntrantMap(Event event) {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View mapView = inflater.inflate(R.layout.organizer_event_map_popup, null);
@@ -918,7 +919,6 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         Data.getProfiles(allEntrants,
                 (profiles) -> {
-                    // Add markers
                     for (Profile profile : profiles) {
                         double lat = 51.0447 + (Math.random() * 0.02 - 0.01);
                         double lon = -114.0719 + (Math.random() * 0.02 - 0.01);
@@ -943,14 +943,13 @@ public class Organizer_UpcomingFragment extends Fragment {
                 .show();
     }
     private void exportAcceptedEntrantsList(Event event) {
-        // Show loading dialog
         AlertDialog loadingDialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Exporting CSV")
                 .setMessage("Preparing accepted entrants list...")
                 .setCancelable(false)
                 .show();
 
-        // ONLY accepted entrants
+        // ONLY  entrants who've accepted
         ArrayList<String> acceptedEntrants = new ArrayList<>();
 
         if (event.getAcceptedEntrants() != null) {
@@ -976,7 +975,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                                 Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(requireContext(),
-                                "Failed to export CSV. Check storage permissions.",
+                                "Failed to export CSV.",
                                 Toast.LENGTH_SHORT).show();
                     }
                 },
