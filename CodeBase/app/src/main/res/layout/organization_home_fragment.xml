@@ -141,6 +141,20 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp" />
+        <Button
+            android:id="@+id/btnOrganizerGuidelines"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Guidelines"
+            android:textAllCaps="false"
+            android:fontFamily="@font/opensans"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="@drawable/bg_button_primary"
+            android:backgroundTint="@null"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp" />
 
         <!-- My Profile -->
         <Button

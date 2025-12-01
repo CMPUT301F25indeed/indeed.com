@@ -33,12 +33,18 @@ public class Organizer_BrowseFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.organization_browse_fragment, container, false);
+        View rootview = inflater.inflate(R.layout.organization_browse_fragment, container, false);
 
+        Button home = rootview.findViewById(R.id.org_browse_home);
+
+        home.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_organizerBrowseFragment_to_organizerHomeFragment)
+        );
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
 
-        RecyclerView rv = v.findViewById(R.id.org_browse_recycler);
+        RecyclerView rv = rootview.findViewById(R.id.org_browse_recycler);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         adapter = new EventsAdapter(event -> {
@@ -61,6 +67,6 @@ public class Organizer_BrowseFragment extends Fragment {
 //            }
 //        });
 
-        return v;
+        return rootview;
     }
 }
