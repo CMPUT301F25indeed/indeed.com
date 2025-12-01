@@ -34,6 +34,7 @@
             android:contentDescription="Event QR Code"
             android:layout_marginBottom="20dp" />
 
+
         <!-- SECTION: EVENT INFO -->
         <TextView
             android:layout_width="wrap_content"
@@ -43,14 +44,12 @@
             android:textStyle="bold"
             android:textColor="#FFFFFF"
             android:layout_marginBottom="8dp" />
-
         <TextView
             android:id="@+id/Organizer_EventPopup_Description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#DDDDDD"
             android:layout_marginBottom="8dp" />
-
         <TextView
             android:id="@+id/Organizer_EventPopup_Criteria"
             android:layout_width="match_parent"
@@ -65,21 +64,29 @@
             android:textColor="#DDDDDD"
             android:layout_marginBottom="6dp" />
 
+        <!-- Event Location Picture-->
+        <org.osmdroid.views.MapView
+            android:id="@+id/Organizer_EventPopup_LocationMap"
+            android:layout_width="wrap_content"
+            android:layout_height="240dp"/>
+
+        <!-- For aligning label and content-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Location: "
-            android:textSize="15sp"
-            android:textStyle="italic" />
 
-        <TextView
-            android:id="@+id/Organizer_EventPopup_EventLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location: "
+                android:textSize="15sp"
+                android:textStyle="italic" />
+
+            <TextView
+                android:id="@+id/Organizer_EventPopup_LocationText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
         <!-- Radius Show -->

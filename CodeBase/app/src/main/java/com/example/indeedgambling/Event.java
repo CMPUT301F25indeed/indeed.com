@@ -759,7 +759,7 @@ public class Event implements Serializable {
     @com.google.firebase.firestore.Exclude
     private void checkLatitudeValid(double lat){
         if (Math.abs(lat) > 90){
-            throw new IllegalArgumentException("Latitude must be between -90 and +90 degrees!");
+            throw new IllegalArgumentException("Latitude must be between -90 and +90 degrees!".concat(this.eventId));
         }
     }
 
@@ -768,8 +768,8 @@ public class Event implements Serializable {
      * @param lng
      */
     private void checkLongitudeValid(double lng){
-        if (Math.abs(lng)> 180){
-            throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees!");
+        if (Math.abs(lng) > 180){
+            throw new IllegalArgumentException("Longitude must be between -180 and 180 degrees!".concat(this.eventId));
         }
     }
 
