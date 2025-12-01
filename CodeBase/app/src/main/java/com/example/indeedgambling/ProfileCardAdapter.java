@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import java.util.List;
 
 /** Display Adapter for non-admin Array purposes, like in Upcoming Event profile lists.
+ * Modified OrganizerEventCardAdapter
  */
 public class ProfileCardAdapter extends ArrayAdapter<Profile> {
 
@@ -63,7 +64,6 @@ public class ProfileCardAdapter extends ArrayAdapter<Profile> {
         Profile profile = getItem(position);
         if (profile == null) return convertView;
 
-        // Name
         holder.name.setText(profile.getPersonName());
         holder.email.setText(profile.getEmail());
 
@@ -74,7 +74,8 @@ public class ProfileCardAdapter extends ArrayAdapter<Profile> {
         String imageDocId = profile.getProfileImageUrl();
         if (imageDocId == null || imageDocId.isEmpty()) return convertView;
 
-        // Fetch image from Firestore
+        // Get the pfp from firestore and decode it
+        // Sets to default image if the server one is null or bad.
         firebaseVM.getDb().collection("images")
                 .document(imageDocId)
                 .get()
