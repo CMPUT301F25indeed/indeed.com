@@ -105,10 +105,10 @@ public class Organizer_UpcomingFragment extends Fragment {
         orgID = organizerVM.getOrganizer().getValue().getProfileId();
 
         // --- profile list adapters ---
-        WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
-        inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
-        cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
-        acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
+        WaitingListAdapter = new ProfileCardAdapter(requireContext(),Data, WaitingListArray);
+        inviteListAdapter = new ProfileCardAdapter(requireContext(), Data, invitedPeople);
+        cancelledListAdapter = new ProfileCardAdapter(requireContext(), Data, cancelledPeople);
+        acceptedListAdapter = new ProfileCardAdapter(requireContext(), Data, acceptedPeople);
 
         // --- event card list ---
         EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
