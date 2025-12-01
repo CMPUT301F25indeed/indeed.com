@@ -1,16 +1,10 @@
 package com.example.indeedgambling;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.Pair;
 
-import com.example.indeedgambling.QRCodeGenerator;
-
 import androidx.annotation.NonNull;
 
-
-
-import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,8 +22,8 @@ public class Event implements Serializable {
     private String category;
     private double latitude;
     private double longitude;
-    private boolean RegistrationRadiusEnabled;
-    private double Registerableradius;
+    private boolean registrationRadiusEnabled;
+    private double registerableRadius;
     private Date eventStart;
     private Date eventEnd;
     private Date registrationStart;
@@ -540,23 +534,23 @@ public class Event implements Serializable {
         this.longitude = longitude;
     }
 
-    public double getRegisterableradius() {
-        return Registerableradius;
+    public double getregisterableRadius() {
+        return registerableRadius;
     }
 
     /** Updates the radius, in meters. Uses absolute values for arguments
-     * @param registerableradius Distance in Meters to allow for signup.
+     * @param registerableRadius Distance in Meters to allow for signup.
      */
-    public void setRegisterableradius(double registerableradius) {
-        Registerableradius = Math.abs(registerableradius);
+    public void setregisterableRadius(double registerableRadius) {
+        this.registerableRadius = Math.abs(registerableRadius);
     }
 
-    public boolean isRegistrationRadiusEnabled() {
-        return RegistrationRadiusEnabled;
+    public boolean isregistrationRadiusEnabled() {
+        return registrationRadiusEnabled;
     }
 
-    public void setRegistrationRadiusEnabled(boolean registrationRadiusEnabled) {
-        RegistrationRadiusEnabled = registrationRadiusEnabled;
+    public void setregistrationRadiusEnabled(boolean registrationRadiusEnabled) {
+        this.registrationRadiusEnabled = registrationRadiusEnabled;
     }
 
     //---------------------------------------------------- Helpers ---------------------------//
@@ -646,7 +640,7 @@ public class Event implements Serializable {
      */
     public boolean coordinates_in_range(double latitude, double longitude) {
         //If there is no enforcement on radius, it cannot be out of range
-        if (!isRegistrationRadiusEnabled()){
+        if (!isregistrationRadiusEnabled()){
           return true;
         }
 
@@ -665,7 +659,7 @@ public class Event implements Serializable {
 
         double distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        return distance <= Registerableradius;
+        return distance <= registerableRadius;
     }
 
     /** Moves a random selection of entrants from the waitlist/lostlist to the invited list. DOES NOT TALK TO SERVER DIRECTLY

@@ -333,8 +333,8 @@ public class Organizer_UpcomingFragment extends Fragment {
             CreatedEvent.setLocation(MapClickedPoint.getLatitude(),MapClickedPoint.getLongitude());
 
 
-            CreatedEvent.setRegistrationRadiusEnabled(RadiusRequirement);
-            CreatedEvent.setRegisterableradius(Radius);
+            CreatedEvent.setregistrationRadiusEnabled(RadiusRequirement);
+            CreatedEvent.setregisterableRadius(Radius);
             //Optionals
             if (!MaxEnt.isBlank()){
                 CreatedEvent.setMaxWaitingEntrants(Integer.parseInt(MaxEnt));
@@ -436,7 +436,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         Button endRegButton = popupView.findViewById(R.id.Organizer_EventPopup_EndRegistrationNow);
         CheckBox locationRequirement = popupView.findViewById(R.id.Organizer_EventPopup_RadiusEnabled);
 
-        locationRequirement.setChecked(event.isRegistrationRadiusEnabled());
+        locationRequirement.setChecked(event.isregistrationRadiusEnabled());
 
 
         //Hiding the end registration button if it is not needed
@@ -478,7 +478,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         LocationString.setText(event.getLocationString());
 
 
-        Radius.setText(Double.toString(event.getRegisterableradius()).concat(" meters"));
+        Radius.setText(Double.toString(event.getregisterableRadius()).concat(" meters"));
 
         //Event Capacity: 12/40, 3/Unlimited, 0/30
         Capacity.setText((Integer.toString(event.getWaitingList().size() + event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
@@ -505,6 +505,8 @@ public class Organizer_UpcomingFragment extends Fragment {
                             event.setLostList(updatedEvent.getLostList());
                             event.setAcceptedEntrants(updatedEvent.getAcceptedEntrants());
                             event.setCancelledEntrants(updatedEvent.getCancelledEntrants());
+                            event.setregisterableRadius(updatedEvent.getregisterableRadius());
+                            Radius.setText(Double.toString(event.getregisterableRadius()).concat(" meters"));
                             updateCapacityDisplay(Capacity,event);
 
 
@@ -594,7 +596,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                         .setPositiveButton("Accept", (dialog, which) -> Radius.setText(RadTextInput.getText().toString().concat(" meters")))
                         .setNegativeButton("Cancel", ((dialog, which) -> {
                             //Reset checkbox if they refuse to put something that is non-zero.
-                            if (event.getRegisterableradius() == 0) {
+                            if (event.getregisterableRadius() == 0) {
                                 locationRequirement.setChecked(false);
                             }
                         }))
@@ -616,17 +618,18 @@ public class Organizer_UpcomingFragment extends Fragment {
 
                     HashMap<String, Object> Update = new HashMap<String, Object>();
                     //Update the Radius on the server if it has changed.
-                    if (!Radius.getText().toString().equals(Double.toString(event.getRegisterableradius()).concat(" meters"))) {
-                        Update.put("Registerableradius", Double.parseDouble(Radius.getText().toString().replace(" meters","")));
-                        event.setRegisterableradius(Double.parseDouble(Radius.getText().toString().replace(" meters","")));
+                    if (!Radius.getText().toString().equals(Double.toString(event.getregisterableRadius()).concat(" meters"))) {
+                        Update.put("registerableRadius", Double.parseDouble(Radius.getText().toString().replace(" meters","")));
+                        event.setregisterableRadius(Double.parseDouble(Radius.getText().toString().replace(" meters","")));
+                        //eventAdapter.notifyDataSetChanged();
                     }
 
                     //Update Checkbox to server if needed.
-                    if (locationRequirement.isChecked() != event.isRegistrationRadiusEnabled()) {
+                    if (locationRequirement.isChecked() != event.isregistrationRadiusEnabled()) {
                         //Locale change
-                        event.setRegistrationRadiusEnabled(locationRequirement.isChecked());
+                        event.setregistrationRadiusEnabled(locationRequirement.isChecked());
                         //Push to server
-                        Update.put("registrationRadiusEnabled", event.isRegistrationRadiusEnabled());
+                        Update.put("registrationRadiusEnabled", event.isregistrationRadiusEnabled());
                     }
 
                     if (!Update.isEmpty()) {
@@ -634,7 +637,7 @@ public class Organizer_UpcomingFragment extends Fragment {
                         }, e -> {
                             Log.d("Firebase Error", "Error Pushing to Server: ".concat(e.toString()));
                             //Put event back to normal if error occured on server.
-                            event.setRegistrationRadiusEnabled(locationRequirement.isChecked());
+                            event.setregistrationRadiusEnabled(locationRequirement.isChecked());
                         });
                     }
                 })
