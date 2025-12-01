@@ -53,6 +53,10 @@ public class NotificationSenderFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
         initializeViews(view);
         setupSendButton();
+        Button backButton = view.findViewById(R.id.btnBack);
+        backButton.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this).navigateUp();
+        });
         fetchEventId();
     }
     /**
