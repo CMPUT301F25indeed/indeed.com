@@ -38,6 +38,11 @@ public class Organizer_BrowseFragment extends Fragment {
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
 
+        Button homeButton = v.findViewById(R.id.org_browse_home);
+        homeButton.setOnClickListener(view -> {
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_organizerBrowseFragment_to_organizerHomeFragment);
+        });
         RecyclerView rv = v.findViewById(R.id.org_browse_recycler);
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
 
