@@ -26,7 +26,12 @@ import android.util.Base64;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 
-
+/**
+ * Admin-only fragment that displays full details of a single event for admin purposes.
+ * Shows event info, poster (if any), registration/waiting stats, and provides
+ * a "Remove" button that permanently deletes the event and all associated data
+ * (entrants, waitlist total, image, etc.) via {@link FirebaseViewModel}.
+ */
 public class Admin_EventDetailsFragment extends Fragment {
 
     private FirebaseViewModel firebaseVM;
@@ -37,6 +42,18 @@ public class Admin_EventDetailsFragment extends Fragment {
     private TextView name, desc, loc, dates, reg, status, category, total;
     private Button backBtn, removeBtn;
 
+
+    /**
+     * Sets up fragment.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to. The fragment should not add the view itself.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from
+     *                           a previous saved state as given here.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -83,6 +100,12 @@ public class Admin_EventDetailsFragment extends Fragment {
         return v;
     }
 
+
+    /**
+     * Binds the current {@link Event} object to all UI elements.
+     * Handles poster loading from Firestore "images" collection (base64),
+     * formats dates, and shows correct entrant/waitlist counts based on registration state.
+     */
     private void bindEvent() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault());
 
@@ -153,6 +176,14 @@ public class Admin_EventDetailsFragment extends Fragment {
 
     }
 
+    /**
+     * Shows a confirmation dialog before deleting the event.
+     * Deletes the following:
+     * - The event document
+     * - All entrant references
+     * - Waitlist/lost list entries
+     * - Associated poster image
+     */
     private void confirmDelete() {
         if (getContext() == null || event == null) return;
 

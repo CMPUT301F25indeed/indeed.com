@@ -23,6 +23,12 @@ import androidx.navigation.fragment.NavHostFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Admin screen that shows the full list of events with live search.
+ * Pulls the event list from Firebase through {@link FirebaseViewModel},
+ * keeps a local copy for fast filtering, and lets the admin
+ * tap any event to open its details screen.
+ */
 public class Admin_BrowseEventsFragment extends Fragment {
 
     private SearchView searchView;
@@ -33,6 +39,17 @@ public class Admin_BrowseEventsFragment extends Fragment {
     private AdminEventCardAdapter adapter;
     private final List<Event> allEvents = new ArrayList<>();
 
+    /**
+     * Sets up fragment.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to. The fragment should not add the view itself.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from
+     *                           a previous saved state as given here.
+     * @return The View for the fragment's UI.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -91,6 +108,13 @@ public class Admin_BrowseEventsFragment extends Fragment {
         return view;
     }
 
+
+    /**
+     * Filters the full event list based on the search query.
+     * Matching is case-insensitive and checks both event name and description.
+     * Empty or null query returns all events.
+     * @param query Raw search string from SearchView (may be null)
+     */
     private void applyFilter(String query) {
         String q = query == null ? "" : query.trim().toLowerCase();
         List<Event> filtered = new ArrayList<>();

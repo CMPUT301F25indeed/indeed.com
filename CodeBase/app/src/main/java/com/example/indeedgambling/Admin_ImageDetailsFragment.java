@@ -21,6 +21,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Admin screen for reviewing a single uploaded event poster in detail.
+ * Shows the full-size image, event context, uploader info, upload timestamp,
+ * and allows the admin to permanently delete the image (which also clears
+ * the reference from the associated event).
+ * All required data is passed via fragment arguments from the image
+ */
 public class Admin_ImageDetailsFragment extends Fragment {
 
     private FirebaseViewModel firebaseVM;
@@ -32,6 +39,18 @@ public class Admin_ImageDetailsFragment extends Fragment {
     private String uploaderId;
     private long uploadedAtMillis;
 
+
+    /**
+     * Sets up fragment.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate
+     *                           any views in the fragment.
+     * @param container          If non-null, this is the parent view that the fragment's
+     *                           UI should be attached to. The fragment should not add the view itself.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from
+     *                           a previous saved state as given here.
+     * @return The View for the fragment's UI.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
