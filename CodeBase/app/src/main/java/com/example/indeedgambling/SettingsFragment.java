@@ -328,18 +328,6 @@ public class SettingsFragment extends Fragment {
                 error -> Toast.makeText(requireContext(), "Update failed: " + error.getMessage(), Toast.LENGTH_SHORT).show()
         );
 
-        if (role.equals("entrant")) {
-            entrantVM.updateSettings(updates);
-        }
-
-        if (role.equals("organizer")) {
-            organizerVM.updateSettings(updates);
-        }
-
-        if (role.equals("admin")) {
-            adminVM.updateSettings(updates);
-        }
-
         // Update local variables so UI knows the new values
         for (String key : updates.keySet()) {
 
@@ -359,11 +347,11 @@ public class SettingsFragment extends Fragment {
                 initialNotifications = (Boolean) updates.get(key);
             }
 
-
             if (key.equals("profileImageUrl")) {
                 imageUrl = (String) updates.get(key);
             }
         }
     }
+
 
 }

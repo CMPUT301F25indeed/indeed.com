@@ -3,27 +3,16 @@ package com.example.indeedgambling;
 import java.util.Date;
 
 /**
- * Represents an in-app notification between users in the system.
+ * Represents an in-app notification stored in Firestore.
  *
- * Notifications are stored in Firestore under the "notifications" collection.
- * These help the system inform entrants, organizers, or admins about important updates.
- *
- * Common notification examples:
- * - Organizer invites entrant to an event
- * - Entrant receives acceptance or rejection
- * - System reminders about deadlines or actions
- *
- * Fields:
- * - senderId: ID of the user sending the notification (could be system or organizer)
- * - receiverId: ID of the user receiving the notification
- * - eventId: ID of the related event (if applicable)
- * - type: category of the notification (ex: "INVITE", "ACCEPTED", "REMINDER")
- * - message: human-readable message text
- * - timestamp: when the notification was created
- *
- * Firestore requires a no-argument constructor which is included below.
+ * Each document will now also store its Firestore document ID inside
+ * the Notification object using the 'id' field. This makes deletion,
+ * admin operations, and list updates 100% reliable.
  */
 public class Notification {
+
+    // Firestore document ID (VERY IMPORTANT)
+    private String id;
 
     private String senderId;
     private String receiverId;
@@ -34,32 +23,68 @@ public class Notification {
     private String senderEmail;
     private String eventName;
 
-    /** Required empty constructor for Firestore serialization */
+    /** Required empty constructor for Firestore */
     public Notification() {}
 
+    // -------------------------
+    // ID GETTER/SETTER
+    // -------------------------
+    public String getId() {
+        return id;
+    }
 
-    public String getSenderId() { return senderId; }
-    public void setSenderId(String senderId) { this.senderId = senderId; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getReceiverId() { return receiverId; }
-    public void setReceiverId(String receiverId) { this.receiverId = receiverId; }
+    // -------------------------
+    // Other fields
+    // -------------------------
+    public String getSenderId() {
+        return senderId;
+    }
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
 
-    public String getEventId() { return eventId; }
-    public void setEventId(String eventId) { this.eventId = eventId; }
+    public String getReceiverId() {
+        return receiverId;
+    }
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public String getEventId() {
+        return eventId;
+    }
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    public Date getTimestamp() { return timestamp; }
-    public void setTimestamp(Date timestamp) { this.timestamp = timestamp; }
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public String getSenderEmail() {
         return senderEmail;
     }
-
     public void setSenderEmail(String senderEmail) {
         this.senderEmail = senderEmail;
     }
@@ -67,7 +92,6 @@ public class Notification {
     public String getEventName() {
         return eventName;
     }
-
     public void setEventName(String eventName) {
         this.eventName = eventName;
     }

@@ -76,7 +76,14 @@ public class EventDetailsFragment extends Fragment {
         firebaseVM = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         entrantVM  = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
 
-        entrantId = entrantVM.returnID();
+        Entrant current = entrantVM.getCurrentEntrant();
+        if (current != null) {
+            entrantId = current.getProfileId();
+        } else {
+            entrantId = null;
+        }
+
+
 
         // Setup fused location client + attempt to update user location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
@@ -284,11 +291,7 @@ public class EventDetailsFragment extends Fragment {
             return;
         }
 
-        entrantVM.addEventToEntrant(event.getEventId());
-        if (event.getWaitingList() != null &&
-                !event.getWaitingList().contains(entrantId)) {
-            event.getWaitingList().add(entrantId);
-        }
+
 
         firebaseVM.joinWaitingList(
                 event.getEventId(),
@@ -320,7 +323,6 @@ public class EventDetailsFragment extends Fragment {
         }
 
         event.getWaitingList().remove(entrantId);
-        entrantVM.removeEventFromEntrant(event.getEventId());
 
         firebaseVM.leaveWaitingList(
                 event.getEventId(),

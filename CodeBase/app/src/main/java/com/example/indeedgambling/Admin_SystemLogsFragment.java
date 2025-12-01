@@ -76,7 +76,7 @@ public class Admin_SystemLogsFragment extends Fragment {
         cancelBtn.setOnClickListener(v -> dialog.dismiss());
 
         yesBtn.setOnClickListener(v -> {
-            fvm.deleteNotification(notification);
+            fvm.deleteNotificationById(notification.getId());
             dialog.dismiss();
         });
 

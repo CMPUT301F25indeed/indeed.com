@@ -1,113 +1,71 @@
 package com.example.indeedgambling;
 
-import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.Map;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
 
-/**
- * ViewModel for Entrant user.
- *
- * Holds the logged-in Entrant profile and the currently selected Event.
- * Used to share data between fragments without passing arguments manually.
- *
- * LiveData ensures UI updates automatically when data changes.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class EntrantViewModel extends ViewModel {
 
-    /** Stores the currently logged-in entrant profile */
-    private final MutableLiveData<Entrant> entrant = new MutableLiveData<>();
+    private Entrant currentEntrant;
 
+    // Optional LiveData for entrant (you can keep it for other screens if needed)
+    private final MutableLiveData<Entrant> entrantLiveData = new MutableLiveData<>();
 
-    /**
-     * Sets the logged-in entrant profile
-     * @param e Entrant object of the logged-in user*/
-    public void setEntrant(@NonNull Entrant e) {
-        entrant.setValue(e);
-    }
+    // LiveData for notifications (used by old system, but still fine to keep)
+    private final MutableLiveData<List<Notification>> liveNotifications =
+            new MutableLiveData<>(new ArrayList<>());
 
-    /**
-     * Clears entrant information from local ViewModel.
-     *
-     * Used during logout to ensure:
-     * - No user data is retained
-     * - App returns to a clean state
-     * - Auto-login does not occur unless deviceId is still set in Firestore
-     */
-    public void clearEntrant() {
-        entrant.setValue(null);
-    }
-
-
-    /** @return Entrant object for direct access*/
+    // ---------- Entrant ----------
     public Entrant getCurrentEntrant() {
-        return entrant.getValue();
+        return currentEntrant;
     }
 
-    /**@return LiveData for observing entrant profile changes from UI*/
-    public MutableLiveData<Entrant> getEntrant() {
-        return entrant;
+    public LiveData<Entrant> getEntrantLiveData() {
+        return entrantLiveData;
     }
 
-    public String returnID() {
-        Entrant e = entrant.getValue();
-        return (e != null) ? e.getProfileId() : null;
+    public void setEntrant(Entrant entrant) {
+        this.currentEntrant = entrant;
+        entrantLiveData.setValue(entrant);
     }
 
-
-    public void addEventToEntrant(@NonNull String eventId) {
-        Entrant e = entrant.getValue();
-        if (e != null) {
-            e.add2Entrant(eventId);
-            entrant.setValue(e); // notify observers
-        }
+    // ---------- Notifications ----------
+    public LiveData<List<Notification>> getNotificationsLive() {
+        return liveNotifications;
     }
 
-    public void removeEventFromEntrant(@NonNull String eventId) {
-        Entrant e = entrant.getValue();
-        if (e != null) {
-            e.remove2Entrant(eventId);
-            entrant.setValue(e); // notify observers
-        }
+    /** Old listener, still usable if some old screen calls it */
+    public void startNotificationListener(FirebaseViewModel fvm) {
+
+        if (currentEntrant == null || currentEntrant.getProfileId() == null)
+            return;
+
+        String userId = currentEntrant.getProfileId();
+
+        fvm.getDb()
+                .collection("notifications")
+                .whereEqualTo("receiverId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snap, err) -> {
+                    if (err != null || snap == null)
+                        return;
+
+                    List<Notification> list = new ArrayList<>();
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        Notification n = d.toObject(Notification.class);
+                        if (n != null) {
+                            n.setId(d.getId());   // keep Firestore doc id
+                            list.add(n);
+                        }
+                    }
+
+                    liveNotifications.postValue(list);
+                });
     }
-
-    public void inviteEntrantRemoveWaitlist(@NonNull String eventId) {
-        Entrant e = entrant.getValue();
-        if (e != null) {
-            e.removeWaitlistedEvent(eventId);
-            entrant.setValue(e); // notify observers
-        }
-    }
-
-
-
-    public void updateSettings(Map<String, Object> updates) {
-        Entrant e = entrant.getValue();
-        if (e == null) return;
-
-        for (String key : updates.keySet()) {
-
-            if (key.equals("personName")) {
-                e.setPersonName((String) updates.get(key));
-            }
-
-            if (key.equals("email")) {
-                e.setEmail((String) updates.get(key));
-            }
-
-            if (key.equals("phone")) {
-                e.setPhone((String) updates.get(key));
-            }
-
-            if (key.equals("notificationsEnabled")) {
-                e.setNotificationsEnabled((Boolean) updates.get(key));
-            }
-
-
-        }
-
-        entrant.setValue(e); // notify observers
-    }
-
 }

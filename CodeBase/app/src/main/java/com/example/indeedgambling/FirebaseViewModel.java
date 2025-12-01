@@ -941,18 +941,38 @@ public class FirebaseViewModel extends ViewModel {
     public LiveData<List<Notification>> observeNotificationsForUser(String userId) {
         MutableLiveData<List<Notification>> live = new MutableLiveData<>(new ArrayList<>());
 
-        NOTIFS.whereEqualTo("receiverId", userId)
+        // Get ALL notifications ordered by timestamp, filter by receiverId on client
+        NOTIFS
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snap, err) -> {
                     if (err != null || snap == null) {
                         return;
                     }
-                    List<Notification> list = snap.toObjects(Notification.class);
+
+                    List<Notification> list = new ArrayList<>();
+                    for (DocumentSnapshot d : snap.getDocuments()) {
+                        Notification n = d.toObject(Notification.class);
+                        if (n == null) continue;
+
+                        n.setId(d.getId());
+
+                        // Only keep notifications for this userId
+                        if (userId.equals(n.getReceiverId())) {
+                            list.add(n);
+                        }
+                    }
+
                     live.postValue(list);
                 });
 
         return live;
     }
+
+    public void deleteNotificationById(String id) {
+        NOTIFS.document(id).delete();
+    }
+
+
 
     /**
      * Fetch latest (most recent) notification for popup.
@@ -1625,45 +1645,47 @@ public class FirebaseViewModel extends ViewModel {
      *
      * @param n Notification to delete
      */
-    public void deleteNotification(Notification n) {
-        if (n == null) return;
+//    public void deleteNotification(Notification n) {
+//        if (n == null) return;
+//
+//        NOTIFS.get()
+//                .addOnSuccessListener(querySnapshot -> {
+//                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+//                        boolean match = matchesNotification(doc, n);
+//                        if (match) {
+//                            NOTIFS.document(doc.getId())
+//                                    .delete()
+//                                    .addOnSuccessListener(v -> {
+//                                        // Optional: log or notify deletion success
+//                                    })
+//                                    .addOnFailureListener(e -> {
+//                                        // Optional: log or handle failure
+//                                    });
+//                            break; // delete only the first matching document
+//                        }
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    // Optional: handle query failure
+//                });
+//    }
 
-        NOTIFS.get()
-                .addOnSuccessListener(querySnapshot -> {
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        boolean match = matchesNotification(doc, n);
-                        if (match) {
-                            NOTIFS.document(doc.getId())
-                                    .delete()
-                                    .addOnSuccessListener(v -> {
-                                        // Optional: log or notify deletion success
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Optional: log or handle failure
-                                    });
-                            break; // delete only the first matching document
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // Optional: handle query failure
-                });
-    }
+//    /**
+//     * Compares a Firestore document to a Notification object, field by field.
+//     * Nulls are treated as equal.
+//     */
+//    private boolean matchesNotification(DocumentSnapshot doc, Notification n) {
+//        return equalsNullable(doc.getString("senderId"), n.getSenderId())
+//                && equalsNullable(doc.getString("receiverId"), n.getReceiverId())
+//                && equalsNullable(doc.getString("eventId"), n.getEventId())
+//                && equalsNullable(doc.getString("type"), n.getType())
+//                && equalsNullable(doc.getString("message"), n.getMessage())
+//                && equalsNullable(doc.getDate("timestamp"), n.getTimestamp())
+//                && equalsNullable(doc.getString("senderEmail"), n.getSenderEmail())
+//                && equalsNullable(doc.getString("eventName"), n.getEventName());
+//    }
+//
 
-    /**
-     * Compares a Firestore document to a Notification object, field by field.
-     * Nulls are treated as equal.
-     */
-    private boolean matchesNotification(DocumentSnapshot doc, Notification n) {
-        return equalsNullable(doc.getString("senderId"), n.getSenderId())
-                && equalsNullable(doc.getString("receiverId"), n.getReceiverId())
-                && equalsNullable(doc.getString("eventId"), n.getEventId())
-                && equalsNullable(doc.getString("type"), n.getType())
-                && equalsNullable(doc.getString("message"), n.getMessage())
-                && equalsNullable(doc.getDate("timestamp"), n.getTimestamp())
-                && equalsNullable(doc.getString("senderEmail"), n.getSenderEmail())
-                && equalsNullable(doc.getString("eventName"), n.getEventName());
-    }
 
     /** Helper for null-safe comparison */
     private <T> boolean equalsNullable(T a, T b) {
