@@ -860,7 +860,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Waitlist")
                 .setView(waitlistView)
-                .setNegativeButton("Close", null);
+                .setNegativeButton("Close", null).show();
     }
 
     /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
