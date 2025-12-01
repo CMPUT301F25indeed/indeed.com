@@ -3,7 +3,6 @@ package com.example.indeedgambling;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Executable;
 import java.util.*;
 
 class EventUnitTest {
@@ -18,9 +17,9 @@ class EventUnitTest {
         Date past = new Date(now.getTime() - 1);
         Date later = new Date(now.getTime() + 10000);
         Event ReturnEvent =  new Event("SampleEvent", past, later, past, later, "ORG1", "desc", "criteria", "Music", "qr.png", "location");
-        ReturnEvent.setRegisterableradius(100);
+        ReturnEvent.setregisterableRadius(100);
         ReturnEvent.setLocation(0,0);
-        ReturnEvent.setRegistrationRadiusEnabled(true);
+        ReturnEvent.setregistrationRadiusEnabled(true);
 
         //Phony waitlist implementon next
         ArrayList<String> waitlist = new ArrayList<>();
@@ -273,7 +272,7 @@ class EventUnitTest {
     @Test
     void testCoordinateToggle(){
         Event e = MockEvent();
-        e.setRegistrationRadiusEnabled(false);
+        e.setregistrationRadiusEnabled(false);
 
         //10 007 543 meters
         assertTrue(e.coordinates_in_range(90,180));
@@ -285,7 +284,7 @@ class EventUnitTest {
         assertTrue(e.coordinates_in_range(0.00001,0.00001));
 
 
-        e.setRegistrationRadiusEnabled(true);
+        e.setregistrationRadiusEnabled(true);
         //10 007 543 meters
         assertFalse(e.coordinates_in_range(90,180));
 

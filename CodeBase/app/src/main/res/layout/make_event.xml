@@ -124,13 +124,10 @@
             android:textSize="14sp"
             android:fontFamily="@font/opensans" />
 
-        <Button
-            android:id="@+id/NewEventPopup_Location"
+        <org.osmdroid.views.MapView
+            android:id="@+id/NewEventPopup_Location_Picker"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:text="Select Location"
-            android:layout_marginTop="8dp"/>
+            android:layout_height="350dp" />
 
         <CheckBox
             android:id="@+id/NewEventPopup_GeoRequirement"
@@ -148,7 +145,8 @@
             android:inputType="number"
             android:textColor="@color/white"
             android:textColorHint="@color/cardview_light_background"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:visibility="gone"/>
 
         <!-- POSTER SECTION -->
         <TextView
