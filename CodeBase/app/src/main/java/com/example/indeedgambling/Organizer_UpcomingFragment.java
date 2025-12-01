@@ -3,13 +3,17 @@ package com.example.indeedgambling;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,12 +31,16 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.ListenerRegistration;
 
+import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -45,6 +53,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import firebase.com.protolitewrapper.BuildConfig;
 
 /**
  * Fragment that displays the organizer's upcoming events.
@@ -64,6 +74,8 @@ public class Organizer_UpcomingFragment extends Fragment {
     private FirebaseViewModel Data;
     private OrganizerViewModel organizerVM;
     private String orgID;
+    private FusedLocationProviderClient fusedLocationClient;
+    private GeoPoint LatestLocation = new GeoPoint(53.51,-113);
 
     // Root view + event list
     private View view;
@@ -92,23 +104,34 @@ public class Organizer_UpcomingFragment extends Fragment {
     private static final int PICK_IMAGE_REQUEST = 999;
     private Uri selectedImageUri;
     private Event currentEventForUpdate;
-    private Uri selectedPosterUri;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        // --- osmdroid config ---
+        Configuration.getInstance().load(
+                requireContext(),
+                PreferenceManager.getDefaultSharedPreferences(requireContext())
+        );
+        Configuration.getInstance().setUserAgentValue(BuildConfig.APPLICATION_ID);
+
+
+
         view = inflater.inflate(R.layout.organization_upcomingevents_fragment, container, false);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        updateUserLocation();
+
         Data = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
         organizerVM = new ViewModelProvider(requireActivity()).get(OrganizerViewModel.class);
         orgID = organizerVM.getOrganizer().getValue().getProfileId();
 
         // --- profile list adapters ---
-        WaitingListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, WaitingListArray);
-        inviteListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, invitedPeople);
-        cancelledListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, cancelledPeople);
-        acceptedListAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, acceptedPeople);
+        WaitingListAdapter = new ProfileCardAdapter(requireContext(),Data, WaitingListArray);
+        inviteListAdapter = new ProfileCardAdapter(requireContext(), Data, invitedPeople);
+        cancelledListAdapter = new ProfileCardAdapter(requireContext(), Data, cancelledPeople);
+        acceptedListAdapter = new ProfileCardAdapter(requireContext(), Data, acceptedPeople);
 
         // --- event card list ---
         EventList = view.findViewById(R.id.Organizer_UpcomingEventList);
@@ -224,8 +247,10 @@ public class Organizer_UpcomingFragment extends Fragment {
 
         //Map location chooser.
         //Set to user location. Nicety, not needed.
+        LocationSelector.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+        updateUserLocation();
         LocationSelector.getController().setZoom(15.0);
-        LocationSelector.getController().setCenter(new GeoPoint(51.05, -114.07)); // Default example
+        LocationSelector.getController().setCenter(LatestLocation);
 
         Marker marker = new Marker(LocationSelector);
         marker.setTitle("Selected Location");
@@ -835,7 +860,7 @@ public class Organizer_UpcomingFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Waitlist")
                 .setView(waitlistView)
-                .setNegativeButton("Close", null);
+                .setNegativeButton("Close", null).show();
     }
 
     /** POPUP that displays all the entrants listed under the event's cancelled entrants. Uses local data.
@@ -1220,4 +1245,40 @@ public class Organizer_UpcomingFragment extends Fragment {
     private void updateCapacityDisplay(TextView Capacity, Event event){
         Capacity.setText((Integer.toString(event.getWaitingList().size()+event.getLostList().size())).concat("/".concat(event.getMaxWaitingEntrantsString())));
     }
+
+    /** Used to set a relevant centre point on the map popup
+     *
+     */
+    private void updateUserLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    new String[]{
+                            "android.permission.ACCESS_COARSE_LOCATION",
+                            "android.permission.ACCESS_FINE_LOCATION"
+                    },
+                    101
+            );
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this::updateCurrentLocation)
+                .addOnFailureListener(e ->
+                        Log.d("Firebase Location Issue", "UpcomingEvent: New Event: " + e)
+                );
+    }
+    private void updateCurrentLocation(Location loc){
+        LatestLocation.setLatitude(loc.getLatitude());
+        LatestLocation.setLongitude(loc.getLongitude());
+    }
+
 }
