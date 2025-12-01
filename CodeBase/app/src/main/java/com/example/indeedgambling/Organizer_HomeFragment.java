@@ -1,3 +1,18 @@
+/**
+ * Displays the Organizer home screen.
+ *
+ * This fragment provides navigation to all organizer-related features:
+ * - Browse all events
+ * - View upcoming created events
+ * - View event history
+ * - Open guidelines
+ * - Open organizer profile settings
+ * - Logout and return to the start screen
+ *
+ * Notes:
+ * - Uses OrganizerViewModel to retrieve the current organizer profile
+ * - Passes profile ID to settings screen for editing
+ */
 package com.example.indeedgambling;
 
 import android.os.Bundle;
@@ -13,11 +28,17 @@ import androidx.navigation.fragment.NavHostFragment;
 
 public class Organizer_HomeFragment extends Fragment {
 
-    View view;
+    private View view;
 
+    /**
+     * Inflates the home screen and initializes all organizer navigation actions.
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState
+    ) {
 
         view = inflater.inflate(R.layout.organization_home_fragment, container, false);
 
@@ -26,40 +47,54 @@ public class Organizer_HomeFragment extends Fragment {
 
         Profile organizer = organizerVM.getCurrentOrganizer();
 
-        // Logout button
+        /**
+         * Handles logout navigation.
+         */
         Button LogoutButton = view.findViewById(R.id.Organizer_HomeLogoutButton);
         LogoutButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_orgHome_to_start)
         );
 
-        // Browse button
+        /**
+         * Navigates to event browsing.
+         */
         Button BrowseButton = view.findViewById(R.id.Organizer_HomeBrowseEventsButton);
         BrowseButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_orgHome_to_browse)
         );
 
-        // Upcoming events button
+        /**
+         * Opens the organizer’s upcoming events list.
+         */
         Button UpcomingEventsButton = view.findViewById(R.id.Organizer_HomeUpcomingEventsButton);
         UpcomingEventsButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_orgHome_to_upcoming)
         );
 
-        // History button
+        /**
+         * Opens event history created by the organizer.
+         */
         Button HistoryButton = view.findViewById(R.id.Organizer_HomeHistoryButton);
         HistoryButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_orgHome_to_history)
         );
-        //Guidelines Button
+
+        /**
+         * Opens organizer guidelines screen.
+         */
         Button btnGuidelines = view.findViewById(R.id.btnOrganizerGuidelines);
-        btnGuidelines.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_organizerHomeFragment_to_organizerGuidelinesFragment);
-        });
-        // Profile button
+        btnGuidelines.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_organizerHomeFragment_to_organizerGuidelinesFragment)
+        );
+
+        /**
+         * Opens organizer profile settings.
+         */
         Button ProfileButton = view.findViewById(R.id.Organizer_HomeProfileButton);
         ProfileButton.setOnClickListener(v -> {
             Bundle args = new Bundle();

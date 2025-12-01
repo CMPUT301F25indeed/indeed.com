@@ -1,12 +1,3 @@
-/**
- * Displays the Entrant home screen.
- *
- * Features:
- * - Shows entrant options (Browse, History, Profile, etc.)
- * - Displays most recent notification
- * - Provides logout functionality that clears the saved deviceId
- *   so auto-login does not occur next time.
- */
 package com.example.indeedgambling;
 
 import android.os.Bundle;
@@ -25,6 +16,20 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+/**
+ * Displays the Entrant home screen.
+ *
+ * This fragment acts as the main dashboard for an Entrant user after login.
+ * It provides navigation to all entrant-related features such as browsing events,
+ * viewing history, editing profile settings, checking notifications, reading event
+ * guidelines, and scanning QR codes.
+ *
+ * Features:
+ * - Displays a personalized greeting using the entrant’s name
+ * - Fetches and shows the latest notification (if available)
+ * - Provides navigation menu options for all entrant functionalities
+ * - Allows logout and clears saved deviceId to disable auto-login upon exit
+ */
 public class Entrant_HomeFragment extends Fragment {
 
     private EntrantViewModel entrantVM;
@@ -32,18 +37,27 @@ public class Entrant_HomeFragment extends Fragment {
 
     public Entrant_HomeFragment() {}
 
+    /**
+     * Creates and initializes the entrant home screen layout,
+     * sets up menu interactions, loads notifications,
+     * and sets logout behavior.
+     */
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState
+    ) {
         View view = inflater.inflate(R.layout.entrant_home_fragment, container, false);
 
         ListView options = view.findViewById(R.id.entrant_home_buttons);
-        Button LogoutButton = view.findViewById(R.id.entrant_logout_button_home);
+        Button logoutButton = view.findViewById(R.id.entrant_logout_button_home);
         TextView greeting = view.findViewById(R.id.entrant_greeting_home);
 
-        String[] optionsString = {"Browse", "History", "Profile", "Guidelines", "Notifications", "Scan QR Code"};
+        String[] optionsString = {
+                "Browse", "History", "Profile", "Guidelines",
+                "Notifications", "Scan QR Code"
+        };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
@@ -57,13 +71,18 @@ public class Entrant_HomeFragment extends Fragment {
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
         fvm = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
-        Profile e = entrantVM.getCurrentEntrant();
-        greeting.setText("Hi " + e.getPersonName());
+        Profile entrant = entrantVM.getCurrentEntrant();
+        greeting.setText("Hi " + entrant.getPersonName());
 
-        if (e.getProfileId() != null) {
-            String entrantId = e.getProfileId();
+        /**
+         * Attempts to load the most recent notification for the entrant
+         * and displays it in a popup dialog if one exists.
+         */
+        if (entrant.getProfileId() != null) {
+            String entrantId = entrant.getProfileId();
 
-            fvm.fetchLatestNotification(entrantId,
+            fvm.fetchLatestNotification(
+                    entrantId,
                     notification -> {
                         if (notification == null) return;
 
@@ -73,10 +92,17 @@ public class Entrant_HomeFragment extends Fragment {
                                 .setPositiveButton("OK", null)
                                 .show();
                     },
-                    error -> Log.e("Entrant_HomeFragment",
-                            "Failed to load latest notification", error));
+                    error -> Log.e(
+                            "Entrant_HomeFragment",
+                            "Failed to load latest notification",
+                            error
+                    )
+            );
         }
 
+        /**
+         * Handles navigation to all Entrant features based on menu selection.
+         */
         options.setOnItemClickListener((parent, itemView, position, id) -> {
             if (position == 0) {
                 NavHostFragment.findNavController(this)
@@ -86,7 +112,7 @@ public class Entrant_HomeFragment extends Fragment {
                         .navigate(R.id.entrant_HistoryFragment);
             } else if (position == 2) {
                 Bundle args = new Bundle();
-                args.putString("profileID", e.getProfileId());
+                args.putString("profileID", entrant.getProfileId());
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.settingsFragment, args);
             } else if (position == 3) {
@@ -101,10 +127,16 @@ public class Entrant_HomeFragment extends Fragment {
             }
         });
 
-        LogoutButton.setOnClickListener(v -> {
+        /**
+         * Logs out the entrant by clearing the saved deviceId,
+         * disabling auto-login, and returning the user to the startup screen.
+         */
+        logoutButton.setOnClickListener(v -> {
+
             Entrant current = entrantVM.getCurrentEntrant();
 
             if (current != null) {
+
                 String profileId = current.getProfileId();
 
                 fvm.updateProfile(
@@ -121,6 +153,7 @@ public class Entrant_HomeFragment extends Fragment {
                                     .navigate(R.id.action_entrantHomeFragment_to_startUpFragment);
                         }
                 );
+
             } else {
                 entrantVM.setEntrant(null);
                 NavHostFragment.findNavController(this)
