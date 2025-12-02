@@ -1,168 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_admin_image_card"
-        android:padding="20dp">
+        android:padding="16dp">
 
-        <!-- TITLE -->
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/notification_sender_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send Notification"
+            android:text="Organizer Notifications"
             android:textSize="20sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/ibmplexserif_semibold"
-            android:gravity="center"
-            android:layout_marginBottom="20dp" />
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
 
-        <!-- Event ID Selection -->
         <TextView
+            android:id="@+id/notification_event_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Event ID *"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="6dp" />
+            android:text="Event info"
+            android:paddingBottom="16dp" />
 
-        <EditText
-            android:id="@+id/edit_event_id"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_edittext_dark"
-            android:hint="Enter Event ID"
-            android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#777777"
-            android:textSize="16sp"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="14dp" />
-
-        <!-- Notification Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Notification Title *"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="6dp" />
-
-        <EditText
-            android:id="@+id/edit_notification_title"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_edittext_dark"
-            android:hint="e.g., Event Update, Important Notice"
-            android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#777777"
-            android:textSize="16sp"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="14dp" />
-
-        <!-- Notification Message -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Message Content *"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="6dp" />
-
-        <EditText
-            android:id="@+id/edit_notification_message"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:background="@drawable/bg_edittext_dark"
-            android:hint="Type your notification message here..."
-            android:inputType="textMultiLine"
-            android:gravity="top"
-            android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#777777"
-            android:textSize="16sp"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="18dp" />
-
-        <!-- Send To -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send To *"
-            android:textSize="14sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/opensans"
-            android:layout_marginBottom="6dp" />
-
-        <RadioGroup
-            android:id="@+id/radio_recipient_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="22dp">
-
-            <RadioButton
-                android:id="@+id/radio_waiting_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="All Waiting List Entrants"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:fontFamily="@font/opensans"
-                android:layout_marginBottom="6dp" />
-
-            <RadioButton
-                android:id="@+id/radio_selected_entrants"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="All Selected Entrants"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:fontFamily="@font/opensans"
-                android:layout_marginBottom="6dp" />
-
-            <RadioButton
-                android:id="@+id/radio_cancelled_entrants"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="All Cancelled Entrants"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                android:fontFamily="@font/opensans" />
-        </RadioGroup>
-
-        <!-- Send Button -->
         <Button
-            android:id="@+id/button_send_notification"
+            android:id="@+id/button_notify_invited"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:text="Send Notification"
-            android:textSize="16sp"
-            android:textAllCaps="false"
-            android:background="@drawable/bg_button_primary"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/opensans" />
+            android:layout_height="wrap_content"
+            android:text="Notify invited entrants (lottery win)" />
+
         <Button
-            android:id="@+id/btnBack"
+            android:id="@+id/button_show_enrolled"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="wrap_content"
+            android:text="Show enrolled entrants"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/button_cancel_nonresponders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel non-responders (lottery loss)"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/notification_enrolled_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enrolled entrants:"
+            android:paddingTop="16dp"
+            android:paddingBottom="4dp" />
+
+        <ListView
+            android:id="@+id/list_enrolled_entrants"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:dividerHeight="1dp" />
+
+        <Button
+            android:id="@+id/button_notifications_back"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="Back"
-            android:textSize="16sp"
-            android:textAllCaps="false"
-            android:background="@drawable/bg_button_primary"
-            android:textColor="#FFFFFF"
-            android:fontFamily="@font/opensans" />
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 </ScrollView>

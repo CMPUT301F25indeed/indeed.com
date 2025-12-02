@@ -71,39 +71,47 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         ImageView imageView = convertView.findViewById(R.id.history_event_image);
         TextView viewDetails = convertView.findViewById(R.id.history_view_details);
 
- 
         String name = event.getEventName();
         if (name == null || name.isEmpty()) {
             name = "Untitled event";
         }
         titleView.setText(name);
 
-
+        // ----- Status text -----
         String listName = event.whichList(entrantId);
         String statusText;
 
-        switch (listName) {
-            case "waiting":
-                statusText = "On waitlist";
-                break;
-            case "invited":
-                statusText = "Invited – tap to respond";
-                break;
-            case "accepted":
-                statusText = "Accepted";
-                break;
-            case "cancelled":
-                statusText = "Cancelled";
-                break;
-            default:
-                statusText = "Not active";
-                break;
+        if (listName == null) {
+            statusText = "Not active";
+        } else {
+            switch (listName) {
+                case "waitlist":
+                case "waiting":
+                case "waitingList":
+                    statusText = "On waitlist";
+                    break;
+
+                case "invited":
+                    statusText = "Invited – tap to respond";
+                    break;
+
+                case "accepted":
+                    statusText = "Accepted";
+                    break;
+
+                case "cancelled":
+                    statusText = "Cancelled";
+                    break;
+
+                default:
+                    statusText = "Not active";
+                    break;
+            }
         }
         statusView.setText(statusText);
 
-
+        // "View Details" navigation
         viewDetails.setText("View Details");
-
         viewDetails.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(v);
             Bundle bundle = new Bundle();
@@ -111,10 +119,9 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
             navController.navigate(R.id.eventDetailsFragment, bundle);
         });
 
-
+        // Reset image view before async load
         imageView.setImageBitmap(null);
         imageView.setBackgroundResource(R.drawable.bg_event_image_rounded);
-
 
         String imageDocId = event.getImageUrl();
         if (imageDocId == null || imageDocId.isEmpty()) {
@@ -128,10 +135,13 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                 .document(imageDocId)
                 .get()
                 .addOnSuccessListener((DocumentSnapshot doc) -> {
-                    if (!doc.exists()) return;
+                    if (doc == null || !doc.exists()) return;
 
                     Object tag = imageView.getTag();
-                    if (!(tag instanceof String) || !imageDocId.equals(tag)) return;
+                    // View has been reused for another item
+                    if (!(tag instanceof String) || !imageDocId.equals(tag)) {
+                        return;
+                    }
 
                     String base64 = doc.getString("url");
                     if (base64 == null || base64.isEmpty()) return;

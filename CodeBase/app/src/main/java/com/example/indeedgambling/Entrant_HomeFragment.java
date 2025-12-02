@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import java.util.Collections;
+
 /**
  * Displays the Entrant home screen.
  *
@@ -65,32 +67,34 @@ public class Entrant_HomeFragment extends Fragment {
                 R.id.entrant_option_text,
                 optionsString
         );
-
         options.setAdapter(adapter);
 
         entrantVM = new ViewModelProvider(requireActivity()).get(EntrantViewModel.class);
         fvm = new ViewModelProvider(requireActivity()).get(FirebaseViewModel.class);
 
-        Profile entrant = entrantVM.getCurrentEntrant();
-        greeting.setText("Hi " + entrant.getPersonName());
+        // Start global notification listener
+        entrantVM.startNotificationListener(fvm);
 
-        /**
-         * Attempts to load the most recent notification for the entrant
-         * and displays it in a popup dialog if one exists.
-         */
-        if (entrant.getProfileId() != null) {
+        Profile entrant = entrantVM.getCurrentEntrant();
+        if (entrant != null && entrant.getPersonName() != null) {
+            greeting.setText("Hi " + entrant.getPersonName());
+        }
+
+        // Attempts to load the most recent notification for the entrant
+        // and displays it in a popup dialog if one exists.
+        if (entrant != null && entrant.getProfileId() != null) {
             String entrantId = entrant.getProfileId();
 
             fvm.fetchLatestNotification(
                     entrantId,
                     notification -> {
-                        if (notification == null) return;
-
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle("Notification")
-                                .setMessage(notification.getMessage())
-                                .setPositiveButton("OK", null)
-                                .show();
+                        if (notification != null) {
+                            new AlertDialog.Builder(requireContext())
+                                    .setTitle("Notification")
+                                    .setMessage(notification.getMessage())
+                                    .setPositiveButton("OK", null)
+                                    .show();
+                        }
                     },
                     error -> Log.e(
                             "Entrant_HomeFragment",
@@ -104,26 +108,36 @@ public class Entrant_HomeFragment extends Fragment {
          * Handles navigation to all Entrant features based on menu selection.
          */
         options.setOnItemClickListener((parent, itemView, position, id) -> {
-            if (position == 0) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.entrant_BrowseFragment);
-            } else if (position == 1) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.entrant_HistoryFragment);
-            } else if (position == 2) {
-                Bundle args = new Bundle();
-                args.putString("profileID", entrant.getProfileId());
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.settingsFragment, args);
-            } else if (position == 3) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.entrant_GuidelinesFragment);
-            } else if (position == 4) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.entrant_NotificationsFragment);
-            } else if (position == 5) {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_entrantHomeFragment_to_scanQRFragment);
+            switch (position) {
+                case 0:
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.entrant_BrowseFragment);
+                    break;
+                case 1:
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.entrant_HistoryFragment);
+                    break;
+                case 2: {
+                    if (entrant != null) {
+                        Bundle args = new Bundle();
+                        args.putString("profileID", entrant.getProfileId());
+                        NavHostFragment.findNavController(this)
+                                .navigate(R.id.settingsFragment, args);
+                    }
+                    break;
+                }
+                case 3:
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.entrant_GuidelinesFragment);
+                    break;
+                case 4:
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.entrant_NotificationsFragment);
+                    break;
+                case 5:
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.action_entrantHomeFragment_to_scanQRFragment);
+                    break;
             }
         });
 
@@ -135,13 +149,13 @@ public class Entrant_HomeFragment extends Fragment {
 
             Entrant current = entrantVM.getCurrentEntrant();
 
-            if (current != null) {
+            if (current != null && current.getProfileId() != null) {
 
                 String profileId = current.getProfileId();
 
                 fvm.updateProfile(
                         profileId,
-                        java.util.Collections.singletonMap("deviceId", null),
+                        Collections.singletonMap("deviceId", null),
                         () -> {
                             entrantVM.setEntrant(null);
                             NavHostFragment.findNavController(this)

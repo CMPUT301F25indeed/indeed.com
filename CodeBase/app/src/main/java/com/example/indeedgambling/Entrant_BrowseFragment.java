@@ -1,5 +1,13 @@
 package com.example.indeedgambling;
 
+/**
+ * Displays all available events for Entrants to browse.
+ * Supports filtering by category and optional date/time range.
+ * Integrates with Firebase to load events and applies filters through
+ * fetchEventsByCategoryAndDate. Navigates to event details when an
+ * event is selected.
+ */
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,9 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.DatePicker;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -80,13 +88,13 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
             adapter.setData(openEvents);
         });
 
-
         Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
         homeBtn.setOnClickListener(view ->
                 NavHostFragment.findNavController(Entrant_BrowseFragment.this)
                         .navigate(R.id.action_entrant_BrowseFragment_to_entrantHomeFragment)
         );
 
+        // Filter button opens the filter dialog
         Button filterBtn = v.findViewById(R.id.entrant_filter_button_browse);
         filterBtn.setOnClickListener(view -> showFilterDialog());
 
