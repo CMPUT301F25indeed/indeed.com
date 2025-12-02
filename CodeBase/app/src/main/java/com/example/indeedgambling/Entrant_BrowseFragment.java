@@ -15,8 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -85,7 +87,6 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
 
             adapter.setData(openEvents);
         });
-
 
         Button homeBtn = v.findViewById(R.id.entrant_home_button_browse);
         homeBtn.setOnClickListener(view ->
@@ -211,17 +212,11 @@ public class Entrant_BrowseFragment extends Fragment implements EventsAdapter.On
      * Result is formatted and placed into the target EditText.
      */
     private void showCustomDateTimeDialog(EditText target) {
-<<<<<<< HEAD
-        View pickerView = LayoutInflater.from(getContext()).inflate(R.layout.datetime_picker, null);
-        android.widget.DatePicker datePicker = pickerView.findViewById(R.id.DateTimePicker_DateDialog);
-        android.widget.TimePicker timePicker = pickerView.findViewById(R.id.DateTimePicker_TimeDialog);
-=======
         View pickerView = LayoutInflater.from(getContext())
                 .inflate(R.layout.datetime_picker, null);
 
         DatePicker datePicker = pickerView.findViewById(R.id.DateTimePicker_DateDialog);
         TimePicker timePicker = pickerView.findViewById(R.id.DateTimePicker_TimeDialog);
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
 
         datePicker.setMinDate(System.currentTimeMillis() - 1000);
 

@@ -71,14 +71,12 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
         ImageView imageView = convertView.findViewById(R.id.history_event_image);
         TextView viewDetails = convertView.findViewById(R.id.history_view_details);
 
- 
         String name = event.getEventName();
         if (name == null || name.isEmpty()) {
             name = "Untitled event";
         }
         titleView.setText(name);
 
-<<<<<<< HEAD
         // ----- Status text -----
         String listName = event.whichList(entrantId);
         String statusText;
@@ -109,34 +107,11 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                     statusText = "Not active";
                     break;
             }
-=======
-
-        String listName = event.whichList(entrantId);
-        String statusText;
-
-        switch (listName) {
-            case "waiting":
-                statusText = "On waitlist";
-                break;
-            case "invited":
-                statusText = "Invited – tap to respond";
-                break;
-            case "accepted":
-                statusText = "Accepted";
-                break;
-            case "cancelled":
-                statusText = "Cancelled";
-                break;
-            default:
-                statusText = "Not active";
-                break;
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
         }
         statusView.setText(statusText);
 
-
+        // "View Details" navigation
         viewDetails.setText("View Details");
-
         viewDetails.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(v);
             Bundle bundle = new Bundle();
@@ -144,10 +119,9 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
             navController.navigate(R.id.eventDetailsFragment, bundle);
         });
 
-
+        // Reset image view before async load
         imageView.setImageBitmap(null);
         imageView.setBackgroundResource(R.drawable.bg_event_image_rounded);
-
 
         String imageDocId = event.getImageUrl();
         if (imageDocId == null || imageDocId.isEmpty()) {
@@ -164,14 +138,10 @@ public class EntrantHistoryAdapter extends ArrayAdapter<Event> {
                     if (doc == null || !doc.exists()) return;
 
                     Object tag = imageView.getTag();
-<<<<<<< HEAD
+                    // View has been reused for another item
                     if (!(tag instanceof String) || !imageDocId.equals(tag)) {
-                        // View has been reused for another item
                         return;
                     }
-=======
-                    if (!(tag instanceof String) || !imageDocId.equals(tag)) return;
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
 
                     String base64 = doc.getString("url");
                     if (base64 == null || base64.isEmpty()) return;
