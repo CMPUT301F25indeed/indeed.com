@@ -118,12 +118,7 @@ public class EventDetailsFragment extends Fragment {
 
         backBtn.setOnClickListener(v1 -> requireActivity().onBackPressed());
 
-<<<<<<< HEAD
         // CASE 1 — from QR scan: load by id, disable all actions
-=======
-
-
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
         if (scannedEventId != null && !scannedEventId.isEmpty()) {
             firebaseVM.getEventById(
                     scannedEventId,
@@ -147,15 +142,9 @@ public class EventDetailsFragment extends Fragment {
         return v;
     }
 
-<<<<<<< HEAD
-    // ---------------------------------------------------------------------
-    // Entrant button logic
-    // ---------------------------------------------------------------------
-=======
     /**
      * Applies button visibility and behavior depending on the entrant’s relation to the event.
      */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
     private void applyEntrantButtonLogic(View v) {
 
         entrantRelation = event.whichList(entrantId);
@@ -209,13 +198,9 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
-<<<<<<< HEAD
-    // QR MODE — disables everything
-=======
     /**
      * Hides all interaction buttons for QR-scan mode.
      */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
     private void disableAllEntrantActions() {
         yesBtn.setVisibility(View.GONE);
         noBtn.setVisibility(View.GONE);
@@ -227,24 +212,15 @@ public class EventDetailsFragment extends Fragment {
         tryAgainBtn.setEnabled(false);
     }
 
-<<<<<<< HEAD
-    // ---------------------------------------------------------------------
-    // Load event details + poster
-    // ---------------------------------------------------------------------
-=======
     /**
      * Loads name, description, poster, category, timings, and status into UI.
      */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
     private void loadEventDetails(View v) {
 
         name.setText(event.getEventName());
         desc.setText(event.getDescription());
 
-<<<<<<< HEAD
         // Poster logic
-=======
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
         if (posterView != null) {
             posterView.setImageBitmap(null);
             posterView.setBackgroundColor(0xFFEEEEEE);
@@ -263,7 +239,9 @@ public class EventDetailsFragment extends Fragment {
                                 Bitmap bmp = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
                                 posterView.setBackgroundColor(0x00000000);
                                 posterView.setImageBitmap(bmp);
-                            } catch (Exception e) {}
+                            } catch (Exception e) {
+                                // ignore
+                            }
                         }
                     });
         }
@@ -297,15 +275,9 @@ public class EventDetailsFragment extends Fragment {
         updateTotal(v);
     }
 
-<<<<<<< HEAD
-    // ---------------------------------------------------------------------
-    // Entrant actions
-    // ---------------------------------------------------------------------
-=======
     /**
      * Handles joining the waitlist.
      */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
     private void clickedJoinWaitlist(View v) {
         if (event.getWaitingList() != null && event.getWaitingList().contains(entrantId)) {
             Toast.makeText(getContext(), "You already joined this waitlist!", Toast.LENGTH_SHORT).show();
@@ -365,9 +337,12 @@ public class EventDetailsFragment extends Fragment {
      * Handles accepting an invitation.
      */
     private void clickedAcceptInvite(View v) {
-        firebaseVM.signUpForEvent(event.getEventId(), entrantId,
+        firebaseVM.signUpForEvent(
+                event.getEventId(),
+                entrantId,
                 () -> Toast.makeText(getContext(), "Signed up!", Toast.LENGTH_SHORT).show(),
-                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                e -> Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
 
     /**
@@ -415,15 +390,9 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
-<<<<<<< HEAD
-    // ---------------------------------------------------------------------
-    // Location
-    // ---------------------------------------------------------------------
-=======
     /**
      * Attempts to retrieve and update entrant location, requesting permission if needed.
      */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
     private void updateUserLocation() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),

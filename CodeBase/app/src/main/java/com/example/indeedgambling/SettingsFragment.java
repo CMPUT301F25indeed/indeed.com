@@ -1,31 +1,10 @@
-/**
- * Fragment that allows users to modify personal account settings.
- *
- * This screen lets Entrants, Organizers, and Admins edit profile details such
- * as name, email, phone number, notification preferences, and profile image.
- *
- * Features:
- * - Loads profile information from Firestore based on profileID
- * - Allows profile picture upload (stored as Base64 in /images collection)
- * - Restricts delete and notification settings to Entrants only
- * - Validates email and phone input before applying updates
- * - Updates ViewModels so all UI layers reflect changes immediately
- *
- * Behavior Notes:
- * - Entrants can delete their profile; Organizers/Admins cannot
- * - Email uniqueness is checked before saving
- * - Image uploads are compressed and stored as Base64 strings
- */
 package com.example.indeedgambling;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +32,24 @@ import java.util.Map;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+/**
+ * Fragment that allows users to modify personal account settings.
+ *
+ * This screen lets Entrants, Organizers, and Admins edit profile details such
+ * as name, email, phone number, notification preferences, and profile image.
+ *
+ * Features:
+ * - Loads profile information from Firestore based on profileID
+ * - Allows profile picture upload (stored as Base64 in /images collection)
+ * - Restricts delete and notification settings to Entrants only
+ * - Validates email and phone input before applying updates
+ * - Updates ViewModels so all UI layers reflect changes immediately
+ *
+ * Behavior Notes:
+ * - Entrants can delete their profile; Organizers/Admins cannot
+ * - Email uniqueness is checked before saving
+ * - Image uploads are compressed and stored as Base64 strings
+ */
 public class SettingsFragment extends Fragment {
 
     private FirebaseViewModel fvm;
@@ -372,14 +369,16 @@ public class SettingsFragment extends Fragment {
                         commitSave(updates);
                     })
                     .addOnFailureListener(ex ->
-                            Toast.makeText(requireContext(),
+                            Toast.makeText(
+                                    requireContext(),
                                     "Failed to upload image",
                                     Toast.LENGTH_SHORT
                             ).show()
                     );
 
         } catch (Exception ex) {
-            Toast.makeText(requireContext(),
+            Toast.makeText(
+                    requireContext(),
                     "Image convert failed",
                     Toast.LENGTH_SHORT
             ).show();
@@ -401,45 +400,23 @@ public class SettingsFragment extends Fragment {
                 error -> Toast.makeText(requireContext(), "Update failed: " + error.getMessage(), Toast.LENGTH_SHORT).show()
         );
 
-<<<<<<< HEAD
-        // Update local variables so UI knows the new values
+// Update local variables so UI knows the new values
         for (String key : updates.keySet()) {
-
             if (key.equals("personName")) {
                 name = (String) updates.get(key);
             }
-
             if (key.equals("email")) {
                 email = (String) updates.get(key);
             }
-
             if (key.equals("phone")) {
                 phone = (String) updates.get(key);
             }
-
             if (key.equals("notificationsEnabled")) {
                 initialNotifications = (Boolean) updates.get(key);
             }
-
             if (key.equals("profileImageUrl")) {
                 imageUrl = (String) updates.get(key);
             }
         }
     }
-
-
-=======
-        if (role.equals("entrant")) entrantVM.updateSettings(updates);
-        if (role.equals("organizer")) organizerVM.updateSettings(updates);
-        if (role.equals("admin")) adminVM.updateSettings(updates);
-
-        for (String key : updates.keySet()) {
-            if (key.equals("personName")) name = (String) updates.get(key);
-            if (key.equals("email")) email = (String) updates.get(key);
-            if (key.equals("phone")) phone = (String) updates.get(key);
-            if (key.equals("notificationsEnabled")) initialNotifications = (Boolean) updates.get(key);
-            if (key.equals("profileImageUrl")) imageUrl = (String) updates.get(key);
-        }
-    }
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
 }

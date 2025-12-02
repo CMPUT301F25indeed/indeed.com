@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-<<<<<<< HEAD
-=======
 /**
  * Displays all notifications received by an Entrant.
  *
@@ -38,8 +36,9 @@ import java.util.List;
  * - Provides a back-navigation button to return to the Entrant home screen
  * - Uses ArrayAdapter to render each notification with custom layout
  */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
 public class Entrant_NotificationsFragment extends Fragment {
+
+    private static final String TAG = "EntrantNotifs";
 
     private EntrantViewModel entrantVM;
     private FirebaseViewModel firebaseVM;
@@ -47,15 +46,10 @@ public class Entrant_NotificationsFragment extends Fragment {
     private ListView listView;
     private ArrayAdapter<Notification> adapter;
 
-<<<<<<< HEAD
-    private static final String TAG = "EntrantNotifs";
-
-=======
     /**
      * Creates the notification screen, loads the user's notifications,
      * and initializes the list adapter.
      */
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater,
@@ -76,27 +70,14 @@ public class Entrant_NotificationsFragment extends Fragment {
 
         // Use the current entrant directly
         Entrant entrant = entrantVM.getCurrentEntrant();
-<<<<<<< HEAD
         if (entrant == null || entrant.getProfileId() == null) {
             Log.d(TAG, "Entrant is null or has no profileId – no notifications.");
-            Toast.makeText(requireContext(),
+            Toast.makeText(
+                    requireContext(),
                     "No entrant loaded. Please log in again.",
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_SHORT
+            ).show();
             return view;
-=======
-        if (entrant != null && entrant.getProfileId() != null) {
-            String entrantId = entrant.getProfileId();
-
-            firebaseVM.observeNotificationsForUser(entrantId)
-                    .observe(getViewLifecycleOwner(), notifications -> {
-
-                        if (notifications == null) {
-                            notifications = new ArrayList<>();
-                        }
-
-                        updateList(notifications);
-                    });
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
         }
 
         String uid = entrant.getProfileId();
@@ -107,13 +88,19 @@ public class Entrant_NotificationsFragment extends Fragment {
                     if (notifications != null) {
                         Log.d(TAG, "Got " + notifications.size() + " notifications:");
                         for (Notification n : notifications) {
-                            Log.d(TAG,
+                            Log.d(
+                                    TAG,
                                     "  type=" + n.getType()
                                             + " msg=" + n.getMessage()
-                                            + " ts=" + n.getTimestamp());
+                                            + " ts=" + n.getTimestamp()
+                            );
                         }
                     } else {
                         Log.d(TAG, "Notifications list is null");
+                    }
+
+                    if (notifications == null) {
+                        notifications = new ArrayList<>();
                     }
                     updateList(notifications);
                 });
@@ -121,13 +108,6 @@ public class Entrant_NotificationsFragment extends Fragment {
         return view;
     }
 
-<<<<<<< HEAD
-    private void updateList(List<Notification> notifications) {
-        if (notifications == null)
-            notifications = new ArrayList<>();
-
-        if (adapter == null) {
-=======
     /**
      * Updates the ListView by creating or refreshing the ArrayAdapter
      * that displays notification message, type, and formatted time.
@@ -135,10 +115,11 @@ public class Entrant_NotificationsFragment extends Fragment {
      * @param notifications List of notifications for the Entrant
      */
     private void updateList(List<Notification> notifications) {
+        if (notifications == null) {
+            notifications = new ArrayList<>();
+        }
 
         if (adapter == null) {
-
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
             adapter = new ArrayAdapter<Notification>(
                     requireContext(),
                     R.layout.item_notification,
@@ -147,18 +128,11 @@ public class Entrant_NotificationsFragment extends Fragment {
             ) {
                 @NonNull
                 @Override
-<<<<<<< HEAD
-                public View getView(int position,
-                                    @Nullable View convertView,
-                                    @NonNull ViewGroup parent) {
-
-=======
                 public View getView(
                         int position,
                         @Nullable View convertView,
                         @NonNull ViewGroup parent
                 ) {
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
                     View v = convertView;
                     if (v == null) {
                         v = LayoutInflater.from(getContext())
@@ -168,7 +142,7 @@ public class Entrant_NotificationsFragment extends Fragment {
                     Notification n = getItem(position);
                     if (n == null) return v;
 
-                    TextView msg = v.findViewById(R.id.notification_message);
+                    TextView msg  = v.findViewById(R.id.notification_message);
                     TextView meta = v.findViewById(R.id.notification_meta);
 
                     msg.setText(n.getMessage());
@@ -176,11 +150,7 @@ public class Entrant_NotificationsFragment extends Fragment {
                     String type = n.getType() != null ? n.getType() : "Info";
 
                     Date ts = n.getTimestamp();
-<<<<<<< HEAD
-                    String time = (ts != null)
-=======
                     String formattedTime = ts != null
->>>>>>> 9a7d4e38f516309921ef145183825ae29f915917
                             ? DateFormat.format("MMM d, h:mm a", ts).toString()
                             : "";
 
